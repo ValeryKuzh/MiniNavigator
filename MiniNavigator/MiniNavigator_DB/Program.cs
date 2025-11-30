@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MiniNavigator_DB.Context;
 
 namespace MiniNavigator_DB
 {
@@ -10,6 +6,10 @@ namespace MiniNavigator_DB
     {
         static void Main(string[] args)
         {
+            using (var context = new MiniNavigatorDbContext())
+            {
+                context.Database.Initialize(true);
+            }
         }
     }
 }

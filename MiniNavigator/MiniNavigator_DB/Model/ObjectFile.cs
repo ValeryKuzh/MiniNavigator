@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Object = DataBase.Model;
+﻿using System.Collections.Generic;
 
-namespace DataBase.Model
+namespace MiniNavigator_DB.Model
 {
-    public class ObjectFile : Object
+    public class ObjectFile : BaseObject
     {
         public string FileExtension { get; set; }
+
+        public ICollection<ObjectFileChunk> Chunks { get; set; }
     }
 }

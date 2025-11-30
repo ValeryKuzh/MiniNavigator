@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBase.Model
+namespace MiniNavigator_DB.Model
 {
-    public class ObjectRole : Object
+    public class ObjectRole : BaseObject
     {
         public string Role { get; set; }
     }

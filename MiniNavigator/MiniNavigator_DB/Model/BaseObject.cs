@@ -3,11 +3,10 @@ using System.Collections.Generic;
 
 namespace MiniNavigator_DB.Model
 {
-    public class ObjectAction
+    public class BaseObject
     {
         public Guid ID { get; set; }
-        public string Name { get; set; }
-
-        public ICollection<ObjectType> ObjectTypes { get; set; }
+        public Guid ObjectTypeID { get; set; }
+        public ObjectType ObjectType { get; set; }
     }
 }

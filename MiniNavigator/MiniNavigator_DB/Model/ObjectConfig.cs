@@ -1,8 +1,6 @@
-﻿using DataBase.Model;
-
-namespace DataBase.Context
+﻿namespace MiniNavigator_DB.Model
 {
-    public class ObjectConfig : Object
+    public class ObjectConfig : BaseObject
     {
 
     }

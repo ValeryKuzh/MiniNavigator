@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 
-namespace DataBase.Model
+namespace MiniNavigator_DB.Model
 {
     public class ObjectAttribute
     {
         public Guid ID { get; set; }
         public string Name { get; set; }
-        public ValueType ValueType { get; set; }
+        public string ValueType { get; set; }
         public string Value { get; set; }
+
+        public ICollection<ObjectType> ObjectTypes { get; set; }
     }
 }

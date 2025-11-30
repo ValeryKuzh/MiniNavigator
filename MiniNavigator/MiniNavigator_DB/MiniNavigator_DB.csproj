@@ -110,6 +110,7 @@
     <Compile Include="Model\ObjectUser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repository\EntityFrameworkRepository.cs" />
     <Compile Include="Repository\IRepository.cs" />
   </ItemGroup>
   <ItemGroup>

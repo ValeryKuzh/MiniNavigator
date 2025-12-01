@@ -11,9 +11,12 @@ namespace MiniNavigator_UI.DTO
     public class NavObjectDTO
     {
         [Description("Название")]
+        [Browsable(true)]
         public string Name { get; set; }
         [Description("Тип")]
+        [Browsable(true)]
         public string Type { get; set; }
-        public List<NavObjectDTO> Children { get; set; } = new List<NavObjectDTO>();
+        [Browsable(false)]
+        public BindingList<NavObjectDTO> Children { get; set; } = new BindingList<NavObjectDTO>();
     }
 }

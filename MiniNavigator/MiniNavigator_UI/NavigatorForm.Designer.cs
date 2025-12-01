@@ -37,13 +37,13 @@ namespace MiniNavigator_UI
             Infralution.Controls.VirtualTree.ObjectCellBinding objectCellBinding4 = new Infralution.Controls.VirtualTree.ObjectCellBinding();
             Infralution.Controls.VirtualTree.ObjectCellBinding objectCellBinding5 = new Infralution.Controls.VirtualTree.ObjectCellBinding();
             this.NavigatorVirtualTree = new Infralution.Controls.VirtualTree.VirtualTree();
-            this.navObjectDTOBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.rowBindingBindingSource = new Infralution.Controls.VirtualTree.ObjectRowBinding();
+            this.Дерево = new Infralution.Controls.VirtualTree.ObjectRowBinding();
             this.colMain = new Infralution.Controls.VirtualTree.Column();
             this.rowBindingNavObjectDTO = new Infralution.Controls.VirtualTree.ObjectRowBinding();
             this.colName = new Infralution.Controls.VirtualTree.Column();
             this.colType = new Infralution.Controls.VirtualTree.Column();
             this.colChildren = new Infralution.Controls.VirtualTree.Column();
+            this.navObjectDTOBindingSource = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorVirtualTree)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.navObjectDTOBindingSource)).BeginInit();
             this.SuspendLayout();
@@ -58,22 +58,18 @@ namespace MiniNavigator_UI
             this.NavigatorVirtualTree.Dock = System.Windows.Forms.DockStyle.Fill;
             this.NavigatorVirtualTree.Location = new System.Drawing.Point(0, 0);
             this.NavigatorVirtualTree.Name = "NavigatorVirtualTree";
-            this.NavigatorVirtualTree.RowBindings.Add(this.rowBindingBindingSource);
+            this.NavigatorVirtualTree.RowBindings.Add(this.Дерево);
             this.NavigatorVirtualTree.RowBindings.Add(this.rowBindingNavObjectDTO);
             this.NavigatorVirtualTree.Size = new System.Drawing.Size(785, 458);
             this.NavigatorVirtualTree.TabIndex = 0;
             // 
-            // navObjectDTOBindingSource
-            // 
-            this.navObjectDTOBindingSource.DataSource = typeof(MiniNavigator_UI.DTO.NavObjectDTO);
-            // 
-            // rowBindingBindingSource
+            // Дерево
             // 
             objectCellBinding1.Column = this.colMain;
-            this.rowBindingBindingSource.CellBindings.Add(objectCellBinding1);
-            this.rowBindingBindingSource.ChildProperty = "this";
-            this.rowBindingBindingSource.Name = "rowBindingBindingSource";
-            this.rowBindingBindingSource.TypeName = "System.Windows.Forms.BindingSource";
+            this.Дерево.CellBindings.Add(objectCellBinding1);
+            this.Дерево.ChildProperty = "this";
+            this.Дерево.Name = "Дерево";
+            this.Дерево.TypeName = "System.Windows.Forms.BindingSource";
             // 
             // colMain
             // 
@@ -120,6 +116,10 @@ namespace MiniNavigator_UI
             this.colChildren.DataField = "Children";
             this.colChildren.Name = "colChildren";
             // 
+            // navObjectDTOBindingSource
+            // 
+            this.navObjectDTOBindingSource.DataSource = typeof(MiniNavigator_UI.DTO.NavObjectDTO);
+            // 
             // NavigatorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -136,12 +136,12 @@ namespace MiniNavigator_UI
 
         #endregion
         private Infralution.Controls.VirtualTree.VirtualTree NavigatorVirtualTree;
+        private System.Windows.Forms.BindingSource navObjectDTOBindingSource;
         private Column colMain;
         private Column colName;
         private Column colType;
         private Column colChildren;
-        private System.Windows.Forms.BindingSource navObjectDTOBindingSource;
-        private ObjectRowBinding rowBindingBindingSource;
+        private ObjectRowBinding Дерево;
         private ObjectRowBinding rowBindingNavObjectDTO;
     }
 }

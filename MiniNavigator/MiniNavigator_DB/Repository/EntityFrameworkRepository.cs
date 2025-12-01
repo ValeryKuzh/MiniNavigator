@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace MiniNavigator_DB.Repository
 {
     public class EntityFrameworkRepository<T> : IRepository<T> where T : class

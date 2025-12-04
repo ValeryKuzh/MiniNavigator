@@ -16,7 +16,7 @@ namespace MiniNavigator_DB.Context
         public DbSet<ObjectFileChunk> ObjectFileChunks { get; set; }
 
         public MiniNavigatorDbContext(string connectionString) : base(connectionString) { }
-        public MiniNavigatorDbContext() : base("name=MiniNavigatorDbContext") { }
+        public MiniNavigatorDbContext() : base("name=HomeDbConnection") { }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             // PK

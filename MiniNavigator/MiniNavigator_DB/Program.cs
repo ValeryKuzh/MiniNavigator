@@ -1,4 +1,6 @@
 ﻿using MiniNavigator_DB.Context;
+using System;
+using System.Data.Entity;
 
 namespace MiniNavigator_DB
 {
@@ -6,9 +8,14 @@ namespace MiniNavigator_DB
     {
         static void Main(string[] args)
         {
-            using (var context = new MiniNavigatorDbContext())
+            Database.SetInitializer(new CreateDatabaseIfNotExists<MiniNavigatorDbContext>());
+
+            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<MiniNavigatorDbContext>());
+
+            using (var db = new MiniNavigatorDbContext())
             {
-                context.Database.Initialize(true);
+                db.Database.Initialize(force: true);
+                Console.WriteLine("База данных успешно создана!");
             }
         }
     }

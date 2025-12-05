@@ -107,7 +107,7 @@ namespace MiniNavigator_UI
                 if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectDTO navObjectDto)
                 {
 
-                    var actions = await _objectService.GetActionsForObject(navObjectDto.ID);
+                    var actions = _objectService.GetActionsForObject(navObjectDto.ID).Result;
 
                     ContextMenuStrip menu = new ContextMenuStrip();
 

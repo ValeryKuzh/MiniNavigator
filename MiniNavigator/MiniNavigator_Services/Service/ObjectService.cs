@@ -17,13 +17,10 @@ namespace MiniNavigator_Services.Service
 
         private readonly IRepository<BaseObject> _objectRepository;
 
-        public ObjectService(MiniNavigatorDbContext dbContext)
+        public ObjectService(IMapper<NavObjectDTO, BaseObject> objectMapper, IRepository<BaseObject> objectRepository)
         {
-            _objectMapper = new ObjectMapper();
-
-            _objectRepository = new EntityFrameworkRepository<BaseObject>(dbContext);
-
-
+            _objectMapper = objectMapper;
+            _objectRepository = objectRepository;
         }
     }
 }

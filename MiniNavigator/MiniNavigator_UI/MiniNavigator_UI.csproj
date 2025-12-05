@@ -50,6 +50,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DTO\NavObjectDTO.cs" />
+    <Compile Include="DTO\ObjectActionDTO.cs" />
+    <Compile Include="DTO\TypeObjectDTO.cs" />
+    <Compile Include="IObjectService.cs" />
     <Compile Include="NavigatorForm.cs">
       <SubType>Form</SubType>
     </Compile>

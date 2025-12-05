@@ -73,6 +73,7 @@ namespace MiniNavigator_UI
             this.NavigatorVirtualTree.RowBindings.Add(this.rowBindingNavObjectDTO);
             this.NavigatorVirtualTree.Size = new System.Drawing.Size(255, 458);
             this.NavigatorVirtualTree.TabIndex = 0;
+            this.NavigatorVirtualTree.MouseUp += NavigatorVirtualTree_MouseUp;
             // 
             // navObjectDTOBindingSource
             // 

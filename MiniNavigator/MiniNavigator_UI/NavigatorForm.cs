@@ -15,6 +15,7 @@ namespace MiniNavigator_UI
 {
     public partial class NavigatorForm : Form
     {
+        private IObjectService _objectService;
         private NavObjectDTO _navObjects = new NavObjectDTO()
         {
             Name = "Система",
@@ -57,25 +58,6 @@ namespace MiniNavigator_UI
         {
             _navObjects.Children.Add(new NavObjectDTO
             {
-                Name = "Файлы",
-                Type = "File",
-                Children =
-                {
-                    new NavObjectDTO { Name = "Модуль 1", Type = "Module" },
-                    new NavObjectDTO
-                    {
-                        Name = "Модуль 2",
-                        Type = "Module",
-                        Children =
-                        {
-                            new NavObjectDTO { Name = "Объект A", Type = "Entity" },
-                            new NavObjectDTO { Name = "Объект B", Type = "Entity" }
-                        }
-                    }
-                }
-            });
-            _navObjects.Children.Add(new NavObjectDTO
-            {
                 Name = "Пользователи",
                 Type = "User",
                 Children =
@@ -93,6 +75,52 @@ namespace MiniNavigator_UI
                     }
                 }
             });
+            _navObjects.Children.Add(new NavObjectDTO
+            {
+                Name = "Роли",
+                Type = "Role",
+                Children =
+                {
+                    new NavObjectDTO { Name = "Модуль 1", Type = "Module" },
+                    new NavObjectDTO
+                    {
+                        Name = "Модуль 2",
+                        Type = "Module",
+                        Children =
+                        {
+                            new NavObjectDTO { Name = "Объект A", Type = "Entity" },
+                            new NavObjectDTO { Name = "Объект B", Type = "Entity" }
+                        }
+                    }
+                }
+            });
+        }
+        private async void NavigatorVirtualTree_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectDTO navObjectDto)
+                {
+
+                    var actions = await _objectService.GetActionsForObject(navObjectDto.ID);
+
+                    ContextMenuStrip menu = new ContextMenuStrip();
+
+                    foreach (var action in actions)
+                    {
+                        var item = new ToolStripMenuItem(action.CommandName);
+                        item.Tag = action;
+                        item.Click += ActionMenuItem_Click;
+                        menu.Items.Add(item);
+                    }
+                    menu.Show(NavigatorVirtualTree, e.Location);
+                }
+            }
+        }
+
+        private void ActionMenuItem_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }

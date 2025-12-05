@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace MiniNavigator_DB.Repository
 {
-    public interface IRepository<T> where T : class
+    public interface IRepository<Entity> where Entity : class
     {
-        Task<T> GetByIdAsync(Guid ID);
-        Task<IEnumerable<T>> GetAllAsync();
-        Task AddAsync(T entity);
-        Task UpdateAsync(T entity);
-        Task DeleteAsync(T entity);
-        IQueryable<T> Query();
-        Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
+        Task<Entity> GetByIdAsync(Guid ID);
+        Task<IEnumerable<Entity>> GetAllAsync();
+        Task AddAsync(Entity entity);
+        Task UpdateAsync(Entity entity);
+        Task DeleteAsync(Entity entity);
+        IQueryable<Entity> Query();
+        Task<bool> ExistsAsync(Expression<Func<Entity, bool>> predicate);
     }
 }

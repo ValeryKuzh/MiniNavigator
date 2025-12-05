@@ -20,9 +20,12 @@ namespace MiniNavigator_UI
             Name = "Система",
             Type = "System"
         };
+
+        private BindingList<NavObjectDTO> _data = new BindingList<NavObjectDTO>();
         public NavigatorForm()
         {
             InitializeComponent();
+            NavigatorDataGridView.DataSource = _data;
 
             InitRoot();
             BindTree();

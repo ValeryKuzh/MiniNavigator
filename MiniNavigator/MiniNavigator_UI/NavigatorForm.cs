@@ -29,11 +29,16 @@ namespace MiniNavigator_UI
             NavigatorDataGridView.DataSource = _data;
 
             InitRoot();
-            BindTree();
+            BindTree(); 
 
             NavigatorVirtualTree.DataSource = _navObjects;
         }
 
+        private void LoadTree()
+        {
+            _navObjects = _objectService.GetTreeOfObjects();
+            NavigatorVirtualTree.DataSource = _navObjects;
+        }
         private void BindTree()
         {
             // создаём биндинг для NavObjectDTO
@@ -113,6 +118,7 @@ namespace MiniNavigator_UI
                         item.Click += ActionMenuItem_Click;
                         menu.Items.Add(item);
                     }
+
                     menu.Show(NavigatorVirtualTree, e.Location);
                 }
             }

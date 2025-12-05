@@ -8,5 +8,6 @@ namespace MiniNavigator_UI
     public interface IObjectService
     {
         Task<List<ObjectActionDTO>> GetActionsForObject(Guid ID);
+        NavObjectDTO GetTreeOfObjects();
     }
 }

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniNavigator_DB", "MiniNav
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniNavigator_UI", "MiniNavigator_UI\MiniNavigator_UI.csproj", "{750AA8CA-2C54-410F-9EC2-EC6F9474829A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniNavigator_Services", "MiniNavigator_Services\MiniNavigator_Services.csproj", "{D0C9816A-7187-4CBA-B992-239E1322DFED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,14 @@ Global
 		{750AA8CA-2C54-410F-9EC2-EC6F9474829A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{750AA8CA-2C54-410F-9EC2-EC6F9474829A}.Release|x64.ActiveCfg = Release|Any CPU
 		{750AA8CA-2C54-410F-9EC2-EC6F9474829A}.Release|x64.Build.0 = Release|Any CPU
+		{D0C9816A-7187-4CBA-B992-239E1322DFED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0C9816A-7187-4CBA-B992-239E1322DFED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0C9816A-7187-4CBA-B992-239E1322DFED}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D0C9816A-7187-4CBA-B992-239E1322DFED}.Debug|x64.Build.0 = Debug|Any CPU
+		{D0C9816A-7187-4CBA-B992-239E1322DFED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0C9816A-7187-4CBA-B992-239E1322DFED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0C9816A-7187-4CBA-B992-239E1322DFED}.Release|x64.ActiveCfg = Release|Any CPU
+		{D0C9816A-7187-4CBA-B992-239E1322DFED}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

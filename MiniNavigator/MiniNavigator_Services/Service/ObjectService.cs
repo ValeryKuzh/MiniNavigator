@@ -1,16 +1,14 @@
-﻿using MiniNavigator_DB.Context;
-using MiniNavigator_DB.Model;
-using MiniNavigator_DB.Repository;
-using MiniNavigator_Services.Mapper;
-using MiniNavigator_UI;
-using MiniNavigator_UI.DTO;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using MiniNavigator_DB.Model;
+using MiniNavigator_DB.Repository;
+using MiniNavigator_Service.Service.Interface;
+using MiniNavigator_Services.DTO;
+using MiniNavigator_Services.Mapper;
 
-namespace MiniNavigator_Services.Service
+namespace MiniNavigator_Service.Service
 {
     public class ObjectService : IObjectService
     {
@@ -28,8 +26,8 @@ namespace MiniNavigator_Services.Service
 
         public async Task<List<ObjectActionDTO>> GetActionsForObject(Guid ID)
         {
-            var obj = _objectRepository.GetByIdAsync(ID);
-            var actionsEntity = obj.Result.ObjectType.Actions.ToList();
+            var obj = await _objectRepository.GetByIdAsync(ID);
+            var actionsEntity = obj.ObjectType.Actions.ToList();
             var actionsDTO = new List<ObjectActionDTO>();
             foreach(var actionEntity in actionsEntity)
             {

@@ -41,22 +41,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DTO\NavObjectDTO.cs" />
+    <Compile Include="DTO\ObjectActionDTO.cs" />
+    <Compile Include="DTO\ObjectTypeDTO.cs" />
     <Compile Include="Mapper\Interface\IMapper.cs" />
     <Compile Include="Mapper\ObjectMapper.cs" />
+    <Compile Include="Service\Interface\IObjectService.cs" />
+    <Compile Include="Service\Interface\IObjectTypeService.cs" />
     <Compile Include="Service\ObjectService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Service\Interface\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\MiniNavigator_DB\MiniNavigator_DB.csproj">
-      <Project>{58a1a564-6415-4846-8f91-01122d87f64a}</Project>
+      <Project>{58A1A564-6415-4846-8F91-01122D87F64A}</Project>
       <Name>MiniNavigator_DB</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MiniNavigator_UI\MiniNavigator_UI.csproj">
-      <Project>{750aa8ca-2c54-410f-9ec2-ec6f9474829a}</Project>
-      <Name>MiniNavigator_UI</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

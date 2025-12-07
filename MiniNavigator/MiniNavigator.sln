@@ -6,8 +6,14 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniNavigator_DB", "MiniNavigator_DB\MiniNavigator_DB.csproj", "{58A1A564-6415-4846-8F91-01122D87F64A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniNavigator_UI", "MiniNavigator_UI\MiniNavigator_UI.csproj", "{750AA8CA-2C54-410F-9EC2-EC6F9474829A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D0C9816A-7187-4CBA-B992-239E1322DFED} = {D0C9816A-7187-4CBA-B992-239E1322DFED}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniNavigator_Services", "MiniNavigator_Services\MiniNavigator_Services.csproj", "{D0C9816A-7187-4CBA-B992-239E1322DFED}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58A1A564-6415-4846-8F91-01122D87F64A} = {58A1A564-6415-4846-8F91-01122D87F64A}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

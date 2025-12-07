@@ -1,9 +1,9 @@
-﻿using MiniNavigator_UI.DTO;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MiniNavigator_Services.DTO;
 
-namespace MiniNavigator_UI
+namespace MiniNavigator_Service.Service.Interface
 {
     public interface IObjectService
     {

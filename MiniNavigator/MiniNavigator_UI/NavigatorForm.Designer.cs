@@ -24,15 +24,15 @@ namespace MiniNavigator_UI
             this.colMain = new Infralution.Controls.VirtualTree.Column();
             this.NavigatorSplitContainer = new System.Windows.Forms.SplitContainer();
             this.NavigatorVirtualTree = new Infralution.Controls.VirtualTree.VirtualTree();
-            this.navObjectDTOBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.rowBindingNavObjectDTO = new Infralution.Controls.VirtualTree.ObjectRowBinding();
+            this.NavObjectViewModelBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.rowBindingNavObjectViewModel = new Infralution.Controls.VirtualTree.ObjectRowBinding();
             this.NavigatorDataGridView = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorSplitContainer)).BeginInit();
             this.NavigatorSplitContainer.Panel1.SuspendLayout();
             this.NavigatorSplitContainer.Panel2.SuspendLayout();
             this.NavigatorSplitContainer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorVirtualTree)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.navObjectDTOBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NavObjectViewModelBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -66,25 +66,25 @@ namespace MiniNavigator_UI
             // NavigatorVirtualTree
             // 
             this.NavigatorVirtualTree.Columns.Add(this.colMain);
-            this.NavigatorVirtualTree.DataSource = this.navObjectDTOBindingSource;
+            this.NavigatorVirtualTree.DataSource = this.NavObjectViewModelBindingSource;
             this.NavigatorVirtualTree.Dock = System.Windows.Forms.DockStyle.Fill;
             this.NavigatorVirtualTree.Location = new System.Drawing.Point(0, 0);
             this.NavigatorVirtualTree.Name = "NavigatorVirtualTree";
-            this.NavigatorVirtualTree.RowBindings.Add(this.rowBindingNavObjectDTO);
+            this.NavigatorVirtualTree.RowBindings.Add(this.rowBindingNavObjectViewModel);
             this.NavigatorVirtualTree.Size = new System.Drawing.Size(255, 458);
             this.NavigatorVirtualTree.TabIndex = 0;
             this.NavigatorVirtualTree.MouseUp += NavigatorVirtualTree_MouseUp;
             // 
-            // navObjectDTOBindingSource
+            // NavObjectViewModelBindingSource
             // 
-            this.navObjectDTOBindingSource.DataSource = typeof(MiniNavigator_UI.DTO.NavObjectDTO);
+            this.NavObjectViewModelBindingSource.DataSource = typeof(MiniNavigator_UI.ViewModel.NavObjectViewModel);
             // 
-            // rowBindingNavObjectDTO
+            // rowBindingNavObjectViewModel
             // 
             objectCellBinding1.Column = this.colMain;
-            this.rowBindingNavObjectDTO.CellBindings.Add(objectCellBinding1);
-            this.rowBindingNavObjectDTO.Name = "rowBindingNavObjectDTO";
-            this.rowBindingNavObjectDTO.TypedListName = "NavObjectDTO";
+            this.rowBindingNavObjectViewModel.CellBindings.Add(objectCellBinding1);
+            this.rowBindingNavObjectViewModel.Name = "rowBindingNavObjectViewModel";
+            this.rowBindingNavObjectViewModel.TypedListName = "NavObjectViewModel";
             // 
             // NavigatorDataGridView
             // 
@@ -108,7 +108,7 @@ namespace MiniNavigator_UI
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorSplitContainer)).EndInit();
             this.NavigatorSplitContainer.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorVirtualTree)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.navObjectDTOBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NavObjectViewModelBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorDataGridView)).EndInit();
             this.ResumeLayout(false);
 
@@ -122,9 +122,9 @@ namespace MiniNavigator_UI
         #endregion
 
         private Infralution.Controls.VirtualTree.VirtualTree NavigatorVirtualTree;
-        private System.Windows.Forms.BindingSource navObjectDTOBindingSource;
+        private System.Windows.Forms.BindingSource NavObjectViewModelBindingSource;
         private Infralution.Controls.VirtualTree.Column colMain;
-        private Infralution.Controls.VirtualTree.ObjectRowBinding rowBindingNavObjectDTO;
+        private Infralution.Controls.VirtualTree.ObjectRowBinding rowBindingNavObjectViewModel;
         private System.Windows.Forms.SplitContainer NavigatorSplitContainer;
         private System.Windows.Forms.DataGridView NavigatorDataGridView;
     }

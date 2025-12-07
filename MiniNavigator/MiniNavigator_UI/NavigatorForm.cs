@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
 using Infralution.Controls.VirtualTree;
-using MiniNavigator_Service.Service.Interface;
-using MiniNavigator_Services.DTO;
 using MiniNavigator_Services.Service.Interface;
+using MiniNavigator_Services.DTO;
 using MiniNavigator_UI.Mapper;
 using MiniNavigator_UI.Mapper.Interface;
 using MiniNavigator_UI.ViewModel;
@@ -32,7 +31,7 @@ namespace MiniNavigator_UI
             InitializeComponent();
             NavigatorDataGridView.DataSource = _data;
 
-            InitRoot();
+            //InitRoot();
             BindTree(); 
 
             NavigatorVirtualTree.DataSource = _navObjects;

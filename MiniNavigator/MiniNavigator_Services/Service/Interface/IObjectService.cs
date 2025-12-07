@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MiniNavigator_Services.DTO;
 
-namespace MiniNavigator_Service.Service.Interface
+namespace MiniNavigator_Services.Service.Interface
 {
     public interface IObjectService
     {

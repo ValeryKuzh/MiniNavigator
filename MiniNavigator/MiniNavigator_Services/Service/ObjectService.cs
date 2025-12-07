@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MiniNavigator_DB.Model;
-using MiniNavigator_DB.Repository;
-using MiniNavigator_Service.Service.Interface;
 using MiniNavigator_Services.DTO;
-using MiniNavigator_Services.Mapper;
+using MiniNavigator_Services.Mapper.Interface;
+using MiniNavigator_Services.Service.Interface;
+using MiniNavigator_DB.Model;
+using MiniNavigator_DB.Repository.Interface;
 
 namespace MiniNavigator_Service.Service
 {

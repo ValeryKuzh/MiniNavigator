@@ -1,4 +1,4 @@
-﻿namespace MiniNavigator_Services.Mapper
+﻿namespace MiniNavigator_Services.Mapper.Interface
 {
     /// <summary>
     /// Интерфейс для маппинга классов 

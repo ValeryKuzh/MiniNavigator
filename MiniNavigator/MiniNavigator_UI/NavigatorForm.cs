@@ -43,6 +43,7 @@ namespace MiniNavigator_UI
             _navObjects = _objectMapper.ToViewModel(_objectService.GetTreeOfObjects());
             NavigatorVirtualTree.DataSource = _navObjects;
         }
+
         private void BindTree()
         {
             // создаём биндинг для NavObjectViewModel

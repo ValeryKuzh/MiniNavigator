@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MiniNavigator_DB.Repository
+namespace MiniNavigator_DB.Repository.Interface
 {
     public interface IRepository<Entity> where Entity : class
     {

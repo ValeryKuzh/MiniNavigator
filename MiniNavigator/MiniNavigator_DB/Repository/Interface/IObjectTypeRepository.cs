@@ -3,7 +3,7 @@ using MiniNavigator_DB.Model;
 using System;
 using System.Threading.Tasks;
 
-namespace MiniNavigator_Services
+namespace MiniNavigator_DB.Repository.Interface
 {
     public interface IObjectTypeRepository
     {

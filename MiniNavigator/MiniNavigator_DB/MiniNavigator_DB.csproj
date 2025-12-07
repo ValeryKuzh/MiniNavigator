@@ -91,9 +91,7 @@
     <None Include="Data\MiniNavigator.sqlite" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Migration\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202512042220130_InitialCreate.resx">
       <DependentUpon>202512042220130_InitialCreate.cs</DependentUpon>

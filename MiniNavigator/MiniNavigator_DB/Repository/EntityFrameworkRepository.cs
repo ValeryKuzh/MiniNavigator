@@ -1,10 +1,12 @@
 ﻿using MiniNavigator_DB.Context;
+using MiniNavigator_DB.Repository.Interface;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+
 namespace MiniNavigator_DB.Repository
 {
     public class EntityFrameworkRepository<Entity> : IRepository<Entity> where Entity : class

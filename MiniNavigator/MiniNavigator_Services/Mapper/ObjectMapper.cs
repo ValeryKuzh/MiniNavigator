@@ -1,4 +1,5 @@
 ﻿using MiniNavigator_Services.DTO;
+using MiniNavigator_Services.Mapper.Interface;
 using MiniNavigator_DB.Model;
 
 namespace MiniNavigator_Services.Mapper

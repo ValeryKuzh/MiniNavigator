@@ -7,7 +7,7 @@
     /// <typeparam name="Entity">Сущность из БД</typeparam>
     public interface IMapper<DTO, Entity> where DTO : class where Entity : class
     {
-        DTO ToDto(Entity entity);
-        Entity ToEntity(DTO dto);
+        DTO ToDTO(Entity entity);
+        Entity ToEntity(DTO DTO);
     }
 }

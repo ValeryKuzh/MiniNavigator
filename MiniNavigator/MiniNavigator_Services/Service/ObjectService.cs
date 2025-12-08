@@ -8,7 +8,7 @@ using MiniNavigator_Services.Service.Interface;
 using MiniNavigator_DB.Model;
 using MiniNavigator_DB.Repository.Interface;
 
-namespace MiniNavigator_Service.Service
+namespace MiniNavigator_Services.Service
 {
     public class ObjectService : IObjectService
     {
@@ -31,7 +31,7 @@ namespace MiniNavigator_Service.Service
             var actionsDTO = new List<ObjectActionDTO>();
             foreach(var actionEntity in actionsEntity)
             {
-                 actionsDTO.Add(_actionMapper.ToDto(actionEntity));
+                 actionsDTO.Add(_actionMapper.ToDTO(actionEntity));
             }
             return actionsDTO;
         }

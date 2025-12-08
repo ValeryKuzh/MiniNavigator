@@ -1,17 +1,17 @@
-﻿using MiniNavigator_Services.DTO;
+﻿using MiniNavigator_DB.Model;
+using MiniNavigator_Services.DTO;
 using MiniNavigator_Services.Mapper.Interface;
-using MiniNavigator_DB.Model;
 
 namespace MiniNavigator_Services.Mapper
 {
-    public class ObjectMapper : IMapper<NavObjectDTO, BaseObject>
+    public class ObjectTypeMapper : IMapper<ObjectTypeDTO, ObjectType>
     {
-        public NavObjectDTO ToDTO(BaseObject entity)
+        public ObjectTypeDTO ToDTO(ObjectType entity)
         {
             throw new System.NotImplementedException();
         }
 
-        public BaseObject ToEntity(NavObjectDTO dto)
+        public ObjectType ToEntity(ObjectTypeDTO dto)
         {
             throw new System.NotImplementedException();
         }

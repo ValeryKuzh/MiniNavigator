@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows.Forms;
-using Infralution.Controls.VirtualTree;
-using MiniNavigator_Services.Service.Interface;
+﻿using Infralution.Controls.VirtualTree;
 using MiniNavigator_Services.DTO;
+using MiniNavigator_Services.Service;
+using MiniNavigator_Services.Service.Interface;
 using MiniNavigator_UI.Mapper;
 using MiniNavigator_UI.Mapper.Interface;
 using MiniNavigator_UI.ViewModel;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace MiniNavigator_UI
 {
@@ -26,12 +27,15 @@ namespace MiniNavigator_UI
 
         private BindingList<NavObjectViewModel> _data = new BindingList<NavObjectViewModel>();
 
-        public NavigatorForm()
+        public NavigatorForm(IObjectService objectService, IObjectTypeService objectTypeService)
         {
+            _objectService = objectService;
+            _objectTypeService = objectTypeService;
+
             InitializeComponent();
             NavigatorDataGridView.DataSource = _data;
 
-            //InitRoot();
+            InitRoot();
             BindTree(); 
 
             NavigatorVirtualTree.DataSource = _navObjects;
@@ -65,12 +69,13 @@ namespace MiniNavigator_UI
 
         private async void InitRoot()
         {
-            List<ObjectTypeDTO> types = await _objectTypeService.GetTypesAsync();
+            List<ObjectTypeDTO> types = await _objectTypeService.GetAllObjectTypesAsync();
 
             foreach (var type in types)
             {
                 _navObjects.Children.Add(_objectTypeMapper.ToViewModel(type));
             }
+
             //_navObjects.Children.Add(new NavObjectDTO
             //{
             //    Name = "Пользователи",

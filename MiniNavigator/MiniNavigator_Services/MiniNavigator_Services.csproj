@@ -45,11 +45,14 @@
     <Compile Include="DTO\ObjectActionDTO.cs" />
     <Compile Include="DTO\ObjectTypeDTO.cs" />
     <Compile Include="Mapper\Interface\IMapper.cs" />
+    <Compile Include="Mapper\ObjectActionMapper.cs" />
     <Compile Include="Mapper\ObjectMapper.cs" />
+    <Compile Include="Mapper\ObjectTypeMapper.cs" />
     <Compile Include="Service\Interface\IObjectService.cs" />
     <Compile Include="Service\Interface\IObjectTypeService.cs" />
     <Compile Include="Service\ObjectService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\ObjectTypeService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MiniNavigator_DB\MiniNavigator_DB.csproj">

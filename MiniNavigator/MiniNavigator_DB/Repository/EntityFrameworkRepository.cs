@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MiniNavigator_DB.Repository
 {
-    public class EntityFrameworkRepository<Entity> : IRepository<Entity> where Entity : class
+    public class EntityFrameworkRepository<Entity> : IRepository<Entity> where Entity : class 
     {
         private readonly MiniNavigatorDbContext _context;
         private readonly DbSet<Entity> _dbSet;

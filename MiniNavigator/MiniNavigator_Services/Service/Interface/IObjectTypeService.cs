@@ -6,6 +6,6 @@ namespace MiniNavigator_Services.Service.Interface
 {
     public interface IObjectTypeService
     {
-        Task<List<ObjectTypeDTO>> GetTypesAsync();
+        Task<List<ObjectTypeDTO>> GetAllObjectTypesAsync();
     }
 }

@@ -13,7 +13,10 @@ namespace MiniNavigator_UI.Mapper
 
         public ObjectTypeViewModel ToViewModel(ObjectTypeDTO entity)
         {
-            throw new System.NotImplementedException();
+            return new ObjectTypeViewModel
+            {
+                Title = entity.Title
+            };
         }
     }
 }

@@ -14,9 +14,10 @@ namespace MiniNavigator_Services.Service
 
         private readonly IMapper<ObjectTypeDTO, ObjectType> _objectTypeMapper;
         
-        public ObjectTypeService(IObjectTypeRepository objectTypeRepository)
+        public ObjectTypeService(IObjectTypeRepository objectTypeRepository, IMapper<ObjectTypeDTO, ObjectType> objectTypeMapper)
         {
             _objectTypeRepository = objectTypeRepository;
+            _objectTypeMapper = objectTypeMapper;
         }
 
         public async Task<List<ObjectTypeDTO>> GetAllObjectTypesAsync()

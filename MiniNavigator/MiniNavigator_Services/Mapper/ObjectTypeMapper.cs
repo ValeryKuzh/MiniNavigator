@@ -8,12 +8,18 @@ namespace MiniNavigator_Services.Mapper
     {
         public ObjectTypeDTO ToDTO(ObjectType entity)
         {
-            throw new System.NotImplementedException();
+            return new ObjectTypeDTO()
+            {
+                Title = entity.Name
+            };
         }
 
         public ObjectType ToEntity(ObjectTypeDTO dto)
         {
-            throw new System.NotImplementedException();
+            return new ObjectType()
+            {
+                Name = dto.Title
+            };
         }
     }
 }

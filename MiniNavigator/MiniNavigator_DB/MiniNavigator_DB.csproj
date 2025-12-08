@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context\MiniNavigatorDbContext.cs" />
+    <Compile Include="Configuration\MiniNavigatorDbConfiguration.cs" />
     <Compile Include="Repository\ObjectTypeRepository\IObjectTypeRepository.cs" />
     <Compile Include="Migrations\202512042220130_InitialCreate.cs" />
     <Compile Include="Migrations\202512042220130_InitialCreate.Designer.cs">

@@ -3,6 +3,7 @@ using System.Data.Entity;
 
 namespace MiniNavigator_DB.Context
 {
+    [DbConfigurationType(typeof(MiniNavigatorDbConfiguration))]
     public class MiniNavigatorDbContext : DbContext
     {
         public DbSet<BaseObject> Object { get; set; }
@@ -16,7 +17,7 @@ namespace MiniNavigator_DB.Context
         public DbSet<ObjectFileChunk> ObjectFileChunks { get; set; }
 
         public MiniNavigatorDbContext(string connectionString) : base(connectionString) { }
-        public MiniNavigatorDbContext() : base("name=InterMechDbConnection") { }
+        public MiniNavigatorDbContext() : base("name=HomeDbConnection") { }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             // PK

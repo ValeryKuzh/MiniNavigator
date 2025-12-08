@@ -106,10 +106,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MiniNavigator_DB\MiniNavigator_DB.csproj">
-      <Project>{58A1A564-6415-4846-8F91-01122D87F64A}</Project>
-      <Name>MiniNavigator_DB</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MiniNavigator_Services\MiniNavigator_Services.csproj">
       <Project>{D0C9816A-7187-4CBA-B992-239E1322DFED}</Project>
       <Name>MiniNavigator_Services</Name>

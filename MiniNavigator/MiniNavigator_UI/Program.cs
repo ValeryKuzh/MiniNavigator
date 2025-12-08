@@ -1,8 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using MiniNavigator_DB.Context;
-using MiniNavigator_DB.Model;
-using MiniNavigator_DB.Repository;
-using MiniNavigator_DB.Repository.Interface;
 using MiniNavigator_Services.Service;
 using MiniNavigator_Services.DTO;
 using MiniNavigator_Services.Mapper;
@@ -10,6 +6,7 @@ using MiniNavigator_Services.Mapper.Interface;
 using MiniNavigator_Services.Service.Interface;
 using System;
 using System.Windows.Forms;
+using MiniNavigator_Services;
 
 namespace MiniNavigator_UI
 {
@@ -23,17 +20,8 @@ namespace MiniNavigator_UI
         {
             var services = new ServiceCollection();
 
-            // DbContext 
-            services.AddScoped<MiniNavigatorDbContext>(sp => new MiniNavigatorDbContext());
-
-            // Repositories
-            services.AddScoped(typeof(IRepository<>), typeof(EntityFrameworkRepository<>));
-            services.AddScoped<IObjectTypeRepository, ObjectTypeRepository>();
-
-            // Mappers Entity <=> DTO
-            services.AddScoped<IMapper<NavObjectDTO, BaseObject>, ObjectMapper>();
-            services.AddScoped<IMapper<ObjectTypeDTO, ObjectType>, ObjectTypeMapper>();
-            services.AddScoped<IMapper<ObjectActionDTO, ObjectAction>, ObjectActionMapper>();
+            // DI в BLL
+            ServiceFactory.AddDependencies(services);
 
             // Mappers DTO <=> ViewModel
 

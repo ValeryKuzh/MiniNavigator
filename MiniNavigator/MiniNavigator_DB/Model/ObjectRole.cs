@@ -1,7 +1,12 @@
-﻿namespace MiniNavigator_DB.Model
+﻿using System;
+
+namespace MiniNavigator_DB.Model
 {
-    public class ObjectRole : BaseObject
+    public class ObjectRole
     {
-        public string Role { get; set; }
+        public Guid ID { get; set; }
+        public BaseObject Base { get; set; }
+
+        public string RoleName { get; set; }
     }
 }

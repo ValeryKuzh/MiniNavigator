@@ -1,17 +1,15 @@
-﻿using MiniNavigator_DB.Context;
-namespace MiniNavigator_DB.Migrations
+﻿namespace MiniNavigator_DB.Migrations
 {
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<MiniNavigatorDbContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<MiniNavigator_DB.Context.MiniNavigatorDbContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
-            ContextKey = "MiniNavigator_DB.Context.MiniNavigatorDbContext";
         }
 
         protected override void Seed(MiniNavigator_DB.Context.MiniNavigatorDbContext context)

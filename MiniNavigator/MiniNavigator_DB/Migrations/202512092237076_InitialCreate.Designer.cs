@@ -13,7 +13,7 @@ namespace MiniNavigator_DB.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "202512042220130_InitialCreate"; }
+            get { return "202512092237076_InitialCreate"; }
         }
         
         string IMigrationMetadata.Source

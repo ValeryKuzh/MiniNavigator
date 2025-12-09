@@ -67,12 +67,13 @@
   <ItemGroup>
     <Compile Include="Context\MiniNavigatorDbContext.cs" />
     <Compile Include="Configuration\MiniNavigatorDbConfiguration.cs" />
-    <Compile Include="Repository\ObjectTypeRepository\IObjectTypeRepository.cs" />
-    <Compile Include="Migrations\202512042220130_InitialCreate.cs" />
-    <Compile Include="Migrations\202512042220130_InitialCreate.Designer.cs">
-      <DependentUpon>202512042220130_InitialCreate.cs</DependentUpon>
+    <Compile Include="Migrations\202512092237076_InitialCreate.cs" />
+    <Compile Include="Migrations\202512092237076_InitialCreate.Designer.cs">
+      <DependentUpon>202512092237076_InitialCreate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Model\ObjectAttributeValue.cs" />
+    <Compile Include="Repository\ObjectTypeRepository\IObjectTypeRepository.cs" />
     <Compile Include="Model\BaseObject.cs" />
     <Compile Include="Model\ObjectAction.cs" />
     <Compile Include="Model\ObjectAttribute.cs" />
@@ -93,10 +94,9 @@
     <None Include="Data\MiniNavigator.sqlite" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202512042220130_InitialCreate.resx">
-      <DependentUpon>202512042220130_InitialCreate.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202512092237076_InitialCreate.resx">
+      <DependentUpon>202512092237076_InitialCreate.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

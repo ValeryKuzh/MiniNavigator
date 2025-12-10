@@ -1,10 +1,11 @@
-﻿namespace MiniNavigator_Services.DTO
+﻿using System;
+
+namespace MiniNavigator_Services.DTO
 {
-    public class ObjectTypeDTO : NavObjectDTO
+    public class ObjectTypeDTO
     {
-        /// <summary>
-        /// Имя типа
-        /// </summary>
-        public override string Title { get; set; }
+        public Guid ID { get; set; }
+        public string Title { get; set; }
+        public Guid ObjectID { get; set; }
     }
 }

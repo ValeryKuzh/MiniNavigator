@@ -1,10 +1,11 @@
-﻿namespace MiniNavigator_UI.ViewModel
+﻿using System;
+
+namespace MiniNavigator_UI.ViewModel
 {
-    public class ObjectTypeViewModel : NavObjectViewModel
+    public class ObjectTypeViewModel
     {
-        /// <summary>
-        /// Имя типа
-        /// </summary>
-        public override string Title { get; set; }
+        public Guid ID { get; set; }
+        public string Name { get; set; }
+        public Guid BaseId { get; set; }
     }
 }

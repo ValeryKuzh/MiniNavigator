@@ -22,7 +22,7 @@ namespace MiniNavigator_UI
 
         private NavObjectViewModel _navObjects = new NavObjectViewModel()
         {
-            Title = "Система"
+            ObjectTitle = "Система"
         };
 
         private BindingList<NavObjectViewModel> _data = new BindingList<NavObjectViewModel>();
@@ -43,7 +43,7 @@ namespace MiniNavigator_UI
 
         private void LoadTree()
         {
-            _navObjects = _objectMapper.ToViewModel(_objectService.GetTreeOfObjects());
+            //_navObjects = _objectMapper.ToViewModel(_objectService.GetTreeOfObjects());
             NavigatorVirtualTree.DataSource = _navObjects;
         }
 
@@ -58,7 +58,7 @@ namespace MiniNavigator_UI
             var nameBinding = new ObjectCellBinding
             {
                 Column = NavigatorVirtualTree.Columns[0],
-                Field = "Name"
+                Field = "ObjectTitle"
             };
 
             binding.CellBindings.Add(nameBinding);
@@ -73,7 +73,7 @@ namespace MiniNavigator_UI
 
             foreach (var type in types)
             {
-                _navObjects.Children.Add(_objectTypeMapper.ToViewModel(type));
+                //_navObjects.Children.Add(_objectTypeMapper.ToViewModel(type));
             }
 
             //_navObjects.Children.Add(new NavObjectDTO
@@ -122,7 +122,7 @@ namespace MiniNavigator_UI
                 if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectDTO navObjectDto)
                 {
 
-                    var actions = _objectService.GetActionsForObject(navObjectDto.ID).Result;
+                    var actions = await _objectService.GetActionsForObject(navObjectDto.ID);
 
                     ContextMenuStrip menu = new ContextMenuStrip();
 

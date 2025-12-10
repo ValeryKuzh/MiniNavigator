@@ -10,7 +10,9 @@ namespace MiniNavigator_Services.Mapper
         {
             return new ObjectTypeDTO()
             {
-                Title = entity.Name
+                ID = entity.ID,
+                Title = entity.Name,
+                ObjectID = entity.Base.ID
             };
         }
 
@@ -18,6 +20,7 @@ namespace MiniNavigator_Services.Mapper
         {
             return new ObjectType()
             {
+                ID = dto.ID,
                 Name = dto.Title
             };
         }

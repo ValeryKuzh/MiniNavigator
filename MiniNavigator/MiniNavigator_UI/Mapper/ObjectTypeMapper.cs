@@ -15,7 +15,7 @@ namespace MiniNavigator_UI.Mapper
         {
             return new ObjectTypeViewModel
             {
-                Title = entity.Title
+                Name = entity.Title
             };
         }
     }

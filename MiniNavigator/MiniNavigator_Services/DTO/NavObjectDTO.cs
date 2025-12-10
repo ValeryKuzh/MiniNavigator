@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MiniNavigator_DB.Model;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace MiniNavigator_Services.DTO
@@ -6,21 +8,10 @@ namespace MiniNavigator_Services.DTO
     public class NavObjectDTO
     {
         public Guid ID { get; set; }
-
-        /// <summary>
-        /// Название объекта
-        /// </summary>
-        [Description("Название")]
-        [Browsable(true)]
-        public virtual string Title { get; set; }
-
-        /// <summary>
-        /// Тип объекта
-        /// </summary>
-        [Description("Тип")]
-        public ObjectTypeDTO Type { get; set; }
-        
-        [Description("Дочерние узлы")]
-        public BindingList<NavObjectDTO> Children { get; set; } = new BindingList<NavObjectDTO>();
+        public Guid? ObjectTypeID { get; set; }
+        public string Title { get; set; }
+        public Guid? ParentID { get; set; }
+        public NavObjectDTO Parent { get; set; }
+        public List<NavObjectDTO> Children { get; set; } = new List<NavObjectDTO>();
     }
 }

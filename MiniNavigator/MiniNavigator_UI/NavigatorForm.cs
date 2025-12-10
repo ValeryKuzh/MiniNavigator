@@ -8,6 +8,7 @@ using MiniNavigator_UI.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace MiniNavigator_UI
@@ -20,10 +21,7 @@ namespace MiniNavigator_UI
         private IMapper<NavObjectViewModel, NavObjectDTO> _objectMapper = new ObjectMapper();
         private IMapper<ObjectTypeViewModel, ObjectTypeDTO> _objectTypeMapper = new ObjectTypeMapper();
 
-        private NavObjectViewModel _navObjects = new NavObjectViewModel()
-        {
-            ObjectTitle = "Система"
-        };
+        private NavObjectViewModel _treeOfObjects = new NavObjectViewModel();
 
         private BindingList<NavObjectViewModel> _data = new BindingList<NavObjectViewModel>();
 
@@ -33,32 +31,24 @@ namespace MiniNavigator_UI
             _objectTypeService = objectTypeService;
 
             InitializeComponent();
-            NavigatorDataGridView.DataSource = _data;
 
-            InitRoot();
-            BindTree(); 
+            this.Load += NavigatorForm_Load;
 
-            NavigatorVirtualTree.DataSource = _navObjects;
-        }
+            BindTree();
 
-        private void LoadTree()
-        {
-            //_navObjects = _objectMapper.ToViewModel(_objectService.GetTreeOfObjects());
-            NavigatorVirtualTree.DataSource = _navObjects;
+            NavigatorVirtualTree.DataSource = _treeOfObjects;
         }
 
         private void BindTree()
         {
-            // создаём биндинг для NavObjectViewModel
             var binding = new ObjectRowBinding(typeof(NavObjectViewModel));
 
-            // указываем, что Children — это дочерние элементы
-            binding.ChildProperty = "Children";
+            binding.ChildProperty = nameof(NavObjectViewModel.Children);
 
             var nameBinding = new ObjectCellBinding
             {
                 Column = NavigatorVirtualTree.Columns[0],
-                Field = "ObjectTitle"
+                Field = nameof(NavObjectViewModel.ObjectTitle)
             };
 
             binding.CellBindings.Add(nameBinding);
@@ -67,54 +57,34 @@ namespace MiniNavigator_UI
             NavigatorVirtualTree.RowBindings.Add(binding);
         }
 
+        private async void NavigatorForm_Load(object sender, EventArgs e)
+        {
+
+            InitRoot();
+        }
+
         private async void InitRoot()
         {
-            List<ObjectTypeDTO> types = await _objectTypeService.GetAllObjectTypesAsync();
-
-            foreach (var type in types)
-            {
-                //_navObjects.Children.Add(_objectTypeMapper.ToViewModel(type));
-            }
-
-            //_navObjects.Children.Add(new NavObjectDTO
-            //{
-            //    Name = "Пользователи",
-            //    Type = "User",
-            //    Children =
-            //    {
-            //        new NavObjectDTO { Name = "Модуль 1", Type = "Module" },
-            //        new NavObjectDTO
-            //        {
-            //            Name = "Модуль 2",
-            //            Type = "Module",
-            //            Children =
-            //            {
-            //                new NavObjectDTO { Name = "Объект A", Type = "Entity" },
-            //                new NavObjectDTO { Name = "Объект B", Type = "Entity" }
-            //            }
-            //        }
-            //    }
-            //});
-            //_navObjects.Children.Add(new NavObjectDTO
-            //{
-            //    Name = "Роли",
-            //    Type = "Role",
-            //    Children =
-            //    {
-            //        new NavObjectDTO { Name = "Модуль 1", Type = "Module" },
-            //        new NavObjectDTO
-            //        {
-            //            Name = "Модуль 2",
-            //            Type = "Module",
-            //            Children =
-            //            {
-            //                new NavObjectDTO { Name = "Объект A", Type = "Entity" },
-            //                new NavObjectDTO { Name = "Объект B", Type = "Entity" }
-            //            }
-            //        }
-            //    }
-            //});
+            var tree = ConvertTreeToViewModels(await _objectService.GetTreeOfObjectsAsync());
+            _treeOfObjects = tree;
         }
+
+        public NavObjectViewModel ConvertTreeToViewModels(NavObjectDTO root)
+        {
+            var result = _objectMapper.ToViewModel(root);
+
+            if (root.Children != null && root.Children.Any())
+            {
+                result.Children = new BindingList<NavObjectViewModel>();
+                foreach (var child in root.Children)
+                {
+                    result.Children.Add(ConvertTreeToViewModels(child));
+                }
+            }
+            
+            return result;
+        }
+
         private async void NavigatorVirtualTree_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)

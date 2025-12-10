@@ -1,6 +1,8 @@
 ﻿using MiniNavigator_Services.DTO;
 using MiniNavigator_UI.Mapper.Interface;
 using MiniNavigator_UI.ViewModel;
+using System;
+using System.Collections.Generic;
 
 namespace MiniNavigator_UI.Mapper
 {
@@ -8,7 +10,13 @@ namespace MiniNavigator_UI.Mapper
     {
         public NavObjectViewModel ToViewModel(NavObjectDTO entity)
         {
-            throw new System.NotImplementedException();
+            return new NavObjectViewModel()
+            {
+                ID = entity.ID,
+                ObjectTypeID = entity.ObjectTypeID,
+                ObjectTitle = entity.Title,
+                ParentID = entity.ParentID
+            };
         }
 
         public NavObjectDTO ToDTO(NavObjectViewModel dto)

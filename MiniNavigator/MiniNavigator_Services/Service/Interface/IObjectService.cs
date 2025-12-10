@@ -8,6 +8,6 @@ namespace MiniNavigator_Services.Service.Interface
     public interface IObjectService
     {
         Task<List<ObjectActionDTO>> GetActionsForObject(Guid ID);
-        Task<List<NavObjectDTO>> GetTreeOfObjectsAsync();
+        Task<NavObjectDTO> GetTreeOfObjectsAsync();
     }
 }

@@ -38,7 +38,7 @@ namespace MiniNavigator_Services.Service
             return actionsDTO;
         }
 
-        public async Task<List<NavObjectDTO>> GetTreeOfObjectsAsync()
+        public async Task<NavObjectDTO> GetTreeOfObjectsAsync()
         {
             var root = new NavObjectDTO()
             {
@@ -58,38 +58,9 @@ namespace MiniNavigator_Services.Service
                 root.Children.Add(objType);
             }
 
-            var dbObjects = await _objectRepository.GetAllAsync();
-
-            // 2. Маппим к DTO
-            var flatList = dbObjects.Select(o => new NavObjectDTO
-            {
-                ID = o.ID,
-                ObjectTypeID = o.ObjectTypeID,
-                ParentID = o.ParentID
-            }).ToList();
-
-            // 3. Создаём lookup по ID
-            var lookup = flatList.ToDictionary(x => x.ID);
-
-            // 4. Список корневых узлов
-            var roots = new List<NavObjectDTO>();
-
-            // 5. Собираем дерево
-            foreach (var dto in flatList)
-            {
-                if (dto.ParentID != null && lookup.ContainsKey(dto.ParentID.Value))
-                {
-                    // Родитель найден — добавляем в Children
-                  //  lookup[dto.ParentID.Value].Children.Add(dto);
-                }
-                else
-                {
-                    // Это корневой объект
-                    roots.Add(dto);
-                }
-            }
-
-            return roots;
+            //var objectsWithoutTypes = _objectRepository.Query().Where(o => !root.Children.Select(obj => obj.ID).Contains(o.ID)).ToList();
+            
+            return root;
         }
     }
 }

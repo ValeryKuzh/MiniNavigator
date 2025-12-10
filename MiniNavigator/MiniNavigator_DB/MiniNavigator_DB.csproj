@@ -71,6 +71,10 @@
     <Compile Include="Migrations\202512092237076_InitialCreate.Designer.cs">
       <DependentUpon>202512092237076_InitialCreate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202512101839119_UpdateObjectTypeModel.cs" />
+    <Compile Include="Migrations\202512101839119_UpdateObjectTypeModel.Designer.cs">
+      <DependentUpon>202512101839119_UpdateObjectTypeModel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\ObjectAttributeValue.cs" />
     <Compile Include="Repository\ObjectTypeRepository\IObjectTypeRepository.cs" />
@@ -97,6 +101,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202512092237076_InitialCreate.resx">
       <DependentUpon>202512092237076_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202512101839119_UpdateObjectTypeModel.resx">
+      <DependentUpon>202512101839119_UpdateObjectTypeModel.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

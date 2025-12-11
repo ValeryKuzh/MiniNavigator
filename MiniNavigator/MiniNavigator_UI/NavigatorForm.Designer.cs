@@ -15,8 +15,6 @@ namespace MiniNavigator_UI
             base.Dispose(disposing);
         }
 
-
-
         #region Код, автоматически созданный конструктором форм Windows
 
         private void InitializeComponent()
@@ -34,13 +32,23 @@ namespace MiniNavigator_UI
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
+            // colMain
+            // 
+            this.colMain.AutoSizePolicy = Infralution.Controls.VirtualTree.ColumnAutoSizePolicy.AutoIncrease;
+            this.colMain.Caption = "Объекты";
+            this.colMain.DataField = "__MAIN__";
+            this.colMain.Hidable = false;
+            this.colMain.Movable = false;
+            this.colMain.Name = "colMain";
+            this.colMain.Width = 362;
+            // 
             // NavigatorSplitContainer
             // 
             this.NavigatorSplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.NavigatorSplitContainer.Location = new System.Drawing.Point(0, 0);
             this.NavigatorSplitContainer.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.NavigatorSplitContainer.Name = "NavigatorSplitContainer";
-            this.NavigatorSplitContainer.SplitterMoved += NavigatorSplitContainer_SplitterMoved;
+            NavigatorSplitContainer.SplitterMoved += NavigatorSplitContainer_SplitterMoved;
             // 
             // NavigatorSplitContainer.Panel1
             // 
@@ -71,16 +79,7 @@ namespace MiniNavigator_UI
             this.NavigatorVirtualTree.ScalingFactor = 1.5F;
             this.NavigatorVirtualTree.Size = new System.Drawing.Size(382, 705);
             this.NavigatorVirtualTree.TabIndex = 0;
-            // 
-            // colMain
-            // 
-            this.colMain.AutoSizePolicy = Infralution.Controls.VirtualTree.ColumnAutoSizePolicy.AutoIncrease;
-            this.colMain.Caption = "Объекты";
-            this.colMain.DataField = "__MAIN__";
-            this.colMain.Hidable = false;
-            this.colMain.Movable = false;
-            this.colMain.Name = "colMain";
-            this.colMain.Width = 362;
+            this.NavigatorVirtualTree.MouseUp += NavigatorVirtualTree_MouseUp;
             // 
             // NavigatorDataGridView
             // 
@@ -105,9 +104,9 @@ namespace MiniNavigator_UI
             this.NavigatorSplitContainer.Panel1.ResumeLayout(false);
             this.NavigatorSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorSplitContainer)).EndInit();
+            this.NavigatorSplitContainer.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorVirtualTree)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorDataGridView)).EndInit();
-            this.NavigatorSplitContainer.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

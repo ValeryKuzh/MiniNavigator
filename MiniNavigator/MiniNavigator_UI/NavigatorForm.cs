@@ -31,7 +31,6 @@ namespace MiniNavigator_UI
             _objectTypeService = objectTypeService;
 
             InitializeComponent();
-
             BindTree();
 
             this.Load += NavigatorForm_Load;
@@ -55,14 +54,13 @@ namespace MiniNavigator_UI
             };
 
             binding.CellBindings.Add(nameBinding);
-            
+
             NavigatorVirtualTree.RowBindings.Add(binding);
         }
 
         private async void InitRoot()
         {
             _treeOfObjects = ConvertTreeToViewModels(await _objectService.GetTreeOfObjectsAsync());
-
             NavigatorVirtualTree.DataSource = _treeOfObjects;
             NavigatorVirtualTree.Refresh();
         }
@@ -86,9 +84,8 @@ namespace MiniNavigator_UI
         {
             if (e.Button == MouseButtons.Right)
             {
-                if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectDTO navObjectDto)
+                if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectDto)
                 {
-
                     var actions = await _objectService.GetActionsForObject(navObjectDto.ID);
 
                     ContextMenuStrip menu = new ContextMenuStrip();

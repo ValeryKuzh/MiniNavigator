@@ -81,30 +81,30 @@ namespace MiniNavigator_DB.Configuration
             var actionAddObject = new BaseObject
             {
                 ID = Guid.NewGuid(),
-                ObjectTypeID = null,
-                ObjectType = null,
-                ParentID = null,
-                Parent = null
+                ObjectTypeID = actionTypeObject.ID,
+                ObjectType = actionTypeObject,
+                ParentID = actionTypeObject.ID,
+                Parent = actionTypeObject
             };
             db.BaseObjects.Add(actionAddObject);
             
             var actionEditObject = new BaseObject
             {
                 ID = Guid.NewGuid(),
-                ObjectTypeID = null,
-                ObjectType = null,
-                ParentID = null,
-                Parent = null
+                ObjectTypeID = actionTypeObject.ID,
+                ObjectType = actionTypeObject,
+                ParentID = actionTypeObject.ID,
+                Parent = actionTypeObject
             };
             db.BaseObjects.Add(actionEditObject);
 
             var actionDeleteObject = new BaseObject
             {
                 ID = Guid.NewGuid(),
-                ObjectTypeID = null,
-                ObjectType = null,
-                ParentID = null,
-                Parent = null
+                ObjectTypeID = actionTypeObject.ID,
+                ObjectType = actionTypeObject,
+                ParentID = actionTypeObject.ID,
+                Parent = actionTypeObject
             };
             db.BaseObjects.Add(actionDeleteObject);
 

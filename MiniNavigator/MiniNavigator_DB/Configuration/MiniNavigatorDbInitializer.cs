@@ -127,6 +127,7 @@ namespace MiniNavigator_DB.Configuration
                 Name = "Редактировать",
                 ObjectTypes = new[] { roleType, userType }
             });
+
             db.ObjectActions.Add(new ObjectAction
             {
                 ID = Guid.NewGuid(),
@@ -135,7 +136,43 @@ namespace MiniNavigator_DB.Configuration
                 Name = "Удалить",
                 ObjectTypes = new[] { roleType, userType }
             });
-            
+
+            // Роль А
+            var roleAObject = new BaseObject
+            {
+                ID = Guid.NewGuid(),
+                ObjectTypeID = roleTypeObject.ID,
+                ObjectType = roleTypeObject,
+                ParentID = roleTypeObject.ID,
+                Parent = roleTypeObject
+            };
+            var roleA = new ObjectRole
+            {
+                ID = Guid.NewGuid(),
+                Base_ID = roleTypeObject.ID,
+                Base = roleTypeObject
+            };
+
+            // Пользователь А
+            var userAObject = new BaseObject
+            {
+                ID = Guid.NewGuid(),
+                ObjectTypeID = userTypeObject.ID,
+                ObjectType = userTypeObject,
+                ParentID = userTypeObject.ID,
+                Parent = userTypeObject
+            };
+            var userA = new ObjectUser
+            {
+                ID = Guid.NewGuid(),
+                Base_ID = userTypeObject.ID,
+                Base = userTypeObject,
+                RoleID = roleA.ID,
+                Role = roleA
+            };
+
+            db.BaseObjects.Add(userAObject);
+            db.ObjectUsers.Add(userA);
             db.SaveChanges();
 
             base.Seed(db);

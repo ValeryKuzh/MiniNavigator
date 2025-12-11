@@ -118,6 +118,7 @@ namespace MiniNavigator_DB.Context
             modelBuilder.Entity<ObjectUser>()
                 .HasRequired(x => x.Base)
                 .WithMany()
+                .HasForeignKey(x => x.Base_ID)
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<ObjectUser>()
@@ -131,6 +132,7 @@ namespace MiniNavigator_DB.Context
             modelBuilder.Entity<ObjectRole>()
                 .HasRequired(x => x.Base)
                 .WithMany()
+                .HasForeignKey(x => x.Base_ID)
                 .WillCascadeOnDelete(false);
 
             // ObjectFile

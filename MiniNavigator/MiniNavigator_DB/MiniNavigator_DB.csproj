@@ -72,6 +72,10 @@
     <Compile Include="Migrations\202512112001361_InitialCreate.Designer.cs">
       <DependentUpon>202512112001361_InitialCreate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202512112214425_AddFKsForEntityAndDeleteRoleName.cs" />
+    <Compile Include="Migrations\202512112214425_AddFKsForEntityAndDeleteRoleName.Designer.cs">
+      <DependentUpon>202512112214425_AddFKsForEntityAndDeleteRoleName.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\ObjectAttributeValue.cs" />
     <Compile Include="Repository\ObjectTypeRepository\IObjectTypeRepository.cs" />
@@ -98,6 +102,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202512112001361_InitialCreate.resx">
       <DependentUpon>202512112001361_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202512112214425_AddFKsForEntityAndDeleteRoleName.resx">
+      <DependentUpon>202512112214425_AddFKsForEntityAndDeleteRoleName.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

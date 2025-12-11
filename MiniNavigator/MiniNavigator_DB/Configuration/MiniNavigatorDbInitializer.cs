@@ -153,6 +153,9 @@ namespace MiniNavigator_DB.Configuration
                 Base = roleTypeObject
             };
 
+            db.ObjectRoles.Add(roleA);
+            db.BaseObjects.Add(roleAObject);
+
             // Пользователь А
             var userAObject = new BaseObject
             {

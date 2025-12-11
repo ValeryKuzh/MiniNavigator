@@ -1,4 +1,5 @@
-﻿using MiniNavigator_DB.Context;
+﻿using MiniNavigator_DB.Configuration;
+using MiniNavigator_DB.Context;
 using System;
 using System.Data.Entity;
 
@@ -8,9 +9,8 @@ namespace MiniNavigator_DB
     {
         static void Main(string[] args)
         {
-            Database.SetInitializer(new CreateDatabaseIfNotExists<MiniNavigatorDbContext>());
+            Database.SetInitializer(new MiniNavigatorDbInitializer());
 
-            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<MiniNavigatorDbContext>());
 
             using (var db = new MiniNavigatorDbContext())
             {

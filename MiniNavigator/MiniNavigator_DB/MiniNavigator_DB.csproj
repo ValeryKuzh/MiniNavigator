@@ -65,15 +65,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\MiniNavigatorDbInitializer.cs" />
     <Compile Include="Context\MiniNavigatorDbContext.cs" />
     <Compile Include="Configuration\MiniNavigatorDbConfiguration.cs" />
-    <Compile Include="Migrations\202512092237076_InitialCreate.cs" />
-    <Compile Include="Migrations\202512092237076_InitialCreate.Designer.cs">
-      <DependentUpon>202512092237076_InitialCreate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202512101839119_UpdateObjectTypeModel.cs" />
-    <Compile Include="Migrations\202512101839119_UpdateObjectTypeModel.Designer.cs">
-      <DependentUpon>202512101839119_UpdateObjectTypeModel.cs</DependentUpon>
+    <Compile Include="Migrations\202512112001361_InitialCreate.cs" />
+    <Compile Include="Migrations\202512112001361_InitialCreate.Designer.cs">
+      <DependentUpon>202512112001361_InitialCreate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\ObjectAttributeValue.cs" />
@@ -99,11 +96,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202512092237076_InitialCreate.resx">
-      <DependentUpon>202512092237076_InitialCreate.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202512101839119_UpdateObjectTypeModel.resx">
-      <DependentUpon>202512101839119_UpdateObjectTypeModel.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202512112001361_InitialCreate.resx">
+      <DependentUpon>202512112001361_InitialCreate.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

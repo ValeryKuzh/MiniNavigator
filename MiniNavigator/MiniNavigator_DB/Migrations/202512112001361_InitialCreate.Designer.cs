@@ -7,13 +7,13 @@ namespace MiniNavigator_DB.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.5.1")]
-    public sealed partial class UpdateObjectTypeModel : IMigrationMetadata
+    public sealed partial class InitialCreate : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(UpdateObjectTypeModel));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(InitialCreate));
         
         string IMigrationMetadata.Id
         {
-            get { return "202512101839119_UpdateObjectTypeModel"; }
+            get { return "202512112001361_InitialCreate"; }
         }
         
         string IMigrationMetadata.Source

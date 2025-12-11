@@ -27,8 +27,8 @@
                 c => new
                     {
                         ID = c.Guid(nullable: false),
-                        Name = c.String(),
                         Base_ID = c.Guid(nullable: false),
+                        Name = c.String(),
                     })
                 .PrimaryKey(t => t.ID)
                 .ForeignKey("dbo.BaseObjects", t => t.Base_ID)
@@ -39,8 +39,8 @@
                 c => new
                     {
                         ID = c.Guid(nullable: false),
-                        Name = c.String(),
                         Base_ID = c.Guid(nullable: false),
+                        Name = c.String(),
                     })
                 .PrimaryKey(t => t.ID)
                 .ForeignKey("dbo.BaseObjects", t => t.Base_ID)

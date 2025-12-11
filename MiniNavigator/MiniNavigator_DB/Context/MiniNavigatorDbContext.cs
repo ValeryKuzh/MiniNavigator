@@ -103,6 +103,7 @@ namespace MiniNavigator_DB.Context
             modelBuilder.Entity<ObjectAction>()
                 .HasRequired(x => x.Base)
                 .WithMany()
+                .HasForeignKey(x => x.Base_ID)
                 .WillCascadeOnDelete(false);
 
             // ObjectAttribute

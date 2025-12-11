@@ -32,11 +32,14 @@ namespace MiniNavigator_UI
 
             InitializeComponent();
 
-            this.Load += NavigatorForm_Load;
-
             BindTree();
 
-            NavigatorVirtualTree.DataSource = _treeOfObjects;
+            this.Load += NavigatorForm_Load;
+        }
+
+        private async void NavigatorForm_Load(object sender, EventArgs e)
+        {
+            InitRoot();
         }
 
         private void BindTree()
@@ -52,21 +55,16 @@ namespace MiniNavigator_UI
             };
 
             binding.CellBindings.Add(nameBinding);
-
-            // Регистрируем биндинг
+            
             NavigatorVirtualTree.RowBindings.Add(binding);
-        }
-
-        private async void NavigatorForm_Load(object sender, EventArgs e)
-        {
-
-            InitRoot();
         }
 
         private async void InitRoot()
         {
-            var tree = ConvertTreeToViewModels(await _objectService.GetTreeOfObjectsAsync());
-            _treeOfObjects = tree;
+            _treeOfObjects = ConvertTreeToViewModels(await _objectService.GetTreeOfObjectsAsync());
+
+            NavigatorVirtualTree.DataSource = _treeOfObjects;
+            NavigatorVirtualTree.Refresh();
         }
 
         public NavObjectViewModel ConvertTreeToViewModels(NavObjectDTO root)
@@ -75,13 +73,12 @@ namespace MiniNavigator_UI
 
             if (root.Children != null && root.Children.Any())
             {
-                result.Children = new BindingList<NavObjectViewModel>();
                 foreach (var child in root.Children)
                 {
                     result.Children.Add(ConvertTreeToViewModels(child));
                 }
             }
-            
+
             return result;
         }
 

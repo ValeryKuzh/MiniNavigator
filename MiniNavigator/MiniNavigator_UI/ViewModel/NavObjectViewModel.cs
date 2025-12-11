@@ -13,6 +13,6 @@ namespace MiniNavigator_UI.ViewModel
         public Guid? ParentID { get; set; }
         public string ParentTitle { get; set; }
 
-        public BindingList<NavObjectViewModel> Children = new BindingList<NavObjectViewModel>();
+        public BindingList<NavObjectViewModel> Children { get; set; } = new BindingList<NavObjectViewModel>();
     }
 }

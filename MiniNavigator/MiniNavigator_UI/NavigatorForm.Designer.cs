@@ -15,36 +15,24 @@ namespace MiniNavigator_UI
             base.Dispose(disposing);
         }
 
+
+
         #region Код, автоматически созданный конструктором форм Windows
 
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            Infralution.Controls.VirtualTree.ObjectCellBinding objectCellBinding = new Infralution.Controls.VirtualTree.ObjectCellBinding();
             this.colMain = new Infralution.Controls.VirtualTree.Column();
             this.NavigatorSplitContainer = new System.Windows.Forms.SplitContainer();
             this.NavigatorVirtualTree = new Infralution.Controls.VirtualTree.VirtualTree();
-            this.rowBindingNavObjectViewModel = new Infralution.Controls.VirtualTree.ObjectRowBinding();
             this.NavigatorDataGridView = new System.Windows.Forms.DataGridView();
-            this.NavObjectViewModelBindingSource = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorSplitContainer)).BeginInit();
             this.NavigatorSplitContainer.Panel1.SuspendLayout();
             this.NavigatorSplitContainer.Panel2.SuspendLayout();
             this.NavigatorSplitContainer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorVirtualTree)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorDataGridView)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.NavObjectViewModelBindingSource)).BeginInit();
             this.SuspendLayout();
-            // 
-            // colMain
-            // 
-            this.colMain.AutoSizePolicy = Infralution.Controls.VirtualTree.ColumnAutoSizePolicy.AutoIncrease;
-            this.colMain.Caption = "Объекты";
-            this.colMain.DataField = "__MAIN__";
-            this.colMain.Hidable = false;
-            this.colMain.MinWidth = 45;
-            this.colMain.Name = "colMain";
-            this.colMain.Width = 862;
             // 
             // NavigatorSplitContainer
             // 
@@ -70,7 +58,6 @@ namespace MiniNavigator_UI
             // 
             this.NavigatorVirtualTree.Columns.Add(this.colMain);
             this.NavigatorVirtualTree.ConnectionOffset = 12;
-            this.NavigatorVirtualTree.DataSource = this.NavObjectViewModelBindingSource;
             this.NavigatorVirtualTree.Dock = System.Windows.Forms.DockStyle.Fill;
             this.NavigatorVirtualTree.HeaderHeight = 27;
             this.NavigatorVirtualTree.IndentWidth = 30;
@@ -79,19 +66,21 @@ namespace MiniNavigator_UI
             this.NavigatorVirtualTree.MaxRowHeight = 184;
             this.NavigatorVirtualTree.MinRowHeight = 21;
             this.NavigatorVirtualTree.Name = "NavigatorVirtualTree";
-            this.NavigatorVirtualTree.RowBindings.Add(this.rowBindingNavObjectViewModel);
             this.NavigatorVirtualTree.RowHeaderWidth = 45;
             this.NavigatorVirtualTree.RowHeight = 27;
             this.NavigatorVirtualTree.ScalingFactor = 1.5F;
             this.NavigatorVirtualTree.Size = new System.Drawing.Size(382, 705);
             this.NavigatorVirtualTree.TabIndex = 0;
             // 
-            // rowBindingNavObjectViewModel
+            // colMain
             // 
-            objectCellBinding.Column = this.colMain;
-            this.rowBindingNavObjectViewModel.CellBindings.Add(objectCellBinding);
-            this.rowBindingNavObjectViewModel.Name = "rowBindingNavObjectViewModel";
-            this.rowBindingNavObjectViewModel.TypedListName = "NavObjectViewModel";
+            this.colMain.AutoSizePolicy = Infralution.Controls.VirtualTree.ColumnAutoSizePolicy.AutoIncrease;
+            this.colMain.Caption = "Объекты";
+            this.colMain.DataField = "__MAIN__";
+            this.colMain.Hidable = false;
+            this.colMain.Movable = false;
+            this.colMain.Name = "colMain";
+            this.colMain.Width = 362;
             // 
             // NavigatorDataGridView
             // 
@@ -103,10 +92,6 @@ namespace MiniNavigator_UI
             this.NavigatorDataGridView.RowHeadersWidth = 62;
             this.NavigatorDataGridView.Size = new System.Drawing.Size(790, 705);
             this.NavigatorDataGridView.TabIndex = 0;
-            // 
-            // NavObjectViewModelBindingSource
-            // 
-            this.NavObjectViewModelBindingSource.DataSource = typeof(MiniNavigator_UI.ViewModel.NavObjectViewModel);
             // 
             // NavigatorForm
             // 
@@ -120,28 +105,23 @@ namespace MiniNavigator_UI
             this.NavigatorSplitContainer.Panel1.ResumeLayout(false);
             this.NavigatorSplitContainer.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorSplitContainer)).EndInit();
-            this.NavigatorSplitContainer.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorVirtualTree)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.NavigatorDataGridView)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.NavObjectViewModelBindingSource)).EndInit();
+            this.NavigatorSplitContainer.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         private void NavigatorSplitContainer_SplitterMoved(object sender, System.Windows.Forms.SplitterEventArgs e)
         {
-            this.colMain.Width = this.NavigatorSplitContainer.Panel1.Width;
+            this.colMain.Width = this.NavigatorSplitContainer.Panel1.ClientSize.Width - 2;
         }
 
         #endregion
 
         private Infralution.Controls.VirtualTree.VirtualTree NavigatorVirtualTree;
-        private System.Windows.Forms.BindingSource NavObjectViewModelBindingSource;
         private Infralution.Controls.VirtualTree.Column colMain;
-        private Infralution.Controls.VirtualTree.ObjectRowBinding rowBindingNavObjectViewModel;
         private System.Windows.Forms.SplitContainer NavigatorSplitContainer;
         private System.Windows.Forms.DataGridView NavigatorDataGridView;
     }
-
 }
-

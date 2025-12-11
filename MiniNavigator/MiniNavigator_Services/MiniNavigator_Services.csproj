@@ -56,6 +56,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionService.cs" />
     <Compile Include="DTO\NavObjectDTO.cs" />
     <Compile Include="DTO\ObjectActionDTO.cs" />
     <Compile Include="DTO\ObjectTypeDTO.cs" />

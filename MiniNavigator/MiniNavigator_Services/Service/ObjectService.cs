@@ -13,28 +13,47 @@ namespace MiniNavigator_Services.Service
     public class ObjectService : IObjectService
     {
         private readonly IObjectTypeService _objectTypeService;
-        private readonly IMapper<NavObjectDTO, BaseObject> _objectMapper;
+
         private readonly IMapper<ObjectActionDTO, ObjectAction> _actionMapper;
 
         private readonly IRepository<BaseObject> _objectRepository;
+        private readonly IRepository<ObjectType> _objectTypeRepository;
 
-        public ObjectService(IObjectTypeService objectTypeService, IMapper<NavObjectDTO, BaseObject> objectMapper, IMapper<ObjectActionDTO, ObjectAction> actionMapper, IRepository<BaseObject> objectRepository)
+        public ObjectService(
+            IObjectTypeService objectTypeService,
+            IMapper<NavObjectDTO, BaseObject> objectMapper,
+            IMapper<ObjectActionDTO, ObjectAction> actionMapper,
+            IRepository<ObjectType> objectTypeRepository,
+            IRepository<BaseObject> objectRepository)
         {
+            _objectTypeRepository = objectTypeRepository;
             _objectTypeService = objectTypeService;
-            _objectMapper = objectMapper;
             _actionMapper = actionMapper;
             _objectRepository = objectRepository;
         }
 
+        /// <summary>
+        /// Получает список действий для объекта
+        /// </summary>
+        /// <param name="ID">ID объекта</param>
+        /// <returns>Список действий с объектом</returns>
         public async Task<List<ObjectActionDTO>> GetActionsForObject(Guid ID)
         {
-            var obj = await _objectRepository.GetByIdAsync(ID);
-            //var actionsEntity = obj.ObjectType.Actions.ToList();
             var actionsDTO = new List<ObjectActionDTO>();
-            //foreach(var actionEntity in actionsEntity)
-            //{
-            //     actionsDTO.Add(_actionMapper.ToDTO(actionEntity));
-            //}
+            if (ID == Guid.Empty)
+                return actionsDTO;
+
+            var baseObject = _objectRepository.Query().Where(bo => bo.ID == ID).FirstOrDefault();
+
+            var typeOfObject = _objectTypeRepository.Query().Where(ot => ot.ID == baseObject.ObjectTypeID).FirstOrDefault();
+
+            if (!(typeOfObject is null))
+            {
+                foreach (var actionEntity in typeOfObject?.Actions)
+                {
+                    actionsDTO.Add(_actionMapper.ToDTO(actionEntity));
+                }
+            }
             return actionsDTO;
         }
 
@@ -58,8 +77,8 @@ namespace MiniNavigator_Services.Service
                 root.Children.Add(objType);
             }
 
-            //var objectsWithoutTypes = _objectRepository.Query().Where(o => !root.Children.Select(obj => obj.ID).Contains(o.ID)).ToList();
-            
+            var objectsWithoutTypes = _objectRepository.Query().Where(o => !root.Children.AsQueryable().Select(obj => obj.ID).Contains(o.ID)).ToList();
+
             return root;
         }
     }

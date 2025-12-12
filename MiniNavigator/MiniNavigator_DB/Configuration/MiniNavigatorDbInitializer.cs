@@ -178,6 +178,65 @@ namespace MiniNavigator_DB.Configuration
             db.ObjectUsers.Add(userA);
             db.SaveChanges();
 
+            var NameAttributeObject = new BaseObject
+            {
+                ID = Guid.NewGuid(),
+                ObjectTypeID = roleTypeObject.ID,
+                ObjectType = roleTypeObject,
+                ParentID = roleTypeObject.ID,
+                Parent = roleTypeObject
+            };
+            var NameAttribute = new ObjectAttribute()
+            {
+                ID = Guid.NewGuid(),
+                Base = NameAttributeObject,
+                Name = "Name",
+                ValueType = "string",
+                ObjectTypes = new[] { roleType, userType }
+            };
+
+            var SurnameAttributeObject = new BaseObject
+            {
+                ID = Guid.NewGuid(),
+                ObjectTypeID = roleTypeObject.ID,
+                ObjectType = roleTypeObject,
+                ParentID = roleTypeObject.ID,
+                Parent = roleTypeObject
+            };
+            var SurnameAttribute = new ObjectAttribute()
+            {
+                ID = Guid.NewGuid(),
+                Base = SurnameAttributeObject,
+                Name = "Surname",
+                ValueType = "string",
+                ObjectTypes = new[] { userType }
+            };
+
+            var AgeAttributeObject = new BaseObject
+            {
+                ID = Guid.NewGuid(),
+                ObjectTypeID = roleTypeObject.ID,
+                ObjectType = roleTypeObject,
+                ParentID = roleTypeObject.ID,
+                Parent = roleTypeObject
+            };
+            var AgeAttribute = new ObjectAttribute()
+            {
+                ID = Guid.NewGuid(),
+                Base = AgeAttributeObject,
+                Name = "Age",
+                ValueType = "byte",
+                ObjectTypes = new[] { userType }
+            };
+
+            db.BaseObjects.Add(NameAttributeObject);
+            db.BaseObjects.Add(SurnameAttributeObject);
+            db.BaseObjects.Add(AgeAttributeObject);
+            db.ObjectAttributes.Add(NameAttribute);
+            db.ObjectAttributes.Add(SurnameAttribute);
+            db.ObjectAttributes.Add(AgeAttribute);
+            db.SaveChanges();
+
             base.Seed(db);
         }
     }

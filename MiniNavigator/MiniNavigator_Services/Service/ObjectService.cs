@@ -14,6 +14,7 @@ namespace MiniNavigator_Services.Service
     {
         private readonly IObjectTypeService _objectTypeService;
 
+        private readonly IMapper<NavObjectDTO, BaseObject> _objectMapper;
         private readonly IMapper<ObjectActionDTO, ObjectAction> _actionMapper;
 
         private readonly IRepository<BaseObject> _objectRepository;
@@ -21,14 +22,19 @@ namespace MiniNavigator_Services.Service
 
         public ObjectService(
             IObjectTypeService objectTypeService,
+
             IMapper<NavObjectDTO, BaseObject> objectMapper,
             IMapper<ObjectActionDTO, ObjectAction> actionMapper,
+            
             IRepository<ObjectType> objectTypeRepository,
             IRepository<BaseObject> objectRepository)
         {
-            _objectTypeRepository = objectTypeRepository;
             _objectTypeService = objectTypeService;
+            
+            _objectMapper = objectMapper;
             _actionMapper = actionMapper;
+            
+            _objectTypeRepository = objectTypeRepository;
             _objectRepository = objectRepository;
         }
 
@@ -57,13 +63,17 @@ namespace MiniNavigator_Services.Service
             return actionsDTO;
         }
 
+        /// <summary>
+        /// Строит дерево объектов из GUID 
+        /// </summary>
+        /// <returns>Дерево объектов</returns>
         public async Task<NavObjectDTO> GetTreeOfObjectsAsync()
         {
             var root = new NavObjectDTO()
             {
                 Title = "Система"
             };
-
+            
             foreach (var type in await _objectTypeService.GetAllObjectTypesAsync())
             {
                 var objType = new NavObjectDTO()
@@ -77,9 +87,38 @@ namespace MiniNavigator_Services.Service
                 root.Children.Add(objType);
             }
 
-            var objectsWithoutTypes = _objectRepository.Query().Where(o => !root.Children.AsQueryable().Select(obj => obj.ID).Contains(o.ID)).ToList();
+            var baseObjects = await _objectRepository.GetAllAsync();
+
+            foreach (var baseObject in baseObjects)
+            {
+                if (baseObjects.Where(bo => bo.ID == baseObject.ParentID) == null) // если тип объекта - пропускаем
+                {
+                    continue;
+                }
+                else
+                {
+                    var navObjectDTO = _objectMapper.ToDTO(baseObject);
+                    AddObjectToTree(root, navObjectDTO);
+                }
+            }
 
             return root;
+        }
+
+        private void AddObjectToTree(NavObjectDTO root, NavObjectDTO obj) 
+        {
+            if (obj.ParentID == root.ID)
+            {
+                obj.Parent = root;
+                root.Children.Add(obj);
+            }
+            else
+            {
+                foreach (var child in root.Children)
+                {
+                    AddObjectToTree(child, obj);
+                }
+            }
         }
     }
 }

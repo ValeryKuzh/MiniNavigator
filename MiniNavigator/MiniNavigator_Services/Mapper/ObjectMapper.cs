@@ -8,7 +8,14 @@ namespace MiniNavigator_Services.Mapper
     {
         public NavObjectDTO ToDTO(BaseObject entity)
         {
-            throw new System.NotImplementedException();
+            return new NavObjectDTO()
+            {
+                ID = entity.ID,
+                ObjectTypeID = entity.ObjectTypeID,
+                Title = nameof(entity),
+                Parent = null,
+                ParentID = entity.ParentID
+            };
         }
 
         public BaseObject ToEntity(NavObjectDTO dto)

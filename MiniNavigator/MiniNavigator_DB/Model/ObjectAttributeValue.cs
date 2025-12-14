@@ -16,6 +16,8 @@ namespace MiniNavigator_DB.Model
 
         public Guid AttributeID { get; set; }
         public ObjectAttribute Attribute { get; set; }
+        
+        // public int Index { get; set; } // возможно создание мультизначного атрибута 
 
         public string Value { get; set; }
     }

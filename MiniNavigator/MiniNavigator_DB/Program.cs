@@ -9,11 +9,10 @@ namespace MiniNavigator_DB
     {
         static void Main(string[] args)
         {
-            Database.SetInitializer(new MiniNavigatorDbInitializer());
-
-
             using (var db = new MiniNavigatorDbContext())
             {
+                Database.SetInitializer(new MiniNavigatorDbInitializer(db));
+
                 db.Database.Initialize(force: true);
                 Console.WriteLine("База данных успешно создана!");
             }

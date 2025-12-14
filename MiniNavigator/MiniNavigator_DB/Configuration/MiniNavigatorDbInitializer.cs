@@ -6,106 +6,55 @@ using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace MiniNavigator_DB.Configuration
 {
     public class MiniNavigatorDbInitializer : DropCreateDatabaseAlways<MiniNavigatorDbContext>
     {
+        private readonly MiniNavigatorDbContext _db;
+        public MiniNavigatorDbInitializer(MiniNavigatorDbContext db)
+        {
+            _db = db;
+        }
         protected override void Seed(MiniNavigatorDbContext db)
         {
             // Объект-тип "Роль"
-            var roleTypeObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = null,
-                ObjectType = null,
-                ParentID = null,
-                Parent = null
-            };
+            var roleTypeObject = CreateNewObject(null);
             db.BaseObjects.Add(roleTypeObject);
-
-            var roleType = new ObjectType
-            {
-                ID = Guid.NewGuid(),
-                Base_ID = roleTypeObject.ID,
-                Base = roleTypeObject,
-                Name = "Роль"
-            };
+            //Тип "Роль"
+            var roleType = CreateNewObjectType(roleTypeObject, "Роль");
             db.ObjectTypes.Add(roleType);
             db.SaveChanges();
 
             // Объект-тип "Пользователь"
-            var userTypeObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = null,
-                ObjectType = null,
-                ParentID = null,
-                Parent = null
-            };
+            var userTypeObject = CreateNewObject(null);
             db.BaseObjects.Add(userTypeObject);
-
-            var userType = new ObjectType
-            {
-                ID = Guid.NewGuid(),
-                Base_ID = userTypeObject.ID,
-                Base = userTypeObject,
-                Name = "Пользователь"
-               
-            };
+            //Тип "Пользователь"
+            var userType = CreateNewObjectType(userTypeObject, "Пользователь");
             db.ObjectTypes.Add(userType);
             db.SaveChanges();
 
             // Объект-тип "Действие"
-            var actionTypeObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = null,
-                ObjectType = null,
-                ParentID = null,
-                Parent = null
-            };
+            var actionTypeObject = CreateNewObject(null);
             db.BaseObjects.Add(actionTypeObject);
-
-            var actionType = new ObjectType
-            {
-                ID = Guid.NewGuid(),
-                Base_ID = actionTypeObject.ID,
-                Base = actionTypeObject,
-                Name = "Действие"
-            };
+            //Тип "Действие"
+            var actionType = CreateNewObjectType(actionTypeObject, "Действие");
             db.ObjectTypes.Add(actionType);
             db.SaveChanges();
 
             // Объекты действий
-            var actionAddObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = actionTypeObject.ID,
-                ObjectType = actionTypeObject,
-                ParentID = actionTypeObject.ID,
-                Parent = actionTypeObject
-            };
+
+            // Объект действия "Добавить"
+            var actionAddObject = CreateNewObject(actionTypeObject);
             db.BaseObjects.Add(actionAddObject);
-            
-            var actionEditObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = actionTypeObject.ID,
-                ObjectType = actionTypeObject,
-                ParentID = actionTypeObject.ID,
-                Parent = actionTypeObject
-            };
+
+            // Объект действия "Редактировать"
+            var actionEditObject = CreateNewObject(actionTypeObject);
             db.BaseObjects.Add(actionEditObject);
 
-            var actionDeleteObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = actionTypeObject.ID,
-                ObjectType = actionTypeObject,
-                ParentID = actionTypeObject.ID,
-                Parent = actionTypeObject
-            };
+            // Объект действия "Удалить"
+            var actionDeleteObject = CreateNewObject(actionTypeObject);
             db.BaseObjects.Add(actionDeleteObject);
 
             db.SaveChanges();
@@ -127,7 +76,6 @@ namespace MiniNavigator_DB.Configuration
                 Name = "Редактировать",
                 ObjectTypes = new[] { roleType, userType }
             });
-
             db.ObjectActions.Add(new ObjectAction
             {
                 ID = Guid.NewGuid(),
@@ -136,35 +84,23 @@ namespace MiniNavigator_DB.Configuration
                 Name = "Удалить",
                 ObjectTypes = new[] { roleType, userType }
             });
+            db.SaveChanges();
 
             // Роль А
-            var roleAObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = roleTypeObject.ID,
-                ObjectType = roleTypeObject,
-                ParentID = roleTypeObject.ID,
-                Parent = roleTypeObject
-            };
+            var roleAObject = CreateNewObject(roleTypeObject);
+            db.BaseObjects.Add(roleAObject);
             var roleA = new ObjectRole
             {
                 ID = Guid.NewGuid(),
                 Base_ID = roleTypeObject.ID,
                 Base = roleTypeObject
             };
-
             db.ObjectRoles.Add(roleA);
-            db.BaseObjects.Add(roleAObject);
+            db.SaveChanges();
 
             // Пользователь А
-            var userAObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = userTypeObject.ID,
-                ObjectType = userTypeObject,
-                ParentID = userTypeObject.ID,
-                Parent = userTypeObject
-            };
+            var userAObject = CreateNewObject(userTypeObject);
+            db.BaseObjects.Add(userAObject);
             var userA = new ObjectUser
             {
                 ID = Guid.NewGuid(),
@@ -173,12 +109,33 @@ namespace MiniNavigator_DB.Configuration
                 RoleID = roleA.ID,
                 Role = roleA
             };
-
-            db.BaseObjects.Add(userAObject);
             db.ObjectUsers.Add(userA);
             db.SaveChanges();
 
             base.Seed(db);
         }
+
+        private BaseObject CreateNewObject(BaseObject objType)
+        {
+            return new BaseObject
+            {
+                ID = Guid.NewGuid(),
+                ObjectTypeID = objType?.ID,
+                ObjectType = objType,
+                ParentID = objType?.ID,
+                Parent = objType
+            };
+        }
+        private ObjectType CreateNewObjectType(BaseObject objOfType, string name)
+        {
+            return new ObjectType
+            {
+                ID = Guid.NewGuid(),
+                Base_ID = objOfType.ID,
+                Base = objOfType,
+                Name = name
+            };
+        }
+
     }
 }

@@ -58,7 +58,9 @@
   <ItemGroup>
     <Compile Include="DTO\NavObjectDTO.cs" />
     <Compile Include="DTO\ObjectActionDTO.cs" />
+    <Compile Include="DTO\ObjectAttributeDTO.cs" />
     <Compile Include="DTO\ObjectTypeDTO.cs" />
+    <Compile Include="Mapper\AttributeMapper.cs" />
     <Compile Include="Mapper\Interface\IMapper.cs" />
     <Compile Include="Mapper\ObjectActionMapper.cs" />
     <Compile Include="Mapper\ObjectMapper.cs" />

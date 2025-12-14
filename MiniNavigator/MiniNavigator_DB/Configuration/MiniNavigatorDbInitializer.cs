@@ -133,7 +133,7 @@ namespace MiniNavigator_DB.Configuration
                 ID = Guid.NewGuid(),
                 Base = NameAttributeObject,
                 Name = "Name",
-                ValueType = "string",
+                ValueType = typeof(string).ToString(),
                 ObjectTypes = new[] { roleType, userType }
             };
 
@@ -150,7 +150,7 @@ namespace MiniNavigator_DB.Configuration
                 ID = Guid.NewGuid(),
                 Base = SurnameAttributeObject,
                 Name = "Surname",
-                ValueType = "string",
+                ValueType = typeof(string).ToString(),
                 ObjectTypes = new[] { userType }
             };
 
@@ -167,7 +167,7 @@ namespace MiniNavigator_DB.Configuration
                 ID = Guid.NewGuid(),
                 Base = AgeAttributeObject,
                 Name = "Age",
-                ValueType = "byte",
+                ValueType = typeof(byte).ToString(),
                 ObjectTypes = new[] { userType }
             };
 

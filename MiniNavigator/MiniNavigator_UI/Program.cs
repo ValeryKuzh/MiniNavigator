@@ -26,6 +26,7 @@ namespace MiniNavigator_UI
 
             // Mappers DTO <=> ViewModel
             services.AddScoped<IMapper<NavObjectViewModel, NavObjectDTO>, ObjectMapper>();
+            services.AddScoped<IMapper<NavObjectViewModel, NavObjectDTO>, ObjectMapper>();
 
             // Services
             services.AddScoped<IObjectService, ObjectService>();

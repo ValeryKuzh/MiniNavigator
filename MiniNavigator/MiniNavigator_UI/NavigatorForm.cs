@@ -8,7 +8,9 @@ using MiniNavigator_UI.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MiniNavigator_UI
@@ -21,10 +23,12 @@ namespace MiniNavigator_UI
         private IMapper<NavObjectViewModel, NavObjectDTO> _objectMapper;
 
         private NavObjectViewModel _treeOfObjects = new NavObjectViewModel();
-        private BindingList<ObjectDynamicAtributeViewModel> _objectsData = new BindingList<ObjectDynamicAtributeViewModel>();
+
+        private DataTable _table;
+        private BindingList<ObjectDynamicAtributeViewModel> _objectsData;
 
         public NavigatorForm(
-            IObjectService objectService, 
+            IObjectService objectService,
             IObjectTypeService objectTypeService,
             IMapper<NavObjectViewModel, NavObjectDTO> objectMapper)
         {
@@ -35,16 +39,23 @@ namespace MiniNavigator_UI
 
             InitializeComponent();
 
-            NavigatorDataGridView.DataSource = _objectsData;
-
-            BindTree();
-
             this.Load += NavigatorForm_Load;
         }
 
         private async void NavigatorForm_Load(object sender, EventArgs e)
         {
-            InitRoot();
+            BindTree();
+
+            await InitRoot();
+
+            NavigatorVirtualTree.DataSource = _treeOfObjects;
+            NavigatorVirtualTree.Refresh();
+
+            var firstChild = _treeOfObjects.Children?.FirstOrDefault();
+            if (firstChild != null)
+            {
+                BindTable(firstChild.ID);
+            }
         }
 
         private void BindTree()
@@ -64,11 +75,9 @@ namespace MiniNavigator_UI
             NavigatorVirtualTree.RowBindings.Add(binding);
         }
 
-        private async void InitRoot()
+        private async Task InitRoot()
         {
             _treeOfObjects = ConvertTreeToViewModels(await _objectService.GetTreeOfObjectsAsync());
-            NavigatorVirtualTree.DataSource = _treeOfObjects;
-            NavigatorVirtualTree.Refresh();
         }
 
         public NavObjectViewModel ConvertTreeToViewModels(NavObjectDTO root)
@@ -100,7 +109,6 @@ namespace MiniNavigator_UI
                     {
                         var item = new ToolStripMenuItem(action.CommandName);
                         item.Tag = action;
-                        item.Click += ActionMenuItem_Click;
                         menu.Items.Add(item);
                     }
 
@@ -109,9 +117,43 @@ namespace MiniNavigator_UI
             }
         }
 
-        private void ActionMenuItem_Click(object sender, EventArgs e)
+        private async Task BindTable(Guid typeID)
         {
-            throw new NotImplementedException();
+            var tableData = await _objectService.GetTableData(typeID);
+
+            if (tableData == null || tableData.Count == 0)
+                return;
+
+            var table = new DataTable();
+
+            var allAttributes = tableData
+                .SelectMany(row => row.Values)
+                .Where(attr => attr != null && !string.IsNullOrWhiteSpace(attr.Name))
+                .GroupBy(attr => attr.ID)
+                .Select(g => g.First())
+                .ToList();
+
+            foreach (var attr in allAttributes)
+            {
+                table.Columns.Add(attr.Name, attr.ValueType);
+            }
+
+            foreach (var rowData in tableData)
+            {
+                var row = table.NewRow();
+
+                foreach (var attr in rowData.Values)
+                {
+                    if (attr == null) continue;
+
+                    row[attr.Name] = attr.Value ?? string.Empty;
+                }
+
+                table.Rows.Add(row);
+            }
+
+            NavigatorDataGridView.AutoGenerateColumns = true;
+            NavigatorDataGridView.DataSource = table;
         }
     }
 }

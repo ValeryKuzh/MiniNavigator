@@ -16,26 +16,32 @@ namespace MiniNavigator_Services.Service
 
         private readonly IMapper<NavObjectDTO, BaseObject> _objectMapper;
         private readonly IMapper<ObjectActionDTO, ObjectAction> _actionMapper;
+        private readonly IMapper<ObjectAttributeDTO, ObjectAttributeValue> _attributeMapper;
 
         private readonly IRepository<BaseObject> _objectRepository;
-        private readonly IRepository<ObjectType> _objectTypeRepository;
+        private readonly IObjectTypeRepository _objectTypeRepository;
+        private readonly IRepository<ObjectAttributeValue> _objectAttributeValueRepository;
 
         public ObjectService(
             IObjectTypeService objectTypeService,
 
             IMapper<NavObjectDTO, BaseObject> objectMapper,
             IMapper<ObjectActionDTO, ObjectAction> actionMapper,
-            
-            IRepository<ObjectType> objectTypeRepository,
-            IRepository<BaseObject> objectRepository)
+            IMapper<ObjectAttributeDTO, ObjectAttributeValue> attributeMapper,
+
+            IObjectTypeRepository objectTypeRepository,
+            IRepository<BaseObject> objectRepository, 
+            IRepository<ObjectAttributeValue> objectAttributeValueRepository)
         {
             _objectTypeService = objectTypeService;
             
             _objectMapper = objectMapper;
             _actionMapper = actionMapper;
+            _attributeMapper = attributeMapper;
             
             _objectTypeRepository = objectTypeRepository;
             _objectRepository = objectRepository;
+            _objectAttributeValueRepository = objectAttributeValueRepository;
         }
 
         /// <summary>
@@ -74,7 +80,7 @@ namespace MiniNavigator_Services.Service
                 Title = "Система"
             };
             
-            foreach (var type in await _objectTypeService.GetAllObjectTypesAsync())
+            foreach (var type in await _objectTypeService.GetAllTypesAsync())
             {
                 var objType = new NavObjectDTO()
                 {
@@ -120,6 +126,56 @@ namespace MiniNavigator_Services.Service
                     AddObjectToTree(child, obj);
                 }
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <returns></returns>
+        public async Task<List<Dictionary<Guid, ObjectAttributeDTO>>> GetTableData(Guid ID)
+        {
+            var result = new List<Dictionary<Guid, ObjectAttributeDTO>>();
+
+            var objectsOfType = _objectRepository.Query().Where(bo => bo.ObjectTypeID == ID).ToList();
+
+            var attributesOfType = await GetAttributesForTypeAsync(ID);
+
+            foreach (var obj in objectsOfType)
+            {
+                var attributeNameInfo = new Dictionary<Guid, ObjectAttributeDTO>();
+
+                foreach (var attr in attributesOfType)
+                {
+                    var value = _objectAttributeValueRepository
+                        .Query()
+                        .Where(av => av.ObjectID == obj.ID && av.AttributeID == attr.ID)
+                        .FirstOrDefault();
+                    if (value != null)
+                        attributeNameInfo[attr.ID] = _attributeMapper.ToDTO(value);
+                    else
+                        attributeNameInfo[attr.ID] = null;
+                }
+
+                result.Add(attributeNameInfo);
+            }
+
+            return result;
+        }
+
+        private async Task<List<ObjectAttribute>> GetAttributesForTypeAsync(Guid ID)
+        {
+            var attributes = new List<ObjectAttribute>();
+
+            var typeObject = await _objectRepository.GetByIdAsync(ID);
+            var type = await _objectTypeRepository.GetTypeWithAttributesAsync(typeObject.ID);
+            
+            foreach (var attr in type?.Attributes)
+            {
+                attributes.Add(attr);
+            }
+
+            return attributes;
         }
     }
 }

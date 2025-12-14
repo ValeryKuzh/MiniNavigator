@@ -20,6 +20,7 @@ namespace MiniNavigator_DB.Context
         public MiniNavigatorDbContext() : base("name=HomeDbConnection") { }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+
             // PK
 
             modelBuilder.Entity<BaseObject>().HasKey(o => o.ID);

@@ -8,8 +8,7 @@ namespace MiniNavigator_UI.ViewModel
 {
     public class ObjectDynamicAtributeViewModel
     {
-        public Guid ID { get; set; }
-
-        Dictionary<string, string> Attributes { get; set; } = new Dictionary<string, string>();
+        public Guid ID { get; set; } // ID объекта
+        public Dictionary<Guid, AttributeViewModel> Attributes { get; set; } = new Dictionary<Guid, AttributeViewModel>(); 
     }
 }

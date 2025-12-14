@@ -17,6 +17,13 @@ namespace MiniNavigator_DB.Model
         public string Name { get; set; }
         public string ValueType { get; set; }
 
+        [NotMapped]
+        public Type ValType
+        {
+            get => ValueType == null ? null : Type.GetType(ValueType);
+            set => ValueType = value?.AssemblyQualifiedName;
+        }
+
         public ICollection<ObjectType> ObjectTypes { get; set; }
     }
 }

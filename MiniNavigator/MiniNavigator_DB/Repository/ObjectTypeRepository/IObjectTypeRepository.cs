@@ -12,5 +12,6 @@ namespace MiniNavigator_DB.Repository.Interface
         Task<ObjectType> GetByIdAsync(Guid ID);
         Task<IEnumerable<ObjectType>> GetAllAsync();
         IQueryable<ObjectType> Query();
+        Task<ObjectType> GetTypeWithAttributesAsync(Guid ID);
     }
 }

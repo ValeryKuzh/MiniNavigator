@@ -29,6 +29,7 @@ namespace MiniNavigator_Services
             services.AddScoped<IMapper<NavObjectDTO, BaseObject>, ObjectMapper>();
             services.AddScoped<IMapper<ObjectTypeDTO, ObjectType>, ObjectTypeMapper>();
             services.AddScoped<IMapper<ObjectActionDTO, ObjectAction>, ObjectActionMapper>();
+            services.AddScoped<IMapper<ObjectAttributeDTO, ObjectAttributeValue>, AttributeMapper>();
         }
     }
 }

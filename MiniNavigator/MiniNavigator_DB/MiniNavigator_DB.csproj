@@ -84,7 +84,12 @@
     <Compile Include="Migrations\202512141522577_AddIsVisibleInObjectType.Designer.cs">
       <DependentUpon>202512141522577_AddIsVisibleInObjectType.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202512142000013_UpdateTypeField.cs" />
+    <Compile Include="Migrations\202512142000013_UpdateTypeField.Designer.cs">
+      <DependentUpon>202512142000013_UpdateTypeField.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Model\AttributeValuePair.cs" />
     <Compile Include="Model\ObjectAttributeValue.cs" />
     <Compile Include="Repository\ObjectTypeRepository\IObjectTypeRepository.cs" />
     <Compile Include="Model\BaseObject.cs" />
@@ -119,6 +124,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202512141522577_AddIsVisibleInObjectType.resx">
       <DependentUpon>202512141522577_AddIsVisibleInObjectType.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202512142000013_UpdateTypeField.resx">
+      <DependentUpon>202512142000013_UpdateTypeField.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

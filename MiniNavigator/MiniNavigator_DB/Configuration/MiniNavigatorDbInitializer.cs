@@ -23,7 +23,7 @@ namespace MiniNavigator_DB.Configuration
             var roleTypeObject = CreateNewObject(null);
             db.BaseObjects.Add(roleTypeObject);
             //Тип "Роль"
-            var roleType = CreateNewObjectType(roleTypeObject, "Роль");
+            var roleType = CreateNewObjectType(roleTypeObject, "Роль", true);
             db.ObjectTypes.Add(roleType);
             db.SaveChanges();
 
@@ -31,7 +31,7 @@ namespace MiniNavigator_DB.Configuration
             var userTypeObject = CreateNewObject(null);
             db.BaseObjects.Add(userTypeObject);
             //Тип "Пользователь"
-            var userType = CreateNewObjectType(userTypeObject, "Пользователь");
+            var userType = CreateNewObjectType(userTypeObject, "Пользователь", true);
             db.ObjectTypes.Add(userType);
             db.SaveChanges();
 
@@ -39,8 +39,16 @@ namespace MiniNavigator_DB.Configuration
             var actionTypeObject = CreateNewObject(null);
             db.BaseObjects.Add(actionTypeObject);
             //Тип "Действие"
-            var actionType = CreateNewObjectType(actionTypeObject, "Действие");
+            var actionType = CreateNewObjectType(actionTypeObject, "Действие", false);
             db.ObjectTypes.Add(actionType);
+            db.SaveChanges();
+
+            // Объект-тип "Атрибут"
+            var attributeTypeObject = CreateNewObject(null);
+            db.BaseObjects.Add(attributeTypeObject);
+            //Тип "Действие"
+            var attributeType = CreateNewObjectType(attributeTypeObject, "Атрибут", false);
+            db.ObjectTypes.Add(attributeType);
             db.SaveChanges();
 
             // Объекты действий
@@ -92,8 +100,8 @@ namespace MiniNavigator_DB.Configuration
             var roleA = new ObjectRole
             {
                 ID = Guid.NewGuid(),
-                Base_ID = roleTypeObject.ID,
-                Base = roleTypeObject
+                Base_ID = roleAObject.ID,
+                Base = roleAObject
             };
             db.ObjectRoles.Add(roleA);
             db.SaveChanges();
@@ -115,10 +123,10 @@ namespace MiniNavigator_DB.Configuration
             var NameAttributeObject = new BaseObject
             {
                 ID = Guid.NewGuid(),
-                ObjectTypeID = roleTypeObject.ID,
-                ObjectType = roleTypeObject,
-                ParentID = roleTypeObject.ID,
-                Parent = roleTypeObject
+                ObjectTypeID = attributeTypeObject.ID,
+                ObjectType = attributeTypeObject,
+                ParentID = attributeTypeObject.ID,
+                Parent = attributeTypeObject
             };
             var NameAttribute = new ObjectAttribute()
             {
@@ -132,10 +140,10 @@ namespace MiniNavigator_DB.Configuration
             var SurnameAttributeObject = new BaseObject
             {
                 ID = Guid.NewGuid(),
-                ObjectTypeID = roleTypeObject.ID,
-                ObjectType = roleTypeObject,
-                ParentID = roleTypeObject.ID,
-                Parent = roleTypeObject
+                ObjectTypeID = attributeTypeObject.ID,
+                ObjectType = attributeTypeObject,
+                ParentID = attributeTypeObject.ID,
+                Parent = attributeTypeObject
             };
             var SurnameAttribute = new ObjectAttribute()
             {
@@ -149,10 +157,10 @@ namespace MiniNavigator_DB.Configuration
             var AgeAttributeObject = new BaseObject
             {
                 ID = Guid.NewGuid(),
-                ObjectTypeID = roleTypeObject.ID,
-                ObjectType = roleTypeObject,
-                ParentID = roleTypeObject.ID,
-                Parent = roleTypeObject
+                ObjectTypeID = attributeTypeObject.ID,
+                ObjectType = attributeTypeObject,
+                ParentID = attributeTypeObject.ID,
+                Parent = attributeTypeObject
             };
             var AgeAttribute = new ObjectAttribute()
             {
@@ -171,6 +179,26 @@ namespace MiniNavigator_DB.Configuration
             db.ObjectAttributes.Add(AgeAttribute);
             db.SaveChanges();
 
+            db.ObjectAttributeValues.Add(new ObjectAttributeValue
+            {
+                Object = userAObject,
+                ObjectID = userAObject.ID,
+                Attribute = NameAttribute,
+                AttributeID = NameAttribute.ID,
+                Value = "Valery"
+            });
+
+            db.ObjectAttributeValues.Add(new ObjectAttributeValue
+            {
+                Object = userAObject,
+                ObjectID = userAObject.ID,
+                Attribute = SurnameAttribute,
+                AttributeID = SurnameAttribute.ID,
+                Value = "Kuzhovnik"
+            });
+
+            db.SaveChanges();
+
             base.Seed(db);
         }
 
@@ -185,14 +213,15 @@ namespace MiniNavigator_DB.Configuration
                 Parent = objType
             };
         }
-        private ObjectType CreateNewObjectType(BaseObject objOfType, string name)
+        private ObjectType CreateNewObjectType(BaseObject objOfType, string name, bool isVisible)
         {
             return new ObjectType
             {
                 ID = Guid.NewGuid(),
                 Base_ID = objOfType.ID,
                 Base = objOfType,
-                Name = name
+                Name = name,
+                IsVisible = isVisible
             };
         }
 

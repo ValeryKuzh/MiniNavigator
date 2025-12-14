@@ -18,19 +18,25 @@ namespace MiniNavigator_UI
         private IObjectService _objectService;
         private IObjectTypeService _objectTypeService;
 
-        private IMapper<NavObjectViewModel, NavObjectDTO> _objectMapper = new ObjectMapper();
-        private IMapper<ObjectTypeViewModel, ObjectTypeDTO> _objectTypeMapper = new ObjectTypeMapper();
+        private IMapper<NavObjectViewModel, NavObjectDTO> _objectMapper;
 
         private NavObjectViewModel _treeOfObjects = new NavObjectViewModel();
+        private BindingList<ObjectDynamicAtributeViewModel> _objectsData = new BindingList<ObjectDynamicAtributeViewModel>();
 
-        private BindingList<NavObjectViewModel> _data = new BindingList<NavObjectViewModel>();
-
-        public NavigatorForm(IObjectService objectService, IObjectTypeService objectTypeService)
+        public NavigatorForm(
+            IObjectService objectService, 
+            IObjectTypeService objectTypeService,
+            IMapper<NavObjectViewModel, NavObjectDTO> objectMapper)
         {
             _objectService = objectService;
             _objectTypeService = objectTypeService;
 
+            _objectMapper = objectMapper;
+
             InitializeComponent();
+
+            NavigatorDataGridView.DataSource = _objectsData;
+
             BindTree();
 
             this.Load += NavigatorForm_Load;

@@ -112,8 +112,8 @@ namespace MiniNavigator_DB.Configuration
             var userA = new ObjectUser
             {
                 ID = Guid.NewGuid(),
-                Base_ID = userTypeObject.ID,
-                Base = userTypeObject,
+                Base_ID = userAObject.ID,
+                Base = userAObject,
                 RoleID = roleA.ID,
                 Role = roleA
             };
@@ -195,6 +195,15 @@ namespace MiniNavigator_DB.Configuration
                 Attribute = SurnameAttribute,
                 AttributeID = SurnameAttribute.ID,
                 Value = "Kuzhovnik"
+            });
+
+            db.ObjectAttributeValues.Add(new ObjectAttributeValue
+            {
+                Object = userAObject,
+                ObjectID = userAObject.ID,
+                Attribute = AgeAttribute,
+                AttributeID = AgeAttribute.ID,
+                Value = "19"
             });
 
             db.SaveChanges();

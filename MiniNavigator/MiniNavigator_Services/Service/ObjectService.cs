@@ -84,7 +84,8 @@ namespace MiniNavigator_Services.Service
                     Parent = root,
                     ParentID = root.ID,
                 };
-                root.Children.Add(objType);
+                if(type.IsVisible)
+                    root.Children.Add(objType);
             }
 
             var baseObjects = await _objectRepository.GetAllAsync();

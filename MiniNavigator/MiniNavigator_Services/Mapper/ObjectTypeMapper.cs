@@ -12,7 +12,8 @@ namespace MiniNavigator_Services.Mapper
             {
                 ID = entity.ID,
                 Title = entity.Name,
-                ObjectID = entity.Base_ID
+                ObjectID = entity.Base_ID,
+                IsVisible = entity.IsVisible
             };
         }
 

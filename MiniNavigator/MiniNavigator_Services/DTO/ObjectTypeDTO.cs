@@ -7,5 +7,6 @@ namespace MiniNavigator_Services.DTO
         public Guid ID { get; set; }
         public string Title { get; set; }
         public Guid ObjectID { get; set; }
+        public bool IsVisible { get; set; }
     }
 }

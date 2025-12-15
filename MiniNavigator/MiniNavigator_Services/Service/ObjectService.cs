@@ -169,12 +169,13 @@ namespace MiniNavigator_Services.Service
 
             var typeObject = await _objectRepository.GetByIdAsync(ID);
             var type = await _objectTypeRepository.GetTypeWithAttributesAsync(typeObject.ID);
-            
-            foreach (var attr in type?.Attributes)
+            if (type != null)
             {
-                attributes.Add(attr);
+                foreach (var attr in type?.Attributes)
+                {
+                    attributes.Add(attr);
+                }
             }
-
             return attributes;
         }
     }

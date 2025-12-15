@@ -40,6 +40,15 @@ namespace MiniNavigator_UI
             InitializeComponent();
 
             this.Load += NavigatorForm_Load;
+            this.NavigatorVirtualTree.CellClick += NavigatorVirtualTree_CellClick;
+        }
+
+        private void NavigatorVirtualTree_CellClick(object sender, EventArgs e)
+        {
+            if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObj)
+            {
+                BindTable(navObj.ID);
+            }
         }
 
         private async void NavigatorForm_Load(object sender, EventArgs e)
@@ -50,12 +59,6 @@ namespace MiniNavigator_UI
 
             NavigatorVirtualTree.DataSource = _treeOfObjects;
             NavigatorVirtualTree.Refresh();
-
-            var firstChild = _treeOfObjects.Children?.FirstOrDefault();
-            if (firstChild != null)
-            {
-                BindTable(firstChild.ID);
-            }
         }
 
         private void BindTree()
@@ -122,7 +125,10 @@ namespace MiniNavigator_UI
             var tableData = await _objectService.GetTableData(typeID);
 
             if (tableData == null || tableData.Count == 0)
+            {
+                NavigatorDataGridView.DataSource = null;
                 return;
+            }
 
             var table = new DataTable();
 
@@ -131,6 +137,7 @@ namespace MiniNavigator_UI
                 .Where(attr => attr != null && !string.IsNullOrWhiteSpace(attr.Name))
                 .GroupBy(attr => attr.ID)
                 .Select(g => g.First())
+                .OrderBy(attr => attr.Name, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             foreach (var attr in allAttributes)

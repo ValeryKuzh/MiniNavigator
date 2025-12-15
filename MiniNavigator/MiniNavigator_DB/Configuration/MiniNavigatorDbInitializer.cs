@@ -82,7 +82,7 @@ namespace MiniNavigator_DB.Configuration
                 Base_ID = actionEditObject.ID,
                 Base = actionEditObject,
                 Name = "Редактировать",
-                ObjectTypes = new[] { roleType, userType }
+                ObjectTypes = new[] { roleType }
             });
             db.ObjectActions.Add(new ObjectAction
             {
@@ -90,7 +90,7 @@ namespace MiniNavigator_DB.Configuration
                 Base_ID = actionDeleteObject.ID,
                 Base = actionDeleteObject,
                 Name = "Удалить",
-                ObjectTypes = new[] { roleType, userType }
+                ObjectTypes = new[] { roleType }
             });
             db.SaveChanges();
 

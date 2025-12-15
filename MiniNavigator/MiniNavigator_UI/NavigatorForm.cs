@@ -40,6 +40,9 @@ namespace MiniNavigator_UI
 
             InitializeComponent();
 
+            NavigatorDataGridView.RowHeaderMouseClick += NotesGridView_RowHeaderMouseClick;
+            NavigatorDataGridView.CellClick += NotesGridView_CellClick;
+
             this.Load += NavigatorForm_Load;
         }
 
@@ -171,6 +174,29 @@ namespace MiniNavigator_UI
 
             NavigatorDataGridView.AutoGenerateColumns = true;
             NavigatorDataGridView.DataSource = table;
+        }
+
+        /// <summary>
+        /// Обработчик для выделения всей строки
+        /// </summary>
+        private void NotesGridView_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            NavigatorDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            NavigatorDataGridView.ClearSelection();
+            NavigatorDataGridView.Rows[e.RowIndex].Selected = true;
+        }
+
+        /// <summary>
+        /// Обработчик для выделения отдельной ячейки
+        /// </summary>
+        private void NotesGridView_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                NavigatorDataGridView.SelectionMode = DataGridViewSelectionMode.CellSelect;
+                NavigatorDataGridView.ClearSelection();
+                NavigatorDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Selected = true;
+            }
         }
     }
 }

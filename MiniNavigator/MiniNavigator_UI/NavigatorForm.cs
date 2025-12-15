@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -40,22 +41,13 @@ namespace MiniNavigator_UI
             InitializeComponent();
 
             this.Load += NavigatorForm_Load;
-            this.NavigatorVirtualTree.CellClick += NavigatorVirtualTree_CellClick;
-        }
-
-        private void NavigatorVirtualTree_CellClick(object sender, EventArgs e)
-        {
-            if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObj)
-            {
-                BindTable(navObj.ID);
-            }
         }
 
         private async void NavigatorForm_Load(object sender, EventArgs e)
         {
             BindTree();
 
-            await InitRoot();
+            await InitRootAsync();
 
             NavigatorVirtualTree.DataSource = _treeOfObjects;
             NavigatorVirtualTree.Refresh();
@@ -78,9 +70,10 @@ namespace MiniNavigator_UI
             NavigatorVirtualTree.RowBindings.Add(binding);
         }
 
-        private async Task InitRoot()
+        private async Task InitRootAsync()
         {
-            _treeOfObjects = ConvertTreeToViewModels(await _objectService.GetTreeOfObjectsAsync());
+            var rootDto = await _objectService.GetTreeOfObjectsAsync();
+            _treeOfObjects = ConvertTreeToViewModels(rootDto);
         }
 
         public NavObjectViewModel ConvertTreeToViewModels(NavObjectDTO root)
@@ -100,27 +93,32 @@ namespace MiniNavigator_UI
 
         private async void NavigatorVirtualTree_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Right)
-            {
-                if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectDto)
+            if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectDto)
+                if (e.Button == MouseButtons.Right)
                 {
-                    var actions = await _objectService.GetActionsForObject(navObjectDto.ID);
-
-                    ContextMenuStrip menu = new ContextMenuStrip();
-
-                    foreach (var action in actions)
-                    {
-                        var item = new ToolStripMenuItem(action.CommandName);
-                        item.Tag = action;
-                        menu.Items.Add(item);
-                    }
-
-                    menu.Show(NavigatorVirtualTree, e.Location);
+                    await ShowContextMenuAsync(navObjectDto, e.Location);
                 }
-            }
+                else if (e.Button == MouseButtons.Left)
+                {
+                    await BindTableAsync(navObjectDto.ID);
+                }
         }
 
-        private async Task BindTable(Guid typeID)
+        private async Task ShowContextMenuAsync(NavObjectViewModel navObjectDto, Point location)
+        {
+            var actions = await _objectService.GetActionsForObject(navObjectDto.ID);
+
+            ContextMenuStrip menu = new ContextMenuStrip();
+            foreach (var action in actions)
+            {
+                var item = new ToolStripMenuItem(action.CommandName) { Tag = action };
+                menu.Items.Add(item);
+            }
+
+            menu.Show(NavigatorVirtualTree, location);
+        }
+
+        private async Task BindTableAsync(Guid typeID)
         {
             var tableData = await _objectService.GetTableData(typeID);
 
@@ -152,7 +150,6 @@ namespace MiniNavigator_UI
                 foreach (var attr in rowData.Values)
                 {
                     if (attr == null) continue;
-
                     row[attr.Name] = attr.Value ?? string.Empty;
                 }
 

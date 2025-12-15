@@ -93,29 +93,40 @@ namespace MiniNavigator_UI
 
         private async void NavigatorVirtualTree_MouseUp(object sender, MouseEventArgs e)
         {
-            if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectDto)
+            if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectViewModel)
+            {
                 if (e.Button == MouseButtons.Right)
                 {
-                    await ShowContextMenuAsync(navObjectDto, e.Location);
+                    await ShowContextMenuAsync(navObjectViewModel, e.Location);
                 }
                 else if (e.Button == MouseButtons.Left)
                 {
-                    await BindTableAsync(navObjectDto.ID);
+                    await BindTableAsync(navObjectViewModel.ID);
                 }
+            }
         }
 
-        private async Task ShowContextMenuAsync(NavObjectViewModel navObjectDto, Point location)
+        private async Task ShowContextMenuAsync(NavObjectViewModel navObjectViewModel, Point location)
         {
-            var actions = await _objectService.GetActionsForObject(navObjectDto.ID);
+            var actions = await _objectService.GetActionsForObject(navObjectViewModel.ID);
 
             ContextMenuStrip menu = new ContextMenuStrip();
             foreach (var action in actions)
             {
                 var item = new ToolStripMenuItem(action.CommandName) { Tag = action };
                 menu.Items.Add(item);
+                item.Click += ItemAdd_Click;
             }
 
             menu.Show(NavigatorVirtualTree, location);
+        }
+
+        private void ItemAdd_Click(object sender, EventArgs e)
+        {
+            if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectViewModel)
+            {
+                //_objectService.AddNewObject();
+            }
         }
 
         private async Task BindTableAsync(Guid typeID)

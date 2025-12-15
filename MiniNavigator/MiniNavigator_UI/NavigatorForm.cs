@@ -126,7 +126,7 @@ namespace MiniNavigator_UI
 
         private void ItemAdd_Click(object sender, EventArgs e)
         {
-            if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectViewModel)
+            if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectViewModel && _table != null)
             {
                 InitializeCreateNewObject();
                 ShowControls();
@@ -172,6 +172,8 @@ namespace MiniNavigator_UI
                 table.Rows.Add(row);
             }
 
+            _table = table;
+            
             NavigatorDataGridView.AutoGenerateColumns = true;
             NavigatorDataGridView.DataSource = table;
         }

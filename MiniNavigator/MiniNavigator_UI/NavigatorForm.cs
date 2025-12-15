@@ -125,6 +125,8 @@ namespace MiniNavigator_UI
         {
             if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectViewModel)
             {
+                InitializeCreateNewObject();
+                ShowControls();
                 //_objectService.AddNewObject();
             }
         }

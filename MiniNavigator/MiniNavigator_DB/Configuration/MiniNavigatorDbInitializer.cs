@@ -46,7 +46,7 @@ namespace MiniNavigator_DB.Configuration
             // Объект-тип "Атрибут"
             var attributeTypeObject = CreateNewObject(null);
             db.BaseObjects.Add(attributeTypeObject);
-            //Тип "Действие"
+            //Тип "Атрибут"
             var attributeType = CreateNewObjectType(attributeTypeObject, "Атрибут", false);
             db.ObjectTypes.Add(attributeType);
             db.SaveChanges();
@@ -171,12 +171,51 @@ namespace MiniNavigator_DB.Configuration
                 ObjectTypes = new[] { userType }
             };
 
+
+            var TitleAttributeObject = new BaseObject
+            {
+                ID = Guid.NewGuid(),
+                ObjectTypeID = attributeTypeObject.ID,
+                ObjectType = attributeTypeObject,
+                ParentID = attributeTypeObject.ID,
+                Parent = attributeTypeObject
+            };
+            var TitleAttribute = new ObjectAttribute()
+            {
+                ID = Guid.NewGuid(),
+                Base = TitleAttributeObject,
+                Name = "Title",
+                ValueType = typeof(string).ToString(),
+                ObjectTypes = new[] { roleType }
+            };
+
+            var RoleAttributeObject = new BaseObject
+            {
+                ID = Guid.NewGuid(),
+                ObjectTypeID = attributeTypeObject.ID,
+                ObjectType = attributeTypeObject,
+                ParentID = attributeTypeObject.ID,
+                Parent = attributeTypeObject
+            };
+            var RoleAttribute = new ObjectAttribute()
+            {
+                ID = Guid.NewGuid(),
+                Base = RoleAttributeObject,
+                Name = "Role",
+                ValueType = typeof(string).ToString(),
+                ObjectTypes = new[] { userType }
+            };
+
             db.BaseObjects.Add(NameAttributeObject);
             db.BaseObjects.Add(SurnameAttributeObject);
             db.BaseObjects.Add(AgeAttributeObject);
+            db.BaseObjects.Add(TitleAttributeObject);
+            db.BaseObjects.Add(RoleAttributeObject);
             db.ObjectAttributes.Add(NameAttribute);
             db.ObjectAttributes.Add(SurnameAttribute);
             db.ObjectAttributes.Add(AgeAttribute);
+            db.ObjectAttributes.Add(TitleAttribute);
+            db.ObjectAttributes.Add(RoleAttribute);
             db.SaveChanges();
 
             db.ObjectAttributeValues.Add(new ObjectAttributeValue
@@ -204,6 +243,24 @@ namespace MiniNavigator_DB.Configuration
                 Attribute = AgeAttribute,
                 AttributeID = AgeAttribute.ID,
                 Value = "19"
+            });
+
+            db.ObjectAttributeValues.Add(new ObjectAttributeValue
+            {
+                Object = roleAObject,
+                ObjectID = roleAObject.ID,
+                Attribute = TitleAttribute,
+                AttributeID = TitleAttribute.ID,
+                Value = "Admin"
+            });
+
+            db.ObjectAttributeValues.Add(new ObjectAttributeValue
+            {
+                Object = userAObject,
+                ObjectID = userAObject.ID,
+                Attribute = RoleAttribute,
+                AttributeID = RoleAttribute.ID,
+                Value = "Admin"
             });
 
             db.SaveChanges();

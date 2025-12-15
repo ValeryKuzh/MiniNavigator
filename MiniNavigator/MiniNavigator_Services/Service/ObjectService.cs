@@ -55,11 +55,11 @@ namespace MiniNavigator_Services.Service
             if (ID == Guid.Empty)
                 return actionsDTO;
 
-            var baseObject = _objectRepository.Query().Where(bo => bo.ID == ID).FirstOrDefault();
+            var baseObject = await _objectRepository.GetByIdAsync(ID);
 
-            var typeOfObject = _objectTypeRepository.Query().Where(ot => ot.ID == baseObject.ObjectTypeID).FirstOrDefault();
+            var typeOfObject = await _objectTypeRepository.GetTypeWithActionsAsync(baseObject.ID);
 
-            if (!(typeOfObject is null))
+            if (!(typeOfObject.Actions is null))
             {
                 foreach (var actionEntity in typeOfObject?.Actions)
                 {

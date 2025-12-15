@@ -13,7 +13,12 @@ namespace MiniNavigator_Services.Mapper
     {
         public ObjectActionDTO ToDTO(ObjectAction entity)
         {
-            throw new NotImplementedException();
+            return new ObjectActionDTO()
+            {
+                ID = entity.ID,
+                CommandName = entity.Name,
+                ObjectID = entity.Base_ID
+            };
         }
 
         public ObjectAction ToEntity(ObjectActionDTO DTO)

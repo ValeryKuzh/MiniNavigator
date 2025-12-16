@@ -78,6 +78,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\IValidationService.cs" />
+    <Compile Include="Service\ValidationService.cs" />
     <Compile Include="ViewModel\AttributeViewModel.cs" />
     <Compile Include="ViewModel\NavObjectViewModel.cs" />
     <Compile Include="ViewModel\ObjectDynamicAtributeViewModel.cs" />

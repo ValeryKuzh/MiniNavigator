@@ -4,6 +4,7 @@ using MiniNavigator_Services.Service;
 using MiniNavigator_Services.Service.Interface;
 using MiniNavigator_UI.Mapper;
 using MiniNavigator_UI.Mapper.Interface;
+using MiniNavigator_UI.Service;
 using MiniNavigator_UI.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -18,23 +19,25 @@ namespace MiniNavigator_UI
 {
     public partial class NavigatorForm : Form
     {
-        private IObjectService _objectService;
-        private IObjectTypeService _objectTypeService;
+        private readonly IObjectService _objectService;
+        private readonly IObjectTypeService _objectTypeService;
+        private readonly IValidationService _validationService;
 
-        private IMapper<NavObjectViewModel, NavObjectDTO> _objectMapper;
+        private readonly IMapper<NavObjectViewModel, NavObjectDTO> _objectMapper;
 
         private NavObjectViewModel _treeOfObjects = new NavObjectViewModel();
 
         private DataTable _table;
-        private BindingList<ObjectDynamicAtributeViewModel> _objectsData;
 
         public NavigatorForm(
             IObjectService objectService,
             IObjectTypeService objectTypeService,
+            IValidationService validationService,
             IMapper<NavObjectViewModel, NavObjectDTO> objectMapper)
         {
             _objectService = objectService;
             _objectTypeService = objectTypeService;
+            _validationService = validationService;
 
             _objectMapper = objectMapper;
 
@@ -42,8 +45,13 @@ namespace MiniNavigator_UI
 
             NavigatorDataGridView.RowHeaderMouseClick += NavigatorDataGridView_RowHeaderMouseClick;
             NavigatorDataGridView.CellClick += NavigatorDataGridView_CellClick;
-
+            NavigatorDataGridView.ColumnHeaderMouseClick += NavigatorDataGridView_ColumnHeaderMouseClick;
             this.Load += NavigatorForm_Load;
+        }
+
+        private void NavigatorDataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            SetTableReadonlyProperty();
         }
 
         private async void NavigatorForm_Load(object sender, EventArgs e)
@@ -129,6 +137,7 @@ namespace MiniNavigator_UI
             if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectViewModel && _table != null)
             {
                 _newRow = _table.NewRow();
+                SetTableReadonlyProperty();
 
                 foreach (DataColumn col in _table.Columns)
                     _newRow[col.ColumnName] = DBNull.Value;
@@ -200,10 +209,6 @@ namespace MiniNavigator_UI
             NavigatorDataGridView.ReadOnly = false;
             NavigatorDataGridView.AllowUserToAddRows = false;
 
-            foreach (DataGridViewRow row in NavigatorDataGridView.Rows)
-            {
-                row.ReadOnly = true;
-            }
         }
 
         /// <summary>

@@ -8,6 +8,7 @@ using MiniNavigator_Services.Service.Interface;
 using MiniNavigator_UI.ViewModel;
 using MiniNavigator_UI.Mapper;
 using MiniNavigator_UI.Mapper.Interface;
+using MiniNavigator_UI.Service;
 
 namespace MiniNavigator_UI
 {
@@ -31,6 +32,7 @@ namespace MiniNavigator_UI
             // Services
             services.AddScoped<IObjectService, ObjectService>();
             services.AddScoped<IObjectTypeService, ObjectTypeService>();
+            services.AddScoped<IValidationService, ValidationService>();
 
             // Forms
             services.AddScoped<NavigatorForm>();

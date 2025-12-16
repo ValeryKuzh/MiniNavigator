@@ -132,6 +132,7 @@ namespace MiniNavigator_UI
             }
 
             IsEditing = false;
+            SetTableReadonlyProperty();
             ChangeSortMode(IsEditing);
             HideControls();
         }
@@ -144,6 +145,12 @@ namespace MiniNavigator_UI
             // Завершаем редактирование
             NavigatorDataGridView.EndEdit();
             NavigatorDataGridView.CurrentCell = null;
+
+            if (!_validationService.ValidateTypesForRow(_newRow, _table, out string error))
+            {
+                MessageBox.Show(error, "Ошибка валидации", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             int rowIndex = _table.Rows.IndexOf(_newRow);
             var gridRow = NavigatorDataGridView.Rows[rowIndex];
@@ -162,12 +169,11 @@ namespace MiniNavigator_UI
             _newRow = null;
 
             IsEditing = false;
-
+            SetTableReadonlyProperty();
             ChangeSortMode(IsEditing);
-            
+
             HideControls();
         }
-
 
         /// <summary>
         /// Ограничивает действия пользователя на гриде, пока добавляется новая строка.
@@ -177,6 +183,31 @@ namespace MiniNavigator_UI
             if (_newRow != null)
             {
                 ChangeSortMode(IsEditing);
+            }
+        }
+        
+        private void SetTableReadonlyProperty()
+        {
+            if (_table == null) return;
+
+            for (int i = 0; i < NavigatorDataGridView.Rows.Count; i++)
+            {
+                var gridRow = NavigatorDataGridView.Rows[i];
+
+                if (_newRow != null && i == _table.Rows.IndexOf(_newRow))
+                {
+                    // только редактируемая строка
+                    gridRow.ReadOnly = false;
+                    foreach (DataGridViewCell cell in gridRow.Cells)
+                        cell.ReadOnly = false;
+                }
+                else
+                {
+                    // все остальные строки — readonly
+                    gridRow.ReadOnly = true;
+                    foreach (DataGridViewCell cell in gridRow.Cells)
+                        cell.ReadOnly = true;
+                }
             }
         }
 

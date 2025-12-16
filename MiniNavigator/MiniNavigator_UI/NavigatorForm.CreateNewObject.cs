@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,12 @@ namespace MiniNavigator_UI
 {
     public partial class NavigatorForm
     {
+
+        private DataRow _newRow;
+        private bool IsEditing {  get; set; }
+
+        #region Initialization Dialog Buttons
+
         /// <summary>
         /// Кнопка подтверждения действия
         /// </summary>
@@ -56,11 +63,6 @@ namespace MiniNavigator_UI
             return btn;
         }
 
-        private void ApplyBtn_Click(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Создание кнопки отмены на форме
         /// </summary>
@@ -76,10 +78,6 @@ namespace MiniNavigator_UI
             return btn;
         }
 
-        private void CancelBtn_Click(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
         private void PositionCreateButtons()
         {
             if (ApplyBtn == null || CancelButton == null)
@@ -122,6 +120,82 @@ namespace MiniNavigator_UI
         {
             ApplyBtn.Visible = true;
             CancelButton.Visible = true;
+        }
+        #endregion
+
+        private void CancelBtn_Click(object sender, EventArgs e)
+        {
+            if (_newRow != null)
+            {
+                _table.Rows.Remove(_newRow);
+                _newRow = null;
+            }
+
+            IsEditing = false;
+            ChangeSortMode(IsEditing);
+            HideControls();
+        }
+
+        private async void ApplyBtn_Click(object sender, EventArgs e)
+        {
+            if (_newRow == null)
+                return;
+
+            // Завершаем редактирование
+            NavigatorDataGridView.EndEdit();
+            NavigatorDataGridView.CurrentCell = null;
+
+            int rowIndex = _table.Rows.IndexOf(_newRow);
+            var gridRow = NavigatorDataGridView.Rows[rowIndex];
+
+            // Фиксируем строку
+            gridRow.ReadOnly = true;
+            foreach (DataGridViewCell cell in gridRow.Cells)
+                cell.ReadOnly = true;
+
+            // Здесь можно отправить данные на сервис
+            // var values = new Dictionary<string, object>();
+            // foreach (DataColumn col in _table.Columns)
+            //     values[col.ColumnName] = _newRow[col];
+            // await _objectService.CreateObjectAsync(values);
+
+            _newRow = null;
+
+            IsEditing = false;
+
+            ChangeSortMode(IsEditing);
+            
+            HideControls();
+        }
+
+
+        /// <summary>
+        /// Ограничивает действия пользователя на гриде, пока добавляется новая строка.
+        /// </summary>
+        private void RestrictGridDuringCreation()
+        {
+            if (_newRow != null)
+            {
+                ChangeSortMode(IsEditing);
+            }
+        }
+
+        private void ChangeSortMode(bool isEditing)
+        {
+            if (isEditing && _newRow != null)
+            {
+                foreach (DataGridViewColumn col in NavigatorDataGridView.Columns)
+                {
+                    col.SortMode = DataGridViewColumnSortMode.NotSortable;
+                }
+            }
+            else
+            {
+                foreach (DataGridViewColumn col in NavigatorDataGridView.Columns)
+                {
+                    col.SortMode = DataGridViewColumnSortMode.Automatic;
+                }
+            }
         }
     }
 }

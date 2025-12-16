@@ -40,8 +40,8 @@ namespace MiniNavigator_UI
 
             InitializeComponent();
 
-            NavigatorDataGridView.RowHeaderMouseClick += NotesGridView_RowHeaderMouseClick;
-            NavigatorDataGridView.CellClick += NotesGridView_CellClick;
+            NavigatorDataGridView.RowHeaderMouseClick += NavigatorDataGridView_RowHeaderMouseClick;
+            NavigatorDataGridView.CellClick += NavigatorDataGridView_CellClick;
 
             this.Load += NavigatorForm_Load;
         }
@@ -128,11 +128,32 @@ namespace MiniNavigator_UI
         {
             if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectViewModel && _table != null)
             {
+                _newRow = _table.NewRow();
+
+                foreach (DataColumn col in _table.Columns)
+                    _newRow[col.ColumnName] = DBNull.Value;
+
+                _table.Rows.Add(_newRow);
+
+                int rowIndex = _table.Rows.IndexOf(_newRow);
+
+                var gridRow = NavigatorDataGridView.Rows[rowIndex];
+                gridRow.ReadOnly = false;
+                foreach (DataGridViewCell cell in gridRow.Cells)
+                {
+                    cell.ReadOnly = false;
+                }
+
+                NavigatorDataGridView.CurrentCell = NavigatorDataGridView.Rows[rowIndex].Cells[0];
+                NavigatorDataGridView.BeginEdit(true);
+
+                IsEditing = true;
+                RestrictGridDuringCreation();
                 InitializeCreateNewObject();
                 ShowControls();
-                //_objectService.AddNewObject();
             }
         }
+
 
         private async Task BindTableAsync(Guid typeID)
         {
@@ -176,12 +197,19 @@ namespace MiniNavigator_UI
             
             NavigatorDataGridView.AutoGenerateColumns = true;
             NavigatorDataGridView.DataSource = table;
+            NavigatorDataGridView.ReadOnly = false;
+            NavigatorDataGridView.AllowUserToAddRows = false;
+
+            foreach (DataGridViewRow row in NavigatorDataGridView.Rows)
+            {
+                row.ReadOnly = true;
+            }
         }
 
         /// <summary>
         /// Обработчик для выделения всей строки
         /// </summary>
-        private void NotesGridView_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        private void NavigatorDataGridView_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             NavigatorDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             NavigatorDataGridView.ClearSelection();
@@ -191,7 +219,7 @@ namespace MiniNavigator_UI
         /// <summary>
         /// Обработчик для выделения отдельной ячейки
         /// </summary>
-        private void NotesGridView_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void NavigatorDataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
             {

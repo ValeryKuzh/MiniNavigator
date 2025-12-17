@@ -181,5 +181,38 @@ namespace MiniNavigator_Services.Service
             }
             return attributes;
         }
+
+        public async Task CreateObjectAsync(Guid typeID, CreateObjectDTO dto)
+        {
+            var typeObject = await _objectRepository.GetByIdAsync(typeID);
+            var newObject = new BaseObject()
+            {
+                ID = dto.ID,
+                ObjectType = typeObject,
+                Parent = typeObject,
+                ParentID = typeObject.ID,
+            };
+
+            await _objectRepository.AddAsync(newObject);
+
+            var attributes = (await _objectTypeRepository.GetTypeWithAttributesAsync(typeID)).Attributes;
+
+            foreach (var attribute in attributes)
+            {
+                if (!dto.Attributes.TryGetValue(attribute.ID, out var value))
+                    continue; // атрибут не передан — пропускаем
+
+                var attributeValue = new ObjectAttributeValue
+                {
+                    ObjectID = newObject.ID,
+                    Object = newObject,
+                    AttributeID = attribute.ID,
+                    Attribute = attribute,
+                    Value = value.Value
+                };
+
+                await _objectAttributeValueRepository.AddAsync(attributeValue);
+            }
+        }
     }
 }

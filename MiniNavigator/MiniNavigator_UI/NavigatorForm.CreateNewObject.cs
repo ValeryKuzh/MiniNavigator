@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MiniNavigator_Services.DTO;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -160,11 +161,11 @@ namespace MiniNavigator_UI
             foreach (DataGridViewCell cell in gridRow.Cells)
                 cell.ReadOnly = true;
 
+            var typeId = _table.ExtendedProperties["typeID"];
             // Здесь можно отправить данные на сервис
-            // var values = new Dictionary<string, object>();
-            // foreach (DataColumn col in _table.Columns)
-            //     values[col.ColumnName] = _newRow[col];
-            // await _objectService.CreateObjectAsync(values);
+            CreateObjectDTO newObject = CreateNewObjectDTO();
+
+            await _objectService.CreateObjectAsync((Guid)typeId, newObject);
 
             _newRow = null;
 
@@ -185,7 +186,48 @@ namespace MiniNavigator_UI
                 ChangeSortMode(IsEditing);
             }
         }
-        
+
+        public CreateObjectDTO CreateNewObjectDTO()
+        {
+            if(_newRow != null)
+            {
+                return new CreateObjectDTO()
+                {
+                    ID = Guid.NewGuid(),
+                    Attributes = AddAttributesToObjectDTO()
+                };
+            }
+            return null;
+        }
+
+        private Dictionary<Guid, ObjectAttributeDTO> AddAttributesToObjectDTO()
+        {
+            var result = new Dictionary<Guid, ObjectAttributeDTO>();
+
+            foreach (DataColumn column in _table.Columns)
+            {
+                if (!column.ExtendedProperties.ContainsKey("ID"))
+                    continue;
+
+                var attributeId = (Guid)column.ExtendedProperties["ID"];
+                var value = _newRow[column];
+
+                if (value == DBNull.Value || value == null)
+                    continue;
+
+                result[attributeId] = new ObjectAttributeDTO
+                {
+                    ID = attributeId,
+                    Name = column.ColumnName,
+                    ValueType = column.DataType,
+                    Value = value.ToString()
+                };
+            }
+
+            return result;
+        }
+
+
         private void SetTableReadonlyProperty()
         {
             if (_table == null) return;

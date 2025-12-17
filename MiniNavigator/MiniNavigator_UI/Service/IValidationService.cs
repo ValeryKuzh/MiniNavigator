@@ -10,5 +10,6 @@ namespace MiniNavigator_UI.Service
     public interface IValidationService
     {
         bool ValidateTypesForRow(DataRow row, DataTable table, out string errorMessage);
+        bool ValidateSingleValue(string value, Type type, out string error);
     }
 }

@@ -46,8 +46,35 @@ namespace MiniNavigator_UI
             NavigatorDataGridView.RowHeaderMouseClick += NavigatorDataGridView_RowHeaderMouseClick;
             NavigatorDataGridView.CellClick += NavigatorDataGridView_CellClick;
             NavigatorDataGridView.ColumnHeaderMouseClick += NavigatorDataGridView_ColumnHeaderMouseClick;
+            NavigatorDataGridView.CellValidating += NavigatorDataGridView_CellValidating;
+
             this.Load += NavigatorForm_Load;
         }
+
+        private void NavigatorDataGridView_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
+        {
+            if (!IsEditing) return;
+
+            var column = NavigatorDataGridView.Columns[e.ColumnIndex];
+            var value = e.FormattedValue?.ToString();
+
+            if (string.IsNullOrWhiteSpace(value))
+                return;
+
+            string error;
+            bool valid = _validationService.ValidateSingleValue(
+                value,
+                column.ValueType,
+                out error
+            );
+
+            if (!valid)
+            {
+                e.Cancel = true;
+                MessageBox.Show(error, "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
 
         private void NavigatorDataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
@@ -184,9 +211,13 @@ namespace MiniNavigator_UI
                 .OrderBy(attr => attr.Name, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
+            table.ExtendedProperties["typeID"] = typeID;
+
             foreach (var attr in allAttributes)
             {
-                table.Columns.Add(attr.Name, attr.ValueType);
+                var column = new DataColumn(attr.Name, attr.ValueType);
+                column.ExtendedProperties["ID"] = attr.ID;
+                table.Columns.Add(column);
             }
 
             foreach (var rowData in tableData)

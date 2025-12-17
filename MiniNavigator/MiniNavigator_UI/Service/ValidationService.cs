@@ -33,12 +33,32 @@ namespace MiniNavigator_UI.Service
                 }
                 catch 
                 {
-                    errorMessage += $"Значение '{value}' у атрибута '{col.ColumnName}' не соответствует типу атрибута: {col.DataType.Name}.\n";
+                    errorMessage = $"Значение '{value}' у атрибута '{col.ColumnName}' не соответствует типу атрибута: {col.DataType.Name}.";
                     return false;
                 }
             }
-
+            
             return true;
         }
+
+        public bool ValidateSingleValue(string value, Type type, out string error)
+        {
+            error = null;
+
+            bool valid =
+                type == typeof(string) ||
+                (type == typeof(int) && int.TryParse(value, out _)) ||
+                (type == typeof(byte) && byte.TryParse(value, out _)) ||
+                (type == typeof(decimal) && decimal.TryParse(value, out _)) ||
+                (type == typeof(double) && double.TryParse(value, out _)) ||
+                (type == typeof(bool) && bool.TryParse(value, out _)) ||
+                (type == typeof(DateTime) && DateTime.TryParse(value, out _));
+
+            if (!valid)
+                error = $"Значение '{value}' не соответствует атрибуту с типом {type.Name}";
+
+            return valid;
+        }
+
     }
 }

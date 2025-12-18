@@ -11,5 +11,6 @@ namespace MiniNavigator_Services.Service.Interface
         Task<NavObjectDTO> GetTreeOfObjectsAsync();
         Task<List<Dictionary<Guid, ObjectAttributeDTO>>> GetTableData(Guid ID);
         Task CreateObjectAsync(Guid typeID, CreateObjectDTO dto);
+        Task<ObjectInfoDTO> GetObjectByIdAsync(Guid ID);
     }
 }

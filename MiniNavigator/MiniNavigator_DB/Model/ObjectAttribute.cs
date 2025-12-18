@@ -15,6 +15,8 @@ namespace MiniNavigator_DB.Model
         public BaseObject Base { get; set; }
 
         public string Name { get; set; }
+        
+        public bool IsReference { get; set; }
         public string ValueType { get; set; }
 
         [NotMapped]

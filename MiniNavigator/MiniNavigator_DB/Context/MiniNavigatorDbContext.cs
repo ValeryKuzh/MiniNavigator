@@ -17,7 +17,7 @@ namespace MiniNavigator_DB.Context
         public DbSet<ObjectUser> ObjectUsers { get; set; }
 
         public MiniNavigatorDbContext(string connectionString) : base(connectionString) { }
-        public MiniNavigatorDbContext() : base("name=HomeDbConnection") { }
+        public MiniNavigatorDbContext() : base("name=InterMechDbConnection") { }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
 

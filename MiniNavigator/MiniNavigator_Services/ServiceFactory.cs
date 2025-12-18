@@ -3,6 +3,7 @@ using MiniNavigator_DB.Context;
 using MiniNavigator_DB.Model;
 using MiniNavigator_DB.Repository;
 using MiniNavigator_DB.Repository.Interface;
+using MiniNavigator_DB.Repository.ObjectAttributeValueRepository;
 using MiniNavigator_Services.DTO;
 using MiniNavigator_Services.Mapper;
 using MiniNavigator_Services.Mapper.Interface;
@@ -24,6 +25,7 @@ namespace MiniNavigator_Services
             // Repositories
             services.AddScoped(typeof(IRepository<>), typeof(EntityFrameworkRepository<>));
             services.AddScoped<IObjectTypeRepository, ObjectTypeRepository>();
+            services.AddScoped<IObjectAttributeValueRepository, ObjectAttributeValueRepository>();
 
             // Mappers Entity <=> DTO
             services.AddScoped<IMapper<NavObjectDTO, BaseObject>, ObjectMapper>();

@@ -94,7 +94,7 @@ namespace MiniNavigator_DB.Configuration
             });
             db.SaveChanges();
 
-            // Роль А
+            // Объект-Роль А
             var roleAObject = CreateNewObject(roleTypeObject);
             db.BaseObjects.Add(roleAObject);
             var roleA = new ObjectRole
@@ -106,7 +106,7 @@ namespace MiniNavigator_DB.Configuration
             db.ObjectRoles.Add(roleA);
             db.SaveChanges();
 
-            // Пользователь А
+            // Объект-Пользователь А
             var userAObject = CreateNewObject(userTypeObject);
             db.BaseObjects.Add(userAObject);
             var userA = new ObjectUser
@@ -120,31 +120,17 @@ namespace MiniNavigator_DB.Configuration
             db.ObjectUsers.Add(userA);
             db.SaveChanges();
 
-            var NameAttributeObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = attributeTypeObject.ID,
-                ObjectType = attributeTypeObject,
-                ParentID = attributeTypeObject.ID,
-                Parent = attributeTypeObject
-            };
+            var NameAttributeObject = CreateNewObject(attributeTypeObject);
             var NameAttribute = new ObjectAttribute()
             {
                 ID = Guid.NewGuid(),
                 Base = NameAttributeObject,
                 Name = "Name",
                 ValueType = typeof(string).ToString(),
-                ObjectTypes = new[] { roleType, userType }
+                ObjectTypes = new[] { userType }
             };
 
-            var SurnameAttributeObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = attributeTypeObject.ID,
-                ObjectType = attributeTypeObject,
-                ParentID = attributeTypeObject.ID,
-                Parent = attributeTypeObject
-            };
+            var SurnameAttributeObject = CreateNewObject(attributeTypeObject);
             var SurnameAttribute = new ObjectAttribute()
             {
                 ID = Guid.NewGuid(),
@@ -154,14 +140,7 @@ namespace MiniNavigator_DB.Configuration
                 ObjectTypes = new[] { userType }
             };
 
-            var AgeAttributeObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = attributeTypeObject.ID,
-                ObjectType = attributeTypeObject,
-                ParentID = attributeTypeObject.ID,
-                Parent = attributeTypeObject
-            };
+            var AgeAttributeObject = CreateNewObject(attributeTypeObject);
             var AgeAttribute = new ObjectAttribute()
             {
                 ID = Guid.NewGuid(),
@@ -172,14 +151,7 @@ namespace MiniNavigator_DB.Configuration
             };
 
 
-            var TitleAttributeObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = attributeTypeObject.ID,
-                ObjectType = attributeTypeObject,
-                ParentID = attributeTypeObject.ID,
-                Parent = attributeTypeObject
-            };
+            var TitleAttributeObject = CreateNewObject(attributeTypeObject);
             var TitleAttribute = new ObjectAttribute()
             {
                 ID = Guid.NewGuid(),
@@ -189,20 +161,14 @@ namespace MiniNavigator_DB.Configuration
                 ObjectTypes = new[] { roleType }
             };
 
-            var RoleAttributeObject = new BaseObject
-            {
-                ID = Guid.NewGuid(),
-                ObjectTypeID = attributeTypeObject.ID,
-                ObjectType = attributeTypeObject,
-                ParentID = attributeTypeObject.ID,
-                Parent = attributeTypeObject
-            };
+            var RoleAttributeObject = CreateNewObject(attributeTypeObject);
             var RoleAttribute = new ObjectAttribute()
             {
                 ID = Guid.NewGuid(),
                 Base = RoleAttributeObject,
                 Name = "Role",
-                ValueType = typeof(string).ToString(),
+                IsReference = true,
+                ValueType = typeof(Guid).ToString(),
                 ObjectTypes = new[] { userType }
             };
 
@@ -260,7 +226,7 @@ namespace MiniNavigator_DB.Configuration
                 ObjectID = userAObject.ID,
                 Attribute = RoleAttribute,
                 AttributeID = RoleAttribute.ID,
-                Value = "Admin"
+                Value = roleAObject.ID.ToString()
             });
 
             db.SaveChanges();

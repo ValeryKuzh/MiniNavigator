@@ -11,6 +11,7 @@ namespace MiniNavigator_Services.DTO
     {
         public Guid ID { get; set; }
         public string Name { get; set; }
+        public bool IsReference { get; set; }
         public Type ValueType { get; set; }
         public string Value { get; set; }
     }

@@ -210,12 +210,6 @@ namespace MiniNavigator_UI
         {
             var tableData = await _objectService.GetTableData(typeID);
 
-            if (tableData == null || tableData.Count == 0)
-            {
-                NavigatorDataGridView.DataSource = null;
-                return;
-            }
-
             var table = new DataTable();
 
             var allAttributes = tableData
@@ -230,9 +224,18 @@ namespace MiniNavigator_UI
 
             foreach (var attr in allAttributes)
             {
-                var column = new DataColumn(attr.Name, attr.ValueType);
-                column.ExtendedProperties["ID"] = attr.ID;
-                table.Columns.Add(column);
+                if(!attr.IsReference)
+                {
+                    var column = new DataColumn(attr.Name, attr.ValueType);
+                    column.ExtendedProperties["ID"] = attr.ID;
+                    table.Columns.Add(column);
+                }
+                else
+                {
+                    var column = new DataColumn(attr.Name, typeof(string));
+                    column.ExtendedProperties["ID"] = attr.ID;
+                    table.Columns.Add(column);
+                }
             }
 
             foreach (var rowData in tableData)
@@ -242,14 +245,23 @@ namespace MiniNavigator_UI
                 foreach (var attr in rowData.Values)
                 {
                     if (attr == null) continue;
-                    row[attr.Name] = attr.Value ?? string.Empty;
+
+                    if (attr.ValueType == typeof(Guid))
+                    {
+                        var obj = await _objectService.GetObjectByIdAsync(Guid.Parse(attr.Value));
+                        row[attr.Name] = obj?.Title ?? "(Не выбран)";
+                    }
+                    else
+                    {
+                        row[attr.Name] = attr.Value ?? string.Empty;
+                    }
                 }
 
                 table.Rows.Add(row);
             }
 
             _table = table;
-            
+
             NavigatorDataGridView.AutoGenerateColumns = true;
             NavigatorDataGridView.DataSource = table;
             NavigatorDataGridView.ReadOnly = false;

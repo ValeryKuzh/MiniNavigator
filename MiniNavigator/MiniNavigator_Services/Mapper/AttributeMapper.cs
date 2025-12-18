@@ -15,6 +15,7 @@ namespace MiniNavigator_Services.Mapper
             {
                 ID = entity.Attribute.ID,
                 Name = entity.Attribute.Name,
+                IsReference = entity.Attribute.IsReference,
                 ValueType = entity.Attribute.ValType,
                 Value = entity.Value
             };

@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using MiniNavigator_DB.Model;
+using MiniNavigator_DB.Repository.Interface;
+using MiniNavigator_DB.Repository.ObjectAttributeValueRepository;
 using MiniNavigator_Services.DTO;
 using MiniNavigator_Services.Mapper.Interface;
 using MiniNavigator_Services.Service.Interface;
-using MiniNavigator_DB.Model;
-using MiniNavigator_DB.Repository.Interface;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MiniNavigator_Services.Service
 {
@@ -20,7 +21,7 @@ namespace MiniNavigator_Services.Service
 
         private readonly IRepository<BaseObject> _objectRepository;
         private readonly IObjectTypeRepository _objectTypeRepository;
-        private readonly IRepository<ObjectAttributeValue> _objectAttributeValueRepository;
+        private readonly IObjectAttributeValueRepository _objectAttributeValueRepository;
 
         public ObjectService(
             IObjectTypeService objectTypeService,
@@ -30,8 +31,8 @@ namespace MiniNavigator_Services.Service
             IMapper<ObjectAttributeDTO, ObjectAttributeValue> attributeMapper,
 
             IObjectTypeRepository objectTypeRepository,
-            IRepository<BaseObject> objectRepository, 
-            IRepository<ObjectAttributeValue> objectAttributeValueRepository)
+            IRepository<BaseObject> objectRepository,
+            IObjectAttributeValueRepository objectAttributeValueRepository)
         {
             _objectTypeService = objectTypeService;
             
@@ -213,6 +214,25 @@ namespace MiniNavigator_Services.Service
 
                 await _objectAttributeValueRepository.AddAsync(attributeValue);
             }
+        }
+
+        public async Task<ObjectInfoDTO> GetObjectByIdAsync(Guid ID)
+        {
+            var obj = await _objectRepository.GetByIdAsync(ID);
+            
+            var attributes = (await _objectTypeRepository.GetTypeWithAttributesAsync((Guid)obj.ObjectTypeID)).Attributes;
+            ObjectAttributeValue titleAttribute = null;
+            foreach(var attr in attributes)
+            {
+                if(attr.Name == "Title")
+                    titleAttribute = await _objectAttributeValueRepository.GetByIdAsync(obj.ID, attr.ID);
+            }
+            return new ObjectInfoDTO()
+            {
+                ID = obj.ID,
+                Title = titleAttribute.Value
+            };
+        
         }
     }
 }

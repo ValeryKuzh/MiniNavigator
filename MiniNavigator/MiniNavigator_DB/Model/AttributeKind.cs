@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MiniNavigator_UI.ViewModel
+namespace MiniNavigator_DB.Model
 {
-    public class AttributeViewModel
+    public enum AttributeKind
     {
+        Primitive = 0,
+        Reference = 1
     }
 }

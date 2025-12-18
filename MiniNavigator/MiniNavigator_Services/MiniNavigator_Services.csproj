@@ -60,6 +60,7 @@
     <Compile Include="DTO\NavObjectDTO.cs" />
     <Compile Include="DTO\ObjectActionDTO.cs" />
     <Compile Include="DTO\ObjectAttributeDTO.cs" />
+    <Compile Include="DTO\ObjectInfoDTO.cs" />
     <Compile Include="DTO\ObjectTypeDTO.cs" />
     <Compile Include="Mapper\AttributeMapper.cs" />
     <Compile Include="Mapper\Interface\IMapper.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="Mapper\ObjectMapper.cs" />
     <Compile Include="Mapper\ObjectTypeMapper.cs" />
     <Compile Include="ServiceFactory.cs" />
+    <Compile Include="Service\Interface\IObjectInfoService.cs" />
     <Compile Include="Service\Interface\IObjectService.cs" />
     <Compile Include="Service\Interface\IObjectTypeService.cs" />
     <Compile Include="Service\ObjectService.cs" />

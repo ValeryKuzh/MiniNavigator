@@ -88,9 +88,16 @@
     <Compile Include="Migrations\202512142000013_UpdateTypeField.Designer.cs">
       <DependentUpon>202512142000013_UpdateTypeField.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202512181234361_AddReferenceAttribute.cs" />
+    <Compile Include="Migrations\202512181234361_AddReferenceAttribute.Designer.cs">
+      <DependentUpon>202512181234361_AddReferenceAttribute.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Model\AttributeKind.cs" />
     <Compile Include="Model\AttributeValuePair.cs" />
     <Compile Include="Model\ObjectAttributeValue.cs" />
+    <Compile Include="Repository\ObjectAttributeValueRepository\IObjectAttributeValueRepository.cs" />
+    <Compile Include="Repository\ObjectAttributeValueRepository\ObjectAttributeValueRepository.cs" />
     <Compile Include="Repository\ObjectTypeRepository\IObjectTypeRepository.cs" />
     <Compile Include="Model\BaseObject.cs" />
     <Compile Include="Model\ObjectAction.cs" />
@@ -127,6 +134,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202512142000013_UpdateTypeField.resx">
       <DependentUpon>202512142000013_UpdateTypeField.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202512181234361_AddReferenceAttribute.resx">
+      <DependentUpon>202512181234361_AddReferenceAttribute.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

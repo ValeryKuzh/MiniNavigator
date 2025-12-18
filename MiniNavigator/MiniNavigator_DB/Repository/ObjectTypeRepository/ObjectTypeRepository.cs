@@ -24,15 +24,20 @@ namespace MiniNavigator_DB.Repository
                                  .Include(ot => ot.Base).ToListAsync();
         }
 
-        public async Task<ObjectType> GetTypeWithAttributesAsync(Guid ID)
+        public async Task<ObjectType> GetTypeWithAttributesAsync(Guid id)
         {
             return await _context.ObjectTypes
-                                 .Include(ot => ot.Attributes).Where(ot => ot.Base_ID == ID).FirstOrDefaultAsync();
+                .Include(ot => ot.Base)
+                .Include(ot => ot.Attributes)
+                .Include(ot => ot.Attributes.Select(ota => ota.Attribute))
+                .FirstOrDefaultAsync(ot => ot.Base_ID == id);
         }
-        public async Task<ObjectType> GetTypeWithActionsAsync(Guid ID)
+
+        public async Task<ObjectType> GetTypeWithActionsAsync(Guid id)
         {
             return await _context.ObjectTypes
-                                 .Include(ot => ot.Actions).Where(ot => ot.Base_ID == ID).FirstOrDefaultAsync();
+                .Include(ot => ot.Actions)
+                .FirstOrDefaultAsync(ot => ot.Base_ID == id);
         }
     }
 }

@@ -11,11 +11,15 @@ namespace MiniNavigator_DB
         {
             using (var db = new MiniNavigatorDbContext())
             {
-                Database.SetInitializer(new MiniNavigatorDbInitializer(db));
+                Database.SetInitializer(new MiniNavigatorDbInitializer());
 
                 db.Database.Initialize(force: true);
                 Console.WriteLine("База данных успешно создана!");
             }
+            //using (var db = new MiniNavigatorDbContext())
+            //{
+            //    db.Database.Delete(); // Удаляет БД
+            //}
         }
     }
 }

@@ -26,6 +26,6 @@ namespace MiniNavigator_DB.Model
             set => ValueType = value?.AssemblyQualifiedName;
         }
 
-        public ICollection<ObjectType> ObjectTypes { get; set; }
+        public ICollection<ObjectTypeAttribute> ObjectTypes { get; set; }
     }
 }

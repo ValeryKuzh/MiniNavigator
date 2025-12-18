@@ -9,6 +9,7 @@ namespace MiniNavigator_DB.Context
         public DbSet<BaseObject> BaseObjects { get; set; }
         public DbSet<ObjectType> ObjectTypes { get; set; }
         public DbSet<ObjectAction> ObjectActions { get; set; }
+        public DbSet<ObjectTypeAttribute> ObjectTypeAttributes { get; set; }
         public DbSet<ObjectAttribute> ObjectAttributes { get; set; }
         public DbSet<ObjectAttributeValue> ObjectAttributeValues { get; set; }
         public DbSet<ObjectFile> ObjectFiles { get; set; }
@@ -17,14 +18,14 @@ namespace MiniNavigator_DB.Context
         public DbSet<ObjectUser> ObjectUsers { get; set; }
 
         public MiniNavigatorDbContext(string connectionString) : base(connectionString) { }
-        public MiniNavigatorDbContext() : base("name=InterMechDbConnection") { }
+        public MiniNavigatorDbContext() : base("name=HomeDbConnection") { }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
 
             // PK
 
             modelBuilder.Entity<BaseObject>().HasKey(o => o.ID);
-            
+
             modelBuilder.Entity<ObjectType>().HasKey(ot => ot.ID);
 
             modelBuilder.Entity<ObjectAction>().HasKey(oa => oa.ID);
@@ -40,6 +41,8 @@ namespace MiniNavigator_DB.Context
             modelBuilder.Entity<ObjectRole>().HasKey(or => or.ID);
 
             modelBuilder.Entity<ObjectAttributeValue>().HasKey(x => new { x.ObjectID, x.AttributeID });
+
+            modelBuilder.Entity<ObjectTypeAttribute>().HasKey(x => new { x.ObjectTypeID, x.AttributeID });
 
             // Relations
 
@@ -89,15 +92,18 @@ namespace MiniNavigator_DB.Context
                     m.MapRightKey("ActionID");
                 });
 
-            modelBuilder.Entity<ObjectType>()
-                .HasMany(x => x.Attributes)
-                .WithMany(x => x.ObjectTypes)
-                .Map(m =>
-                {
-                    m.ToTable("ObjectTypeAttributes");
-                    m.MapLeftKey("TypeID");
-                    m.MapRightKey("AttributeID");
-                });
+
+            modelBuilder.Entity<ObjectTypeAttribute>()
+                .HasRequired(ota => ota.ObjectType)
+                .WithMany(t => t.Attributes)
+                .HasForeignKey(x => x.ObjectTypeID)
+                .WillCascadeOnDelete(true);
+
+            modelBuilder.Entity<ObjectTypeAttribute>()
+                .HasRequired(x => x.Attribute)
+                .WithMany()
+                .HasForeignKey(x => x.AttributeID)
+                .WillCascadeOnDelete(false);
 
             // ObjectAction
 

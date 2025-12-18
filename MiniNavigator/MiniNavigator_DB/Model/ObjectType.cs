@@ -18,6 +18,6 @@ namespace MiniNavigator_DB.Model
         public bool IsVisible { get; set; }
 
         public ICollection<ObjectAction> Actions { get; set; }
-        public ICollection<ObjectAttribute> Attributes { get; set; }
+        public ICollection<ObjectTypeAttribute> Attributes { get; set; }
     }
 }

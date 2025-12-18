@@ -3,112 +3,84 @@ using MiniNavigator_DB.Model;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace MiniNavigator_DB.Configuration
 {
     public class MiniNavigatorDbInitializer : DropCreateDatabaseAlways<MiniNavigatorDbContext>
     {
-        private readonly MiniNavigatorDbContext _db;
-        public MiniNavigatorDbInitializer(MiniNavigatorDbContext db)
-        {
-            _db = db;
-        }
         protected override void Seed(MiniNavigatorDbContext db)
         {
-            // Объект-тип "Роль"
+            #region Object Types
+
             var roleTypeObject = CreateNewObject(null);
-            db.BaseObjects.Add(roleTypeObject);
-            //Тип "Роль"
             var roleType = CreateNewObjectType(roleTypeObject, "Роль", true);
-            db.ObjectTypes.Add(roleType);
-            db.SaveChanges();
 
-            // Объект-тип "Пользователь"
             var userTypeObject = CreateNewObject(null);
-            db.BaseObjects.Add(userTypeObject);
-            //Тип "Пользователь"
             var userType = CreateNewObjectType(userTypeObject, "Пользователь", true);
-            db.ObjectTypes.Add(userType);
-            db.SaveChanges();
 
-            // Объект-тип "Действие"
             var actionTypeObject = CreateNewObject(null);
-            db.BaseObjects.Add(actionTypeObject);
-            //Тип "Действие"
             var actionType = CreateNewObjectType(actionTypeObject, "Действие", false);
-            db.ObjectTypes.Add(actionType);
-            db.SaveChanges();
 
-            // Объект-тип "Атрибут"
             var attributeTypeObject = CreateNewObject(null);
-            db.BaseObjects.Add(attributeTypeObject);
-            //Тип "Атрибут"
             var attributeType = CreateNewObjectType(attributeTypeObject, "Атрибут", false);
-            db.ObjectTypes.Add(attributeType);
+
+            db.BaseObjects.AddRange(new[] { roleTypeObject, userTypeObject, actionTypeObject, attributeTypeObject });
+            db.ObjectTypes.AddRange(new[] { roleType, userType, actionType, attributeType });
             db.SaveChanges();
 
-            // Объекты действий
+            #endregion
 
-            // Объект действия "Добавить"
+            #region Actions
+
             var actionAddObject = CreateNewObject(actionTypeObject);
-            db.BaseObjects.Add(actionAddObject);
-
-            // Объект действия "Редактировать"
             var actionEditObject = CreateNewObject(actionTypeObject);
-            db.BaseObjects.Add(actionEditObject);
-
-            // Объект действия "Удалить"
             var actionDeleteObject = CreateNewObject(actionTypeObject);
-            db.BaseObjects.Add(actionDeleteObject);
 
+            db.BaseObjects.AddRange(new[] { actionAddObject, actionEditObject, actionDeleteObject });
             db.SaveChanges();
 
-            // ObjectActions, связанные с BaseObjects
-            db.ObjectActions.Add(new ObjectAction
+            db.ObjectActions.AddRange(new[]
             {
-                ID = Guid.NewGuid(),
-                Base_ID = actionAddObject.ID,
-                Base = actionAddObject,
-                Name = "Добавить",
-                ObjectTypes = new[] { roleType, userType }
-            });
-            db.ObjectActions.Add(new ObjectAction
-            {
-                ID = Guid.NewGuid(),
-                Base_ID = actionEditObject.ID,
-                Base = actionEditObject,
-                Name = "Редактировать",
-                ObjectTypes = new[] { roleType }
-            });
-            db.ObjectActions.Add(new ObjectAction
-            {
-                ID = Guid.NewGuid(),
-                Base_ID = actionDeleteObject.ID,
-                Base = actionDeleteObject,
-                Name = "Удалить",
-                ObjectTypes = new[] { roleType }
+                new ObjectAction
+                {
+                    ID = Guid.NewGuid(),
+                    Base_ID = actionAddObject.ID,
+                    Base = actionAddObject,
+                    Name = "Добавить",
+                    ObjectTypes = new[] { roleType, userType }
+                },
+                new ObjectAction
+                {
+                    ID = Guid.NewGuid(),
+                    Base_ID = actionEditObject.ID,
+                    Base = actionEditObject,
+                    Name = "Редактировать",
+                    ObjectTypes = new[] { roleType }
+                },
+                new ObjectAction
+                {
+                    ID = Guid.NewGuid(),
+                    Base_ID = actionDeleteObject.ID,
+                    Base = actionDeleteObject,
+                    Name = "Удалить",
+                    ObjectTypes = new[] { roleType }
+                }
             });
             db.SaveChanges();
 
-            // Объект-Роль А
+            #endregion
+
+            #region Roles and Users
+
             var roleAObject = CreateNewObject(roleTypeObject);
-            db.BaseObjects.Add(roleAObject);
             var roleA = new ObjectRole
             {
                 ID = Guid.NewGuid(),
                 Base_ID = roleAObject.ID,
                 Base = roleAObject
             };
-            db.ObjectRoles.Add(roleA);
-            db.SaveChanges();
 
-            // Объект-Пользователь А
             var userAObject = CreateNewObject(userTypeObject);
-            db.BaseObjects.Add(userAObject);
             var userA = new ObjectUser
             {
                 ID = Guid.NewGuid(),
@@ -117,119 +89,161 @@ namespace MiniNavigator_DB.Configuration
                 RoleID = roleA.ID,
                 Role = roleA
             };
+
+            db.BaseObjects.AddRange(new[] { roleAObject, userAObject });
+            db.ObjectRoles.Add(roleA);
             db.ObjectUsers.Add(userA);
             db.SaveChanges();
 
-            var NameAttributeObject = CreateNewObject(attributeTypeObject);
-            var NameAttribute = new ObjectAttribute()
+            #endregion
+
+            #region Attributes
+
+            var nameAttrObject = CreateNewObject(attributeTypeObject);
+            var surnameAttrObject = CreateNewObject(attributeTypeObject);
+            var ageAttrObject = CreateNewObject(attributeTypeObject);
+            var titleAttrObject = CreateNewObject(attributeTypeObject);
+            var roleAttrObject = CreateNewObject(attributeTypeObject);
+
+            var nameAttribute = new ObjectAttribute
             {
                 ID = Guid.NewGuid(),
-                Base = NameAttributeObject,
+                Base = nameAttrObject,
                 Name = "Name",
-                ValueType = typeof(string).ToString(),
-                ObjectTypes = new[] { userType }
+                ValueType = typeof(string).ToString()
             };
-
-            var SurnameAttributeObject = CreateNewObject(attributeTypeObject);
-            var SurnameAttribute = new ObjectAttribute()
+            var surnameAttribute = new ObjectAttribute
             {
                 ID = Guid.NewGuid(),
-                Base = SurnameAttributeObject,
+                Base = surnameAttrObject,
                 Name = "Surname",
-                ValueType = typeof(string).ToString(),
-                ObjectTypes = new[] { userType }
+                ValueType = typeof(string).ToString()
             };
-
-            var AgeAttributeObject = CreateNewObject(attributeTypeObject);
-            var AgeAttribute = new ObjectAttribute()
+            var ageAttribute = new ObjectAttribute
             {
                 ID = Guid.NewGuid(),
-                Base = AgeAttributeObject,
+                Base = ageAttrObject,
                 Name = "Age",
-                ValueType = typeof(byte).ToString(),
-                ObjectTypes = new[] { userType }
+                ValueType = typeof(byte).ToString()
             };
-
-
-            var TitleAttributeObject = CreateNewObject(attributeTypeObject);
-            var TitleAttribute = new ObjectAttribute()
+            var titleAttribute = new ObjectAttribute
             {
                 ID = Guid.NewGuid(),
-                Base = TitleAttributeObject,
+                Base = titleAttrObject,
                 Name = "Title",
-                ValueType = typeof(string).ToString(),
-                ObjectTypes = new[] { roleType }
+                ValueType = typeof(string).ToString()
             };
-
-            var RoleAttributeObject = CreateNewObject(attributeTypeObject);
-            var RoleAttribute = new ObjectAttribute()
+            var roleAttribute = new ObjectAttribute
             {
                 ID = Guid.NewGuid(),
-                Base = RoleAttributeObject,
+                Base = roleAttrObject,
                 Name = "Role",
                 IsReference = true,
-                ValueType = typeof(Guid).ToString(),
-                ObjectTypes = new[] { userType }
+                ValueType = typeof(Guid).ToString()
             };
 
-            db.BaseObjects.Add(NameAttributeObject);
-            db.BaseObjects.Add(SurnameAttributeObject);
-            db.BaseObjects.Add(AgeAttributeObject);
-            db.BaseObjects.Add(TitleAttributeObject);
-            db.BaseObjects.Add(RoleAttributeObject);
-            db.ObjectAttributes.Add(NameAttribute);
-            db.ObjectAttributes.Add(SurnameAttribute);
-            db.ObjectAttributes.Add(AgeAttribute);
-            db.ObjectAttributes.Add(TitleAttribute);
-            db.ObjectAttributes.Add(RoleAttribute);
+            db.BaseObjects.AddRange(new[] { nameAttrObject, surnameAttrObject, ageAttrObject, titleAttrObject, roleAttrObject });
+            db.ObjectAttributes.AddRange(new[] { nameAttribute, surnameAttribute, ageAttribute, titleAttribute, roleAttribute });
             db.SaveChanges();
 
-            db.ObjectAttributeValues.Add(new ObjectAttributeValue
-            {
-                Object = userAObject,
-                ObjectID = userAObject.ID,
-                Attribute = NameAttribute,
-                AttributeID = NameAttribute.ID,
-                Value = "Valery"
-            });
+            #endregion
 
-            db.ObjectAttributeValues.Add(new ObjectAttributeValue
-            {
-                Object = userAObject,
-                ObjectID = userAObject.ID,
-                Attribute = SurnameAttribute,
-                AttributeID = SurnameAttribute.ID,
-                Value = "Kuzhovnik"
-            });
+            #region ObjectTypeAttributes
 
-            db.ObjectAttributeValues.Add(new ObjectAttributeValue
+            db.ObjectTypeAttributes.AddRange(new[]
             {
-                Object = userAObject,
-                ObjectID = userAObject.ID,
-                Attribute = AgeAttribute,
-                AttributeID = AgeAttribute.ID,
-                Value = "19"
+                new ObjectTypeAttribute
+                {
+                    ObjectTypeID = userType.ID,
+                    AttributeID = nameAttribute.ID,
+                    IsRequired = true,
+                    IsVisible = true,
+                    Order = 1
+                },
+                new ObjectTypeAttribute
+                {
+                    ObjectTypeID = userType.ID,
+                    AttributeID = surnameAttribute.ID,
+                    IsRequired = true,
+                    IsVisible = true,
+                    Order = 2
+                },
+                new ObjectTypeAttribute
+                {
+                    ObjectTypeID = userType.ID,
+                    AttributeID = ageAttribute.ID,
+                    IsRequired = false,
+                    IsVisible = true,
+                    Order = 3
+                },
+                new ObjectTypeAttribute
+                {
+                    ObjectTypeID = userType.ID,
+                    AttributeID = roleAttribute.ID,
+                    IsRequired = true,
+                    IsVisible = true,
+                    Order = 4
+                },
+                new ObjectTypeAttribute
+                {
+                    ObjectTypeID = roleType.ID,
+                    AttributeID = titleAttribute.ID,
+                    IsRequired = true,
+                    IsVisible = true,
+                    Order = 1
+                }
             });
-
-            db.ObjectAttributeValues.Add(new ObjectAttributeValue
-            {
-                Object = roleAObject,
-                ObjectID = roleAObject.ID,
-                Attribute = TitleAttribute,
-                AttributeID = TitleAttribute.ID,
-                Value = "Admin"
-            });
-
-            db.ObjectAttributeValues.Add(new ObjectAttributeValue
-            {
-                Object = userAObject,
-                ObjectID = userAObject.ID,
-                Attribute = RoleAttribute,
-                AttributeID = RoleAttribute.ID,
-                Value = roleAObject.ID.ToString()
-            });
-
             db.SaveChanges();
+
+            #endregion
+
+            #region ObjectAttributeValues
+
+            db.ObjectAttributeValues.AddRange(new[]
+            {
+                new ObjectAttributeValue
+                {
+                    Object = userAObject,
+                    ObjectID = userAObject.ID,
+                    Attribute = nameAttribute,
+                    AttributeID = nameAttribute.ID,
+                    Value = "Valery"
+                },
+                new ObjectAttributeValue
+                {
+                    Object = userAObject,
+                    ObjectID = userAObject.ID,
+                    Attribute = surnameAttribute,
+                    AttributeID = surnameAttribute.ID,
+                    Value = "Kuzhovnik"
+                },
+                new ObjectAttributeValue
+                {
+                    Object = userAObject,
+                    ObjectID = userAObject.ID,
+                    Attribute = ageAttribute,
+                    AttributeID = ageAttribute.ID,
+                    Value = "19"
+                },
+                new ObjectAttributeValue
+                {
+                    Object = roleAObject,
+                    ObjectID = roleAObject.ID,
+                    Attribute = titleAttribute,
+                    AttributeID = titleAttribute.ID,
+                    Value = "Admin"
+                },
+                new ObjectAttributeValue
+                {
+                    Object = userAObject,
+                    ObjectID = userAObject.ID,
+                    Attribute = roleAttribute,
+                    AttributeID = roleAttribute.ID,
+                    Value = roleAObject.ID.ToString()
+                }
+            });
+            db.SaveChanges();
+            #endregion
 
             base.Seed(db);
         }
@@ -245,6 +259,7 @@ namespace MiniNavigator_DB.Configuration
                 Parent = objType
             };
         }
+
         private ObjectType CreateNewObjectType(BaseObject objOfType, string name, bool isVisible)
         {
             return new ObjectType
@@ -256,6 +271,5 @@ namespace MiniNavigator_DB.Configuration
                 IsVisible = isVisible
             };
         }
-
     }
 }

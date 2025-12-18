@@ -131,6 +131,8 @@ namespace MiniNavigator_UI
 
         private async void NavigatorVirtualTree_MouseUp(object sender, MouseEventArgs e)
         {
+            if (IsEditing)
+                return;
             if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectViewModel)
             {
                 if (e.Button == MouseButtons.Right)
@@ -163,6 +165,7 @@ namespace MiniNavigator_UI
         {
             if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectViewModel && _table != null)
             {
+                ResetSorting();
                 _newRow = _table.NewRow();
                 SetTableReadonlyProperty();
 
@@ -190,6 +193,18 @@ namespace MiniNavigator_UI
             }
         }
 
+        private void ResetSorting()
+        {
+            if (NavigatorDataGridView.DataSource is DataTable table)
+            {
+                table.DefaultView.Sort = string.Empty;
+            }
+
+            foreach (DataGridViewColumn col in NavigatorDataGridView.Columns)
+            {
+                col.SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
+        }
 
         private async Task BindTableAsync(Guid typeID)
         {

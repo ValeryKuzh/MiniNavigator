@@ -166,31 +166,50 @@ namespace MiniNavigator_UI
             if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectViewModel && _table != null)
             {
                 ResetSorting();
-                _newRow = _table.NewRow();
                 SetTableReadonlyProperty();
 
-                foreach (DataColumn col in _table.Columns)
-                    _newRow[col.ColumnName] = DBNull.Value;
+                // Добавление новой строки и кнопок для ссылочных колонок
+                AddNewRowWithButtons();
 
-                _table.Rows.Add(_newRow);
-
-                int rowIndex = _table.Rows.IndexOf(_newRow);
-
-                var gridRow = NavigatorDataGridView.Rows[rowIndex];
-                gridRow.ReadOnly = false;
-                foreach (DataGridViewCell cell in gridRow.Cells)
-                {
-                    cell.ReadOnly = false;
-                }
-
-                NavigatorDataGridView.CurrentCell = NavigatorDataGridView.Rows[rowIndex].Cells[0];
-                NavigatorDataGridView.BeginEdit(true);
-
-                IsEditing = true;
-                RestrictGridDuringCreation();
-                InitializeCreateNewObject();
-                ShowControls();
+                IsEditing = true;                    // Переключаем режим редактирования
+                RestrictGridDuringCreation();        // Ограничиваем сетку при создании
+                InitializeCreateNewObject();         // Инициализация объекта для новой строки
+                ShowControls();                      // Отображаем дополнительные элементы управления
             }
+        }
+
+        private void AddNewRowWithButtons()
+        {
+            if (_table == null) return;
+
+            _newRow = _table.NewRow();
+            foreach (DataColumn col in _table.Columns)
+                _newRow[col.ColumnName] = DBNull.Value;
+
+            _table.Rows.Add(_newRow);
+            int rowIndex = _table.Rows.IndexOf(_newRow);
+
+            var gridRow = NavigatorDataGridView.Rows[rowIndex];
+            gridRow.ReadOnly = false;
+
+            for (int i = 0; i < gridRow.Cells.Count; i++)
+            {
+                var column = NavigatorDataGridView.Columns[i];
+                var dataColumn = _table.Columns[column.DataPropertyName];
+
+                if (dataColumn.ExtendedProperties["IsReference"] as bool? == true)
+                {
+                    gridRow.Cells[i] = new DataGridViewButtonCell
+                    {
+                        Value = "Выбрать...",
+                        UseColumnTextForButtonValue = false,
+                        FlatStyle = FlatStyle.Standard
+                    };
+                }
+            }
+
+            NavigatorDataGridView.CurrentCell = gridRow.Cells[0];
+            NavigatorDataGridView.BeginEdit(true);
         }
 
         private void ResetSorting()
@@ -224,20 +243,22 @@ namespace MiniNavigator_UI
 
             foreach (var attr in allAttributes)
             {
-                if (attr.IsVisible)
+                if (!attr.IsVisible)
+                    continue;
+
+                if (!attr.IsReference)
                 {
-                    if (!attr.IsReference)
-                    {
-                        var column = new DataColumn(attr.Name, attr.ValueType);
-                        column.ExtendedProperties["ID"] = attr.ID;
-                        table.Columns.Add(column);
-                    }
-                    else
-                    {
-                        var column = new DataColumn(attr.Name, typeof(string));
-                        column.ExtendedProperties["ID"] = attr.ID;
-                        table.Columns.Add(column);
-                    }
+                    var column = new DataColumn(attr.Name, attr.ValueType);
+                    column.ExtendedProperties["ID"] = attr.ID;
+                    column.ExtendedProperties["IsReference"] = false;
+                    table.Columns.Add(column);
+                }
+                else
+                {
+                    var column = new DataColumn(attr.Name, typeof(string));
+                    column.ExtendedProperties["ID"] = attr.ID;
+                    column.ExtendedProperties["IsReference"] = true;
+                    table.Columns.Add(column);
                 }
             }
 
@@ -293,6 +314,38 @@ namespace MiniNavigator_UI
                 NavigatorDataGridView.ClearSelection();
                 NavigatorDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Selected = true;
             }
+
+            if (!IsEditing)
+                return;
+
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+
+            var cell = NavigatorDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
+
+            if (!(cell is DataGridViewButtonCell))
+                return;
+
+            var column = NavigatorDataGridView.Columns[e.ColumnIndex];
+            var dataColumn = _table.Columns[column.DataPropertyName];
+
+            if (dataColumn?.ExtendedProperties["IsReference"] as bool? != true)
+                return;
+
+            var attributeId = (Guid)dataColumn.ExtendedProperties["ID"];
+
+            //using (var form = new ReferenceSelectForm(attributeId))
+            //{
+            //    if (form.ShowDialog() == DialogResult.OK)
+            //    {
+            //        _newRow[dataColumn.ColumnName] = form.SelectedTitle;
+
+            //        // сохраняем GUID скрыто
+            //        _newRow.SetColumnError(dataColumn, form.SelectedId.ToString());
+
+            //        cell.Value = form.SelectedTitle;
+            //    }
+            //}
         }
     }
 }

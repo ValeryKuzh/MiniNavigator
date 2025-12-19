@@ -168,19 +168,20 @@ namespace MiniNavigator_DB.Configuration
                     IsVisible = true,
                     Order = 2
                 },
+
                 new ObjectTypeAttribute
                 {
                     ObjectTypeID = userType.ID,
-                    AttributeID = ageAttribute.ID,
-                    IsRequired = false,
+                    AttributeID = roleAttribute.ID,
+                    IsRequired = true,
                     IsVisible = true,
                     Order = 3
                 },
                 new ObjectTypeAttribute
                 {
                     ObjectTypeID = userType.ID,
-                    AttributeID = roleAttribute.ID,
-                    IsRequired = true,
+                    AttributeID = ageAttribute.ID,
+                    IsRequired = false,
                     IsVisible = true,
                     Order = 4
                 },

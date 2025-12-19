@@ -140,33 +140,39 @@ namespace MiniNavigator_Services.Service
 
             var objectsOfType = _objectRepository.Query().Where(bo => bo.ObjectTypeID == ID).ToList();
 
-            var attributesOfType = await GetAttributesForTypeAsync(ID);
+            var objectTypeAttributes = await GetAttributesForTypeAsync(ID);
 
             foreach (var obj in objectsOfType)
             {
                 var attributeNameInfo = new Dictionary<Guid, ObjectAttributeDTO>();
 
-                foreach (var attr in attributesOfType)
+                foreach (var attr in objectTypeAttributes)
                 {
                     var value = _objectAttributeValueRepository
                         .Query()
-                        .Where(av => av.ObjectID == obj.ID && av.AttributeID == attr.ID)
+                        .Where(av => av.ObjectID == obj.ID && av.AttributeID == attr.Attribute.ID)
                         .FirstOrDefault();
                     if (value != null)
-                        attributeNameInfo[attr.ID] = _attributeMapper.ToDTO(value);
+                    {
+                        var valueDTO = _attributeMapper.ToDTO(value);
+                        valueDTO.IsRequired = attr.IsRequired;
+                        valueDTO.IsVisible = attr.IsVisible;
+                        valueDTO.Index = attr.Order;
+                        attributeNameInfo[attr.Attribute.ID] = valueDTO;
+                    }
                     else
-                        attributeNameInfo[attr.ID] = null;
+                        attributeNameInfo[attr.Attribute.ID] = null;
                 }
-
+            
                 result.Add(attributeNameInfo);
             }
 
             return result;
         }
 
-        private async Task<List<ObjectAttribute>> GetAttributesForTypeAsync(Guid ID)
+        private async Task<List<ObjectTypeAttribute>> GetAttributesForTypeAsync(Guid ID)
         {
-            var attributes = new List<ObjectAttribute>();
+            var attributes = new List<ObjectTypeAttribute>();
 
             var typeObject = await _objectRepository.GetByIdAsync(ID);
             if (typeObject != null)
@@ -186,7 +192,20 @@ namespace MiniNavigator_Services.Service
         public async Task CreateObjectAsync(Guid typeID, CreateObjectDTO dto)
         {
             var typeObject = await _objectRepository.GetByIdAsync(typeID);
-            var newObject = new BaseObject()
+            var attributes = (await _objectTypeRepository.GetTypeWithAttributesAsync(typeID)).Attributes;
+
+            foreach (var attribute in attributes)
+            {
+                if (attribute.IsRequired &&
+                    !dto.Attributes.ContainsKey(attribute.AttributeID))
+                {
+                    throw new ArgumentException(
+                        $"Атрибут {attribute.Attribute.Name} обязательный!"
+                    );
+                }
+            }
+
+            var newObject = new BaseObject
             {
                 ID = dto.ID,
                 ObjectType = typeObject,
@@ -196,25 +215,24 @@ namespace MiniNavigator_Services.Service
 
             await _objectRepository.AddAsync(newObject);
 
-            var attributes = (await _objectTypeRepository.GetTypeWithAttributesAsync(typeID)).Attributes;
-
             foreach (var attribute in attributes)
             {
-                if (!dto.Attributes.TryGetValue(attribute.ID, out var value))
-                    continue; // атрибут не передан — пропускаем
+                if (!dto.Attributes.TryGetValue(attribute.AttributeID, out var value))
+                    continue;
 
                 var attributeValue = new ObjectAttributeValue
                 {
                     ObjectID = newObject.ID,
                     Object = newObject,
-                    AttributeID = attribute.ID,
-                    Attribute = attribute,
+                    AttributeID = attribute.AttributeID,
+                    Attribute = attribute.Attribute,
                     Value = value.Value
                 };
 
                 await _objectAttributeValueRepository.AddAsync(attributeValue);
             }
         }
+
 
         public async Task<ObjectInfoDTO> GetObjectByIdAsync(Guid ID)
         {
@@ -224,8 +242,8 @@ namespace MiniNavigator_Services.Service
             ObjectAttributeValue titleAttribute = null;
             foreach(var attr in attributes)
             {
-                if(attr.Name == "Title")
-                    titleAttribute = await _objectAttributeValueRepository.GetByIdAsync(obj.ID, attr.ID);
+                if(attr.Attribute.Name == "Title")
+                    titleAttribute = await _objectAttributeValueRepository.GetByIdAsync(obj.ID, attr.AttributeID);
             }
             return new ObjectInfoDTO()
             {

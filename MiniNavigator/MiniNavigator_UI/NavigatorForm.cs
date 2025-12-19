@@ -217,24 +217,27 @@ namespace MiniNavigator_UI
                 .Where(attr => attr != null && !string.IsNullOrWhiteSpace(attr.Name))
                 .GroupBy(attr => attr.ID)
                 .Select(g => g.First())
-                .OrderBy(attr => attr.Name, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(attr => attr.Index)
                 .ToList();
 
             table.ExtendedProperties["typeID"] = typeID;
 
             foreach (var attr in allAttributes)
             {
-                if(!attr.IsReference)
+                if (attr.IsVisible)
                 {
-                    var column = new DataColumn(attr.Name, attr.ValueType);
-                    column.ExtendedProperties["ID"] = attr.ID;
-                    table.Columns.Add(column);
-                }
-                else
-                {
-                    var column = new DataColumn(attr.Name, typeof(string));
-                    column.ExtendedProperties["ID"] = attr.ID;
-                    table.Columns.Add(column);
+                    if (!attr.IsReference)
+                    {
+                        var column = new DataColumn(attr.Name, attr.ValueType);
+                        column.ExtendedProperties["ID"] = attr.ID;
+                        table.Columns.Add(column);
+                    }
+                    else
+                    {
+                        var column = new DataColumn(attr.Name, typeof(string));
+                        column.ExtendedProperties["ID"] = attr.ID;
+                        table.Columns.Add(column);
+                    }
                 }
             }
 
@@ -244,7 +247,7 @@ namespace MiniNavigator_UI
 
                 foreach (var attr in rowData.Values)
                 {
-                    if (attr == null) continue;
+                    if (attr == null || !attr.IsVisible) continue;
 
                     if (attr.ValueType == typeof(Guid))
                     {
@@ -266,7 +269,7 @@ namespace MiniNavigator_UI
             NavigatorDataGridView.DataSource = table;
             NavigatorDataGridView.ReadOnly = false;
             NavigatorDataGridView.AllowUserToAddRows = false;
-
+            SetTableReadonlyProperty();
         }
 
         /// <summary>

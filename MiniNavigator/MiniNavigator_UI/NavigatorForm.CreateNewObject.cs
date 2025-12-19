@@ -165,7 +165,18 @@ namespace MiniNavigator_UI
             // Здесь можно отправить данные на сервис
             CreateObjectDTO newObject = CreateNewObjectDTO();
 
-            await _objectService.CreateObjectAsync((Guid)typeId, newObject);
+            try
+            {
+                await _objectService.CreateObjectAsync((Guid)typeId, newObject);
+            }
+            catch (ArgumentException ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (_newRow != null)
+                {
+                    _table.Rows.Remove(_newRow);
+                }
+            }
 
             _newRow = null;
 

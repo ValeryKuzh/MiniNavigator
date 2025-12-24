@@ -17,6 +17,12 @@ namespace MiniNavigator_DB.Model
         public string Name { get; set; }
         
         public bool IsReference { get; set; }
+        public Guid? ReferenceObjectTypeID { get; set; }
+
+        [ForeignKey("ReferenceObjectTypeID")]
+        public ObjectType ReferenceObjectType { get; set; }
+
+
         public string ValueType { get; set; }
 
         [NotMapped]

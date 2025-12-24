@@ -1,0 +1,28 @@
+﻿using MiniNavigator_DB.Context;
+using MiniNavigator_DB.Model;
+using System;
+using System.Data.Entity;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace MiniNavigator_DB.Repository
+{
+    public class ObjectAttributeRepository : EntityFrameworkRepository<ObjectAttribute>, IObjectAttributeRepository
+    {
+        private readonly MiniNavigatorDbContext _context;
+        public ObjectAttributeRepository(MiniNavigatorDbContext context) : base(context)
+        {
+            _context = context;
+        }
+
+        public async Task<ObjectAttribute> GetAttributeWithObjectTypesAsync(Guid attributeId)
+        {
+            return await _context.ObjectAttributes
+                .Include(a => a.ObjectTypes)
+                .Include(a => a.ObjectTypes.Select(ota => ota.ObjectType))
+                .Include(a => a.ObjectTypes.Select(ota => ota.ObjectType.Base))
+                .Include(a => a.ReferenceObjectType)
+                .FirstOrDefaultAsync(a => a.ID == attributeId);
+        }
+    }
+}

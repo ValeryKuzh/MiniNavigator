@@ -6,8 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MiniNavigator_DB.Repository.ObjectAttributeValueRepository
-{
+namespace MiniNavigator_DB.Repository 
+{ 
     public class ObjectAttributeValueRepository : EntityFrameworkRepository<ObjectAttributeValue>, IObjectAttributeValueRepository
     {
         private readonly MiniNavigatorDbContext _context;

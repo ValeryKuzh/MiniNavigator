@@ -96,11 +96,15 @@
     <Compile Include="Migrations\202512181927598_SeedAndUIChanges.Designer.cs">
       <DependentUpon>202512181927598_SeedAndUIChanges.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202512241959321_Add_ReferenceType_to_ObjectAttribute.cs" />
+    <Compile Include="Migrations\202512241959321_Add_ReferenceType_to_ObjectAttribute.Designer.cs">
+      <DependentUpon>202512241959321_Add_ReferenceType_to_ObjectAttribute.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Model\AttributeKind.cs" />
-    <Compile Include="Model\AttributeValuePair.cs" />
     <Compile Include="Model\ObjectAttributeValue.cs" />
     <Compile Include="Model\ObjectTypeAttribute.cs" />
+    <Compile Include="Repository\ObjectAttributeRepository\IObjectAttributeRepository.cs" />
+    <Compile Include="Repository\ObjectAttributeRepository\ObjectAttributeRepository.cs" />
     <Compile Include="Repository\ObjectAttributeValueRepository\IObjectAttributeValueRepository.cs" />
     <Compile Include="Repository\ObjectAttributeValueRepository\ObjectAttributeValueRepository.cs" />
     <Compile Include="Repository\ObjectTypeRepository\IObjectTypeRepository.cs" />
@@ -145,6 +149,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202512181927598_SeedAndUIChanges.resx">
       <DependentUpon>202512181927598_SeedAndUIChanges.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202512241959321_Add_ReferenceType_to_ObjectAttribute.resx">
+      <DependentUpon>202512241959321_Add_ReferenceType_to_ObjectAttribute.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

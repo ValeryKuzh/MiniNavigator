@@ -80,6 +80,15 @@ namespace MiniNavigator_DB.Configuration
                 Base = roleAObject
             };
 
+            var roleBObject = CreateNewObject(roleTypeObject);
+            var roleB = new ObjectRole
+            {
+                ID = Guid.NewGuid(),
+                Base_ID = roleBObject.ID,
+                Base = roleBObject
+            };
+
+
             var userAObject = CreateNewObject(userTypeObject);
             var userA = new ObjectUser
             {
@@ -139,6 +148,8 @@ namespace MiniNavigator_DB.Configuration
                 Base = roleAttrObject,
                 Name = "Role",
                 IsReference = true,
+                ReferenceObjectType = roleType,
+                ReferenceObjectTypeID = roleType.ID,
                 ValueType = typeof(Guid).ToString()
             };
 
@@ -168,7 +179,6 @@ namespace MiniNavigator_DB.Configuration
                     IsVisible = true,
                     Order = 2
                 },
-
                 new ObjectTypeAttribute
                 {
                     ObjectTypeID = userType.ID,
@@ -233,6 +243,14 @@ namespace MiniNavigator_DB.Configuration
                     Attribute = titleAttribute,
                     AttributeID = titleAttribute.ID,
                     Value = "Admin"
+                },
+                new ObjectAttributeValue
+                {
+                    Object = roleBObject,
+                    ObjectID = roleBObject.ID,
+                    Attribute = titleAttribute,
+                    AttributeID = titleAttribute.ID,
+                    Value = "Manager"
                 },
                 new ObjectAttributeValue
                 {

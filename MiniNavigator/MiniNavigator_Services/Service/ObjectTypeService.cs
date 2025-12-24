@@ -34,5 +34,10 @@ namespace MiniNavigator_Services.Service
             }
             return types;
         }
+
+        public async Task<ObjectTypeDTO> GetTypeByIDAsync(Guid typeID)
+        {
+            return _objectTypeMapper.ToDTO(await _objectTypeRepository.GetByIdAsync(typeID));
+        } 
     }
 }

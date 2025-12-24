@@ -1,12 +1,13 @@
 ﻿using MiniNavigator_DB.Model;
+using MiniNavigator_DB.Repository;
 using MiniNavigator_DB.Repository.Interface;
-using MiniNavigator_DB.Repository.ObjectAttributeValueRepository;
 using MiniNavigator_Services.DTO;
 using MiniNavigator_Services.Mapper.Interface;
 using MiniNavigator_Services.Service.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 
 namespace MiniNavigator_Services.Service
@@ -20,6 +21,8 @@ namespace MiniNavigator_Services.Service
         private readonly IMapper<ObjectAttributeDTO, ObjectAttributeValue> _attributeMapper;
 
         private readonly IRepository<BaseObject> _objectRepository;
+        private readonly IObjectAttributeRepository _objectAttributeRepository;
+        private readonly IRepository<ObjectTypeAttribute> _objectTypeAttributeRepository;
         private readonly IObjectTypeRepository _objectTypeRepository;
         private readonly IObjectAttributeValueRepository _objectAttributeValueRepository;
 
@@ -30,8 +33,10 @@ namespace MiniNavigator_Services.Service
             IMapper<ObjectActionDTO, ObjectAction> actionMapper,
             IMapper<ObjectAttributeDTO, ObjectAttributeValue> attributeMapper,
 
-            IObjectTypeRepository objectTypeRepository,
             IRepository<BaseObject> objectRepository,
+            IObjectAttributeRepository objectAttributeRepository,
+            IRepository<ObjectTypeAttribute> objectTypeAttributeRepository,
+            IObjectTypeRepository objectTypeRepository,
             IObjectAttributeValueRepository objectAttributeValueRepository)
         {
             _objectTypeService = objectTypeService;
@@ -39,9 +44,11 @@ namespace MiniNavigator_Services.Service
             _objectMapper = objectMapper;
             _actionMapper = actionMapper;
             _attributeMapper = attributeMapper;
-            
-            _objectTypeRepository = objectTypeRepository;
+
             _objectRepository = objectRepository;
+            _objectAttributeRepository = objectAttributeRepository;
+            _objectTypeAttributeRepository = objectTypeAttributeRepository;
+            _objectTypeRepository = objectTypeRepository;
             _objectAttributeValueRepository = objectAttributeValueRepository;
         }
 
@@ -130,10 +137,10 @@ namespace MiniNavigator_Services.Service
         }
 
         /// <summary>
-        /// 
+        /// Получает список объектов с атрибутами определенного типа
         /// </summary>
-        /// <param name="ID"></param>
-        /// <returns></returns>
+        /// <param name="ID">ID типа</param>
+        /// <returns>Список объектов</returns>
         public async Task<List<Dictionary<Guid, ObjectAttributeDTO>>> GetTableData(Guid ID)
         {
             var result = new List<Dictionary<Guid, ObjectAttributeDTO>>();
@@ -170,6 +177,11 @@ namespace MiniNavigator_Services.Service
             return result;
         }
 
+        /// <summary>
+        /// Получение списка атрибутов конктретного объекта 
+        /// </summary>
+        /// <param name="ID">ID объекта</param>
+        /// <returns>Список атрибутов</returns>
         private async Task<List<ObjectTypeAttribute>> GetAttributesForTypeAsync(Guid ID)
         {
             var attributes = new List<ObjectTypeAttribute>();
@@ -189,6 +201,12 @@ namespace MiniNavigator_Services.Service
             return attributes;
         }
 
+        /// <summary>
+        /// Создает новый объект в системе со всеми атрибутами
+        /// </summary>
+        /// <param name="typeID">ID типа</param>
+        /// <param name="dto">DTO для создания объекта</param>
+        /// <exception cref="ArgumentException">Если не передан обязательный атрибут</exception>
         public async Task CreateObjectAsync(Guid typeID, CreateObjectDTO dto)
         {
             var typeObject = await _objectRepository.GetByIdAsync(typeID);
@@ -233,8 +251,12 @@ namespace MiniNavigator_Services.Service
             }
         }
 
-
-        public async Task<ObjectInfoDTO> GetObjectByIdAsync(Guid ID)
+        /// <summary>
+        /// Получает Title объекта для отображения списка
+        /// </summary>
+        /// <param name="ID">ID объекта</param>
+        /// <returns>Объект с информацией об объекте</returns>
+        public async Task<ObjectInfoDTO> GetObjectInfoByIdAsync(Guid ID)
         {
             var obj = await _objectRepository.GetByIdAsync(ID);
             
@@ -250,7 +272,64 @@ namespace MiniNavigator_Services.Service
                 ID = obj.ID,
                 Title = titleAttribute.Value
             };
-        
+        }
+
+        /// <summary>
+        /// Получает список информации об объектах  
+        /// </summary>
+        /// <param name="attributeId">ID атрибута</param>
+        /// <returns>Список объектов</returns>
+        public async Task<List<ObjectInfoDTO>> GetReferenceObjectInfosByAttribute(Guid attributeID)
+        {
+            var attribute = await _objectAttributeRepository
+                .GetAttributeWithObjectTypesAsync(attributeID);
+
+            if (attribute?.ReferenceObjectType == null)
+                return new List<ObjectInfoDTO>();
+
+            // получаем все объекты нужного типа
+            var objects = _objectRepository.Query()
+                .Where(o => o.ObjectTypeID == attribute.ReferenceObjectType.Base_ID)
+                .ToList();
+
+            var result = new List<ObjectInfoDTO>();
+
+            foreach (var obj in objects)
+            {
+                var title = await BuildObjectTitleAsync(obj);
+
+                result.Add(new ObjectInfoDTO
+                {
+                    ID = obj.ID,
+                    Title = title
+                });
+            }
+
+            return result;
+        }
+
+        private async Task<string> BuildObjectTitleAsync(BaseObject obj)
+        {
+            var type = await _objectTypeRepository
+                .GetTypeWithAttributesAsync(obj.ObjectTypeID.Value);
+
+            var requiredAttrs = type.Attributes
+                .Where(a => a.IsRequired)
+                .OrderBy(a => a.Order)
+                .ToList();
+
+            var values = _objectAttributeValueRepository
+                .Query()
+                .Where(v => v.ObjectID == obj.ID)
+                .ToList();
+
+            var parts = requiredAttrs
+                .Select(a => values.FirstOrDefault(v => v.AttributeID == a.AttributeID)?.Value)
+                .Where(v => !string.IsNullOrWhiteSpace(v));
+
+            return parts.Any()
+                ? string.Join(" ", parts)
+                : "(без названия)";
         }
     }
 }

@@ -1,7 +1,8 @@
-﻿using System;
+﻿using MiniNavigator_DB.Model;
+using MiniNavigator_Services.DTO;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MiniNavigator_Services.DTO;
 
 namespace MiniNavigator_Services.Service.Interface
 {
@@ -11,6 +12,7 @@ namespace MiniNavigator_Services.Service.Interface
         Task<NavObjectDTO> GetTreeOfObjectsAsync();
         Task<List<Dictionary<Guid, ObjectAttributeDTO>>> GetTableData(Guid ID);
         Task CreateObjectAsync(Guid typeID, CreateObjectDTO dto);
-        Task<ObjectInfoDTO> GetObjectByIdAsync(Guid ID);
+        Task<ObjectInfoDTO> GetObjectInfoByIdAsync(Guid typeID);
+        Task<List<ObjectInfoDTO>> GetReferenceObjectInfosByAttribute(Guid attributeID);
     }
 }

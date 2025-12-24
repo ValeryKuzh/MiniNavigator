@@ -8,5 +8,6 @@ namespace MiniNavigator_Services.Service.Interface
     public interface IObjectTypeService
     {
         Task<List<ObjectTypeDTO>> GetAllTypesAsync();
+        Task<ObjectTypeDTO> GetTypeByIDAsync(Guid typeID);
     }
 }

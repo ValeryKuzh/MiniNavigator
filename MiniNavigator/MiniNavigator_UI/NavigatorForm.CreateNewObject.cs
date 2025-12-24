@@ -143,47 +143,52 @@ namespace MiniNavigator_UI
             if (_newRow == null)
                 return;
 
-            // Завершаем редактирование
             NavigatorDataGridView.EndEdit();
-            NavigatorDataGridView.CurrentCell = null;
 
-            if (!_validationService.ValidateTypesForRow(_newRow, _table, out string error))
-            {
-                MessageBox.Show(error, "Ошибка валидации", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            int rowIndex = _table.Rows.IndexOf(_newRow);
-            var gridRow = NavigatorDataGridView.Rows[rowIndex];
-
-            // Фиксируем строку
-            gridRow.ReadOnly = true;
-            foreach (DataGridViewCell cell in gridRow.Cells)
-                cell.ReadOnly = true;
-
-            var typeId = _table.ExtendedProperties["typeID"];
-            // Здесь можно отправить данные на сервис
+            var typeId = (Guid)_table.ExtendedProperties["TypeID"];
             CreateObjectDTO newObject = CreateNewObjectDTO();
 
             try
             {
-                await _objectService.CreateObjectAsync((Guid)typeId, newObject);
+                // ВСЯ валидация обязательных атрибутов происходит ТУТ
+                await _objectService.CreateObjectAsync(typeId, newObject);
             }
             catch (ArgumentException ex)
             {
+                // Обязательные атрибуты не заполнены
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                // Возвращаем редактирование
+                IsEditing = true;
+                SetTableReadonlyProperty();
+                ShowControls();
+
+                return;
+            }
+            catch (Exception ex)
+            {
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                if (_newRow != null)
-                {
-                    _table.Rows.Remove(_newRow);
-                }
+
+                IsEditing = true;
+                SetTableReadonlyProperty();
+                ShowControls();
+
+                return;
             }
 
-            _newRow = null;
+            // ✅ ТОЛЬКО ТУТ фиксируем строку
+            int rowIndex = _table.Rows.IndexOf(_newRow);
+            var gridRow = NavigatorDataGridView.Rows[rowIndex];
 
+            gridRow.ReadOnly = true;
+            foreach (DataGridViewCell cell in gridRow.Cells)
+                cell.ReadOnly = true;
+
+            _newRow = null;
             IsEditing = false;
+
             SetTableReadonlyProperty();
             ChangeSortMode(IsEditing);
-
             HideControls();
         }
 
@@ -221,17 +226,36 @@ namespace MiniNavigator_UI
                     continue;
 
                 var attributeId = (Guid)column.ExtendedProperties["ID"];
+                var isReference = column.ExtendedProperties["IsReference"] as bool? == true;
                 var value = _newRow[column];
 
                 if (value == DBNull.Value || value == null)
                     continue;
+
+                string finalValue;
+
+                if (isReference)
+                {
+                    // Для ссылочного атрибута берем GUID объекта из ColumnError
+                    var guidString = _newRow.GetColumnError(column);
+                    if (string.IsNullOrWhiteSpace(guidString))
+                    {
+                        MessageBox.Show($"Не выбран объект для ссылки {column.ColumnName}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        continue;
+                    }
+                    finalValue = guidString;
+                }
+                else
+                {
+                    finalValue = value.ToString();
+                }
 
                 result[attributeId] = new ObjectAttributeDTO
                 {
                     ID = attributeId,
                     Name = column.ColumnName,
                     ValueType = column.DataType,
-                    Value = value.ToString()
+                    Value = finalValue
                 };
             }
 

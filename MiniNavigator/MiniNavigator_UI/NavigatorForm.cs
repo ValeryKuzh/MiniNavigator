@@ -61,6 +61,11 @@ namespace MiniNavigator_UI
             if (string.IsNullOrWhiteSpace(value))
                 return;
 
+            var isReference = _table.Columns[column.DataPropertyName].ExtendedProperties["IsReference"] as bool? ?? false;
+
+            if (isReference)
+                return;
+
             string error;
             bool valid = _validationService.ValidateSingleValue(
                 value,
@@ -74,7 +79,6 @@ namespace MiniNavigator_UI
                 MessageBox.Show(error, "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
 
         private void NavigatorDataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
@@ -199,12 +203,14 @@ namespace MiniNavigator_UI
 
                 if (dataColumn.ExtendedProperties["IsReference"] as bool? == true)
                 {
-                    gridRow.Cells[i] = new DataGridViewButtonCell
+                    var btnCell = new DataGridViewButtonCell
                     {
-                        Value = "Выбрать...",
                         UseColumnTextForButtonValue = false,
+                        Value = "Выбрать...",
                         FlatStyle = FlatStyle.Standard
                     };
+
+                    gridRow.Cells[i] = btnCell;
                 }
             }
 
@@ -239,7 +245,7 @@ namespace MiniNavigator_UI
                 .OrderBy(attr => attr.Index)
                 .ToList();
 
-            table.ExtendedProperties["typeID"] = typeID;
+            table.ExtendedProperties["TypeID"] = typeID;
 
             foreach (var attr in allAttributes)
             {
@@ -251,6 +257,7 @@ namespace MiniNavigator_UI
                     var column = new DataColumn(attr.Name, attr.ValueType);
                     column.ExtendedProperties["ID"] = attr.ID;
                     column.ExtendedProperties["IsReference"] = false;
+                    column.ExtendedProperties["IsRequired"] = attr.IsRequired;
                     table.Columns.Add(column);
                 }
                 else
@@ -258,6 +265,7 @@ namespace MiniNavigator_UI
                     var column = new DataColumn(attr.Name, typeof(string));
                     column.ExtendedProperties["ID"] = attr.ID;
                     column.ExtendedProperties["IsReference"] = true;
+                    column.ExtendedProperties["IsRequired"] = attr.IsRequired;
                     table.Columns.Add(column);
                 }
             }
@@ -272,7 +280,7 @@ namespace MiniNavigator_UI
 
                     if (attr.ValueType == typeof(Guid))
                     {
-                        var obj = await _objectService.GetObjectByIdAsync(Guid.Parse(attr.Value));
+                        var obj = await _objectService.GetObjectInfoByIdAsync(Guid.Parse(attr.Value));
                         row[attr.Name] = obj?.Title ?? "(Не выбран)";
                     }
                     else
@@ -333,19 +341,19 @@ namespace MiniNavigator_UI
                 return;
 
             var attributeId = (Guid)dataColumn.ExtendedProperties["ID"];
+            var typeId = (Guid)_table.ExtendedProperties["TypeID"];
 
-            //using (var form = new ReferenceSelectForm(attributeId))
-            //{
-            //    if (form.ShowDialog() == DialogResult.OK)
-            //    {
-            //        _newRow[dataColumn.ColumnName] = form.SelectedTitle;
+            using (var form = new ReferenceSelectForm(attributeId, _objectService))
+            {
+                if (form.ShowDialog() == DialogResult.OK)
+                {
+                    _newRow[dataColumn.ColumnName] = form.SelectedTitle;
+                    
+                    _newRow.SetColumnError(dataColumn, form.SelectedID.ToString());
 
-            //        // сохраняем GUID скрыто
-            //        _newRow.SetColumnError(dataColumn, form.SelectedId.ToString());
-
-            //        cell.Value = form.SelectedTitle;
-            //    }
-            //}
+                    cell.Value = form.SelectedTitle;
+                }
+            }
         }
     }
 }

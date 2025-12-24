@@ -78,6 +78,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReferenceSelectForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReferenceSelectForm.Designer.cs">
+      <DependentUpon>ReferenceSelectForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Service\IValidationService.cs" />
     <Compile Include="Service\ValidationService.cs" />
     <Compile Include="ViewModel\NavObjectViewModel.cs" />
@@ -94,6 +100,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="ReferenceSelectForm.resx">
+      <DependentUpon>ReferenceSelectForm.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\DataSources\MiniNavigator_UI.DTO.NavObjectDTO.datasource" />
     <None Include="Properties\Settings.settings">

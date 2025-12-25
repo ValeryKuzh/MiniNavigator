@@ -7,8 +7,6 @@ using MiniNavigator_UI.Mapper.Interface;
 using MiniNavigator_UI.Service;
 using MiniNavigator_UI.ViewModel;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -348,10 +346,9 @@ namespace MiniNavigator_UI
                 if (form.ShowDialog() == DialogResult.OK)
                 {
                     _newRow[dataColumn.ColumnName] = form.SelectedTitle;
-                    
-                    _newRow.SetColumnError(dataColumn, form.SelectedID.ToString());
 
                     cell.Value = form.SelectedTitle;
+                    cell.Tag = form.SelectedID;
                 }
             }
         }

@@ -176,13 +176,26 @@ namespace MiniNavigator_UI
                 return;
             }
 
-            // ✅ ТОЛЬКО ТУТ фиксируем строку
             int rowIndex = _table.Rows.IndexOf(_newRow);
             var gridRow = NavigatorDataGridView.Rows[rowIndex];
 
             gridRow.ReadOnly = true;
             foreach (DataGridViewCell cell in gridRow.Cells)
                 cell.ReadOnly = true;
+
+            for (int i = 0; i < gridRow.Cells.Count; i++)
+            {
+                if (gridRow.Cells[i] is DataGridViewButtonCell btnCell)
+                {
+                    var textCell = new DataGridViewTextBoxCell
+                    {
+                        Value = btnCell.Value
+                    };  
+
+                    gridRow.Cells[i] = textCell;
+                    textCell.ReadOnly = true;
+                }
+            }
 
             _newRow = null;
             IsEditing = false;
@@ -220,6 +233,12 @@ namespace MiniNavigator_UI
         {
             var result = new Dictionary<Guid, ObjectAttributeDTO>();
 
+            int rowIndex = _table.Rows.IndexOf(_newRow);
+            if (rowIndex < 0)
+                return result;
+
+            var gridRow = NavigatorDataGridView.Rows[rowIndex];
+
             foreach (DataColumn column in _table.Columns)
             {
                 if (!column.ExtendedProperties.ContainsKey("ID"))
@@ -227,26 +246,31 @@ namespace MiniNavigator_UI
 
                 var attributeId = (Guid)column.ExtendedProperties["ID"];
                 var isReference = column.ExtendedProperties["IsReference"] as bool? == true;
-                var value = _newRow[column];
-
-                if (value == DBNull.Value || value == null)
-                    continue;
 
                 string finalValue;
 
                 if (isReference)
                 {
-                    // Для ссылочного атрибута берем GUID объекта из ColumnError
-                    var guidString = _newRow.GetColumnError(column);
-                    if (string.IsNullOrWhiteSpace(guidString))
+                    var cell = gridRow.Cells[column.ColumnName];
+
+                    if (cell.Tag == null)
                     {
-                        MessageBox.Show($"Не выбран объект для ссылки {column.ColumnName}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(
+                            $"Не выбран объект для ссылки {column.ColumnName}",
+                            "Ошибка",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
                         continue;
                     }
-                    finalValue = guidString;
+
+                    finalValue = ((Guid)cell.Tag).ToString();
                 }
                 else
                 {
+                    var value = _newRow[column];
+                    if (value == DBNull.Value || value == null)
+                        continue;
+
                     finalValue = value.ToString();
                 }
 
@@ -261,7 +285,6 @@ namespace MiniNavigator_UI
 
             return result;
         }
-
 
         private void SetTableReadonlyProperty()
         {

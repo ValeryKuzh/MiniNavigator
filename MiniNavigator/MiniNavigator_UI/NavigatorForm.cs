@@ -1,17 +1,18 @@
 ﻿using Infralution.Controls.VirtualTree;
 using MiniNavigator_Services.DTO;
-using MiniNavigator_Services.Service;
 using MiniNavigator_Services.Service.Interface;
-using MiniNavigator_UI.Mapper;
 using MiniNavigator_UI.Mapper.Interface;
 using MiniNavigator_UI.Service;
 using MiniNavigator_UI.ViewModel;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 namespace MiniNavigator_UI
 {
@@ -25,7 +26,10 @@ namespace MiniNavigator_UI
 
         private NavObjectViewModel _treeOfObjects = new NavObjectViewModel();
 
-        private DataTable _table;
+        private BindingList<DynamicObjectRow> _rows;
+        private List<ObjectAttributeViewModel> _attributes;
+        private Guid _currentTypeId;
+
 
         public NavigatorForm(
             IObjectService objectService,
@@ -45,38 +49,93 @@ namespace MiniNavigator_UI
             NavigatorDataGridView.CellClick += NavigatorDataGridView_CellClick;
             NavigatorDataGridView.ColumnHeaderMouseClick += NavigatorDataGridView_ColumnHeaderMouseClick;
             NavigatorDataGridView.CellValidating += NavigatorDataGridView_CellValidating;
+            NavigatorDataGridView.CellPainting += NavigatorDataGridView_CellPainting;
 
             this.Load += NavigatorForm_Load;
         }
 
-        private void NavigatorDataGridView_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
+        private void NavigatorDataGridView_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
-            if (!IsEditing) return;
-
-            var column = NavigatorDataGridView.Columns[e.ColumnIndex];
-            var value = e.FormattedValue?.ToString();
-
-            if (string.IsNullOrWhiteSpace(value))
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
                 return;
 
-            var isReference = _table.Columns[column.DataPropertyName].ExtendedProperties["IsReference"] as bool? ?? false;
+            var column = NavigatorDataGridView.Columns[e.ColumnIndex];
+            var attr = column.Tag as ObjectAttributeViewModel;
 
-            if (isReference)
+            if (attr == null || !attr.IsReference)
+                return;
+
+            var row = _rows[e.RowIndex];
+
+            if (row != _editingRow || !IsEditing)
+            {
+                e.Handled = true;
+                e.PaintBackground(e.CellBounds, true);
+                e.PaintContent(e.CellBounds);
+                return;
+            }
+
+            e.Handled = true;
+            e.PaintBackground(e.CellBounds, true);
+
+            var text = row.Attributes[attr.ID].Value;
+            if (string.IsNullOrWhiteSpace(text))
+                text = "Выбрать...";
+
+            var rect = new Rectangle(
+                e.CellBounds.X + 2,
+                e.CellBounds.Y + 2,
+                e.CellBounds.Width - 4,
+                e.CellBounds.Height - 4
+            );
+
+            ButtonRenderer.DrawButton(
+                e.Graphics,
+                rect,
+                text,
+                NavigatorDataGridView.Font,
+                false,
+                PushButtonState.Normal
+            );
+        }
+
+        private void NavigatorDataGridView_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
+        {
+            if (!IsEditing || e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+
+            var column = NavigatorDataGridView.Columns[e.ColumnIndex];
+
+            var attr = column.Tag as ObjectAttributeViewModel;
+            if (attr == null)
+                return;
+
+            // Ссылочные атрибуты не валидируем
+            if (attr.IsReference)
+                return;
+
+            var value = e.FormattedValue?.ToString();
+            if (string.IsNullOrWhiteSpace(value))
                 return;
 
             string error;
             bool valid = _validationService.ValidateSingleValue(
                 value,
-                column.ValueType,
+                attr.ValueType,
                 out error
             );
 
             if (!valid)
             {
                 e.Cancel = true;
-                MessageBox.Show(error, "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    error,
+                    "Ошибка ввода",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
+
 
         private void NavigatorDataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
@@ -150,7 +209,7 @@ namespace MiniNavigator_UI
 
         private async Task ShowContextMenuAsync(NavObjectViewModel navObjectViewModel, Point location)
         {
-            var actions = await _objectService.GetActionsForObject(navObjectViewModel.ID);
+            var actions = await _objectService.GetActionsForTypeObject(navObjectViewModel.ID);
 
             ContextMenuStrip menu = new ContextMenuStrip();
             foreach (var action in actions)
@@ -165,149 +224,330 @@ namespace MiniNavigator_UI
 
         private void ItemAdd_Click(object sender, EventArgs e)
         {
-            if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectViewModel && _table != null)
+            if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel && _rows != null)
             {
                 ResetSorting();
                 SetTableReadonlyProperty();
 
-                // Добавление новой строки и кнопок для ссылочных колонок
-                AddNewRowWithButtons();
+                AddNewRow();
 
-                IsEditing = true;                    // Переключаем режим редактирования
-                RestrictGridDuringCreation();        // Ограничиваем сетку при создании
-                InitializeCreateNewObject();         // Инициализация объекта для новой строки
-                ShowControls();                      // Отображаем дополнительные элементы управления
+                IsEditing = true;
+                InitializeCreateNewObject();
+                ShowControls();
             }
         }
 
-        private void AddNewRowWithButtons()
+
+        private void AddNewRow()
         {
-            if (_table == null) return;
+            var row = new DynamicObjectRow();
 
-            _newRow = _table.NewRow();
-            foreach (DataColumn col in _table.Columns)
-                _newRow[col.ColumnName] = DBNull.Value;
-
-            _table.Rows.Add(_newRow);
-            int rowIndex = _table.Rows.IndexOf(_newRow);
-
-            var gridRow = NavigatorDataGridView.Rows[rowIndex];
-            gridRow.ReadOnly = false;
-
-            for (int i = 0; i < gridRow.Cells.Count; i++)
+            foreach (var attr in _attributes)
             {
-                var column = NavigatorDataGridView.Columns[i];
-                var dataColumn = _table.Columns[column.DataPropertyName];
-
-                if (dataColumn.ExtendedProperties["IsReference"] as bool? == true)
+                row.Attributes[attr.ID] = new ObjectAttributeViewModel
                 {
-                    var btnCell = new DataGridViewButtonCell
-                    {
-                        UseColumnTextForButtonValue = false,
-                        Value = "Выбрать...",
-                        FlatStyle = FlatStyle.Standard
-                    };
-
-                    gridRow.Cells[i] = btnCell;
-                }
+                    ID = attr.ID,
+                    Name = attr.Name,
+                    ValueType = attr.ValueType,
+                    IsReference = attr.IsReference,
+                    IsRequired = attr.IsRequired,
+                    Value = null
+                };
             }
 
-            NavigatorDataGridView.CurrentCell = gridRow.Cells[0];
+            _rows.Add(row);
+            _editingRow = row;
+
+            int lastRowIndex = NavigatorDataGridView.Rows.Count - 1;
+            if (lastRowIndex >= 0)
+            {
+                NavigatorDataGridView.CurrentCell =
+                    NavigatorDataGridView.Rows[lastRowIndex].Cells[0];
+            }
+
             NavigatorDataGridView.BeginEdit(true);
         }
 
         private void ResetSorting()
         {
-            if (NavigatorDataGridView.DataSource is DataTable table)
-            {
-                table.DefaultView.Sort = string.Empty;
-            }
-
             foreach (DataGridViewColumn col in NavigatorDataGridView.Columns)
             {
                 col.SortMode = DataGridViewColumnSortMode.NotSortable;
             }
         }
 
-        private async Task BindTableAsync(Guid typeID)
+
+        /// <summary>
+        /// Биндинг объектов системы на DataGridView
+        /// </summary>
+        /// <param name="typeId">Тип объектов</param>
+        private async Task BindTableAsync(Guid typeId)
         {
-            var tableData = await _objectService.GetTableData(typeID);
+            _currentTypeId = typeId;
 
-            var table = new DataTable();
+            var tableData = await _objectService.GetTableData(typeId);
 
-            var allAttributes = tableData
-                .SelectMany(row => row.Values)
-                .Where(attr => attr != null && !string.IsNullOrWhiteSpace(attr.Name))
-                .GroupBy(attr => attr.ID)
-                .Select(g => g.First())
-                .OrderBy(attr => attr.Index)
-                .ToList();
+            _attributes = ExtractAttributes(tableData);
 
-            table.ExtendedProperties["TypeID"] = typeID;
+            ConfigureGrid();
 
-            foreach (var attr in allAttributes)
-            {
-                if (!attr.IsVisible)
-                    continue;
+            CreateColumns(_attributes);
 
-                if (!attr.IsReference)
-                {
-                    var column = new DataColumn(attr.Name, attr.ValueType);
-                    column.ExtendedProperties["ID"] = attr.ID;
-                    column.ExtendedProperties["IsReference"] = false;
-                    column.ExtendedProperties["IsRequired"] = attr.IsRequired;
-                    table.Columns.Add(column);
-                }
-                else
-                {
-                    var column = new DataColumn(attr.Name, typeof(string));
-                    column.ExtendedProperties["ID"] = attr.ID;
-                    column.ExtendedProperties["IsReference"] = true;
-                    column.ExtendedProperties["IsRequired"] = attr.IsRequired;
-                    table.Columns.Add(column);
-                }
-            }
+            _rows = await CreateRowsAsync(tableData);
 
-            foreach (var rowData in tableData)
-            {
-                var row = table.NewRow();
+            BindGrid(_rows);
 
-                foreach (var attr in rowData.Values)
-                {
-                    if (attr == null || !attr.IsVisible) continue;
-
-                    if (attr.ValueType == typeof(Guid))
-                    {
-                        var obj = await _objectService.GetObjectInfoByIdAsync(Guid.Parse(attr.Value));
-                        row[attr.Name] = obj?.Title ?? "(Не выбран)";
-                    }
-                    else
-                    {
-                        row[attr.Name] = attr.Value ?? string.Empty;
-                    }
-                }
-
-                table.Rows.Add(row);
-            }
-
-            _table = table;
-
-            NavigatorDataGridView.AutoGenerateColumns = true;
-            NavigatorDataGridView.DataSource = table;
-            NavigatorDataGridView.ReadOnly = false;
-            NavigatorDataGridView.AllowUserToAddRows = false;
-            SetTableReadonlyProperty();
+            IsEditing = false;
         }
 
         /// <summary>
-        /// Обработчик для выделения всей строки
+        /// Маппит Полученные атрибуты из сервиса на ViewModel объекты
         /// </summary>
-        private void NavigatorDataGridView_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        /// <param name="tableData">Список объектов из сервиса</param>
+        /// <returns>Список ViewModel объектов</returns>
+        private List<ObjectAttributeViewModel> ExtractAttributes(List<Dictionary<Guid, ObjectAttributeDTO>> tableData)
+        {
+            return tableData
+                .SelectMany(dict => dict.Values)
+                .Where(a => a != null && a.IsVisible && !string.IsNullOrWhiteSpace(a.Name))
+                .GroupBy(a => a.ID)
+                .Select(g => g.First())
+                .OrderBy(a => a.Index)
+                .Select(a => new ObjectAttributeViewModel
+                {
+                    ID = a.ID,
+                    Name = a.Name,
+                    ValueType = a.ValueType,
+                    IsReference = a.IsReference,
+                    IsRequired = a.IsRequired
+                })
+                .ToList();
+        }
+
+        /// <summary>
+        /// Конфигурация DataGridView
+        /// </summary>
+        private void ConfigureGrid()
+        {
+            NavigatorDataGridView.AutoGenerateColumns = false;
+            NavigatorDataGridView.Columns.Clear();
+            NavigatorDataGridView.AllowUserToAddRows = false;
+            NavigatorDataGridView.ReadOnly = false;
+
+            NavigatorDataGridView.VirtualMode = true;
+            NavigatorDataGridView.CellValueNeeded += NavigatorDataGridView_CellValueNeeded;
+            NavigatorDataGridView.CellValuePushed += NavigatorDataGridView_CellValuePushed;
+        }
+
+
+        /// <summary>
+        /// Создание колонок в таблице
+        /// </summary>
+        /// <param name="attributes">ViewModel объекты атрибутов</param>
+        private void CreateColumns(List<ObjectAttributeViewModel> attributes)
+        {
+            foreach (var attr in attributes)
+            {
+                var column = CreateColumn(attr);
+                NavigatorDataGridView.Columns.Add(column);
+            }
+        }
+
+        /// <summary>
+        /// Создание одной колонки 
+        /// </summary>
+        /// <param name="attr">ViewModel объект атрибута</param>
+        /// <returns>Колонка DataGridView</returns>
+        private DataGridViewColumn CreateColumn(ObjectAttributeViewModel attr)
+        {
+            DataGridViewColumn column;
+
+            if (attr.ValueType == typeof(bool))
+            {
+                column = new DataGridViewCheckBoxColumn();
+            }
+            else
+            {
+                column = new DataGridViewTextBoxColumn();
+            }
+
+            column.Name = attr.Name;
+            column.HeaderText = attr.Name;
+            column.Tag = attr;
+            column.ReadOnly = false;
+
+            return column;
+        }
+
+        /// <summary>
+        /// Создание строк
+        /// </summary>
+        /// <param name="tableData">Данные об объектах из сервиса</param>
+        /// <returns>Структура для отображения на DataGridView</returns>
+        private async Task<BindingList<DynamicObjectRow>> CreateRowsAsync(List<Dictionary<Guid, ObjectAttributeDTO>> tableData)
+        {
+            var rows = new BindingList<DynamicObjectRow>();
+
+            foreach (var rowDict in tableData)
+            {
+                var row = await CreateRowAsync(rowDict);
+                rows.Add(row);
+            }
+
+            return rows;
+        }
+
+        /// <summary>
+        /// Создание строки
+        /// </summary>
+        /// <param name="rowDict">Данные о строке</param>
+        /// <returns>Строка для DataGridView</returns>
+        private async Task<DynamicObjectRow> CreateRowAsync(Dictionary<Guid, ObjectAttributeDTO> rowDict)
+        {
+            var row = new DynamicObjectRow();
+
+            var idAttr = rowDict.Values.FirstOrDefault(a => a.Name == "ID");
+            if (idAttr != null && Guid.TryParse(idAttr.Value, out var objectId))
+            {
+                row.ObjectId = objectId;
+            }
+
+            foreach (var attr in rowDict.Values)
+            {
+                if (attr == null || !attr.IsVisible)
+                    continue;
+
+                var value = await ResolveAttributeValueAsync(attr);
+
+                row.Attributes[attr.ID] = new ObjectAttributeViewModel
+                {
+                    ID = attr.ID,
+                    Name = attr.Name,
+                    ValueType = attr.ValueType,
+                    IsReference = attr.IsReference,
+                    IsRequired = attr.IsRequired,
+                    Value = value
+                };
+            }
+
+            return row;
+        }
+
+        /// <summary>
+        /// Обработчик для отображения значения в ячейке
+        /// </summary>
+        private void NavigatorDataGridView_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= _rows.Count)
+                return;
+
+            var row = _rows[e.RowIndex];
+            var column = NavigatorDataGridView.Columns[e.ColumnIndex];
+            var attr = column.Tag as ObjectAttributeViewModel;
+            if (attr == null)
+                return;
+
+            if (row.Attributes.TryGetValue(attr.ID, out var avm))
+                e.Value = avm.Value;
+        }
+
+        /// <summary>
+        /// Обработчик для получения значения из ячейки
+        /// </summary>
+        private void NavigatorDataGridView_CellValuePushed(object sender, DataGridViewCellValueEventArgs e)
+        {
+            if (!_isEditing)
+                return;
+
+            var row = _rows[e.RowIndex];
+
+            if (row != _editingRow)
+                return;
+
+            var column = NavigatorDataGridView.Columns[e.ColumnIndex];
+            var attr = column.Tag as ObjectAttributeViewModel;
+
+            if (attr == null)
+                return;
+
+            if (attr.IsReference)
+                return;
+
+            if (row.Attributes.TryGetValue(attr.ID, out var vm))
+                vm.Value = e.Value?.ToString();
+        }
+
+
+        /// <summary>
+        /// Определение значения для отображения атрибута 
+        /// </summary>
+        /// <param name="attr">Атрибут</param>
+        /// <returns>Значение</returns>
+        private async Task<string> ResolveAttributeValueAsync(ObjectAttributeDTO attr)
+        {
+            if (!attr.IsReference || attr.Value == null)
+                return attr.Value ?? string.Empty;
+
+            var obj = await _objectService.GetObjectInfoByIdAsync(Guid.Parse(attr.Value.ToString()));
+
+            return obj?.Title ?? "(Не выбран)";
+        }
+
+        /// <summary>
+        /// Биндинг DataGridView 
+        /// </summary>
+        /// <param name="rows">Струтура для биндинга</param>
+        private void BindGrid(BindingList<DynamicObjectRow> rows)
+        {
+            NavigatorDataGridView.DataSource = rows;
+        }
+
+        private async void NavigatorDataGridView_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             NavigatorDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             NavigatorDataGridView.ClearSelection();
             NavigatorDataGridView.Rows[e.RowIndex].Selected = true;
+
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            // Получаем объект из строки
+            var row = _rows[e.RowIndex];
+            if (row == null)
+                return;
+
+            // Показываем контекстное меню
+            await ShowContextMenuForRowAsync(row, NavigatorDataGridView.PointToClient(Cursor.Position));
         }
+
+        private async Task ShowContextMenuForRowAsync(DynamicObjectRow row, Point location)
+        {
+            var objectId = row.ObjectId;
+            var actions = await _objectService.GetActionsForTypeObject(objectId);
+
+            if (actions == null || actions.Count == 0)
+                return;
+
+            ContextMenuStrip menu = new ContextMenuStrip();
+
+            foreach (var action in actions)
+            {
+                var item = new ToolStripMenuItem(action.CommandName) { Tag = action };
+                menu.Items.Add(item);
+                item.Click += ContextMenuItem_Click;
+            }
+
+            menu.Show(NavigatorDataGridView, location);
+        }
+
+        private void ContextMenuItem_Click(object sender, EventArgs e)
+        {
+            if (sender is ToolStripMenuItem item && item.Tag is ObjectActionDTO action)
+            {
+                MessageBox.Show($"Вызвано действие: {action.CommandName}");
+            }
+        }
+
 
         /// <summary>
         /// Обработчик для выделения отдельной ячейки
@@ -321,34 +561,32 @@ namespace MiniNavigator_UI
                 NavigatorDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex].Selected = true;
             }
 
-            if (!IsEditing)
+            if (!IsEditing || e.RowIndex < 0 || e.ColumnIndex < 0)
                 return;
 
-            if (e.RowIndex < 0 || e.ColumnIndex < 0)
-                return;
-
-            var cell = NavigatorDataGridView.Rows[e.RowIndex].Cells[e.ColumnIndex];
-
-            if (!(cell is DataGridViewButtonCell))
+            var row = _rows[e.RowIndex];
+            if (row != _editingRow)
                 return;
 
             var column = NavigatorDataGridView.Columns[e.ColumnIndex];
-            var dataColumn = _table.Columns[column.DataPropertyName];
+            var attr = column.Tag as ObjectAttributeViewModel;
 
-            if (dataColumn?.ExtendedProperties["IsReference"] as bool? != true)
+            if (attr == null || !attr.IsReference)
                 return;
 
-            var attributeId = (Guid)dataColumn.ExtendedProperties["ID"];
-            var typeId = (Guid)_table.ExtendedProperties["TypeID"];
-
-            using (var form = new ReferenceSelectForm(attributeId, _objectService))
+            if (attr.IsReference && row == _editingRow && IsEditing)
             {
-                if (form.ShowDialog() == DialogResult.OK)
+                using (var form = new ReferenceSelectForm(attr.ID, _objectService))
                 {
-                    _newRow[dataColumn.ColumnName] = form.SelectedTitle;
+                    if (form.ShowDialog() == DialogResult.OK)
+                    {
+                        var vm = row.Attributes[attr.ID];
 
-                    cell.Value = form.SelectedTitle;
-                    cell.Tag = form.SelectedID;
+                        vm.Value = form.SelectedTitle;
+                        vm.ReferenceID = form.SelectedID;
+
+                        NavigatorDataGridView.InvalidateCell(e.ColumnIndex, e.RowIndex);
+                    }
                 }
             }
         }

@@ -10,8 +10,8 @@ namespace MiniNavigator_UI
         private readonly IObjectService _objectService;
 
         private Guid AttributeID;
-        public object SelectedTitle { get; internal set; }
-        public object SelectedID { get; internal set; }
+        public string SelectedTitle { get; internal set; }
+        public Guid SelectedID { get; internal set; }
         public ReferenceSelectForm(Guid attributeID, IObjectService objectService)
         {
             InitializeComponent();   
@@ -25,7 +25,7 @@ namespace MiniNavigator_UI
 
         private async void ReferenceSelectForm_Load(object sender, EventArgs e)
         {
-            BindComboBox();
+            await BindComboBox();
         }
 
         private async Task BindComboBox()
@@ -45,9 +45,20 @@ namespace MiniNavigator_UI
 
         private void ApplyBtn_Click(object sender, EventArgs e)
         {
+            if (ObjectComboBox.SelectedItem == null)
+            {
+                MessageBox.Show(
+                    "Выберите объект",
+                    "Ошибка",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
             SelectedTitle = ObjectComboBox.Text;
-            SelectedID = ObjectComboBox.SelectedValue;
-            this.DialogResult = DialogResult.OK;
+            SelectedID = (Guid)ObjectComboBox.SelectedValue;
+
+            DialogResult = DialogResult.OK;
             Close();
         }
     }

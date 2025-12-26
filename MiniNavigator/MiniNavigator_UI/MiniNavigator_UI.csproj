@@ -86,7 +86,9 @@
     </Compile>
     <Compile Include="Service\IValidationService.cs" />
     <Compile Include="Service\ValidationService.cs" />
+    <Compile Include="ViewModel\DynamicObjectRow.cs" />
     <Compile Include="ViewModel\NavObjectViewModel.cs" />
+    <Compile Include="ViewModel\ObjectAttributeViewModel.cs" />
     <EmbeddedResource Include="NavigatorForm.resx">
       <DependentUpon>NavigatorForm.cs</DependentUpon>
     </EmbeddedResource>

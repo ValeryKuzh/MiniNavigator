@@ -1,4 +1,5 @@
 ﻿using MiniNavigator_Services.DTO;
+using MiniNavigator_UI.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -12,9 +13,21 @@ namespace MiniNavigator_UI
 {
     public partial class NavigatorForm
     {
+        private DynamicObjectRow _editingRow;
 
-        private DataRow _newRow;
-        private bool IsEditing {  get; set; }
+        private bool _isEditing;
+        private bool IsEditing
+        {
+            get
+            {
+                return _isEditing;
+            }
+            set
+            {
+                _isEditing = value;
+                SetTableReadonlyProperty();
+            }
+        }
 
         #region Initialization Dialog Buttons
 
@@ -126,207 +139,142 @@ namespace MiniNavigator_UI
 
         private void CancelBtn_Click(object sender, EventArgs e)
         {
-            if (_newRow != null)
-            {
-                _table.Rows.Remove(_newRow);
-                _newRow = null;
-            }
+            CancelEdit();
+        }
 
-            IsEditing = false;
+        private void CancelEdit()
+        {
+            if (_editingRow != null)
+                _rows.Remove(_editingRow);
+
+            _editingRow = null;
+            _isEditing = false;
+
             SetTableReadonlyProperty();
-            ChangeSortMode(IsEditing);
+            NavigatorDataGridView.Invalidate();
             HideControls();
         }
 
         private async void ApplyBtn_Click(object sender, EventArgs e)
         {
-            if (_newRow == null)
+            if (_editingRow == null)
                 return;
 
             NavigatorDataGridView.EndEdit();
 
-            var typeId = (Guid)_table.ExtendedProperties["TypeID"];
-            CreateObjectDTO newObject = CreateNewObjectDTO();
+            // Валидируем все атрибуты перед созданием DTO
+            foreach (var attr in _editingRow.Attributes.Values)
+            {
+                // Если поле обязательное
+                if (attr.IsRequired)
+                {
+                    if (attr.IsReference && (!attr.ReferenceID.HasValue || attr.ReferenceID == Guid.Empty))
+                    {
+                        MessageBox.Show($"Поле '{attr.Name}' обязательно для заполнения", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    if (!attr.IsReference && string.IsNullOrWhiteSpace(attr.Value))
+                    {
+                        MessageBox.Show($"Поле '{attr.Name}' обязательно для заполнения", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                }
+
+                // Валидируем значение на соответствие типу
+                if (!attr.IsReference && !string.IsNullOrWhiteSpace(attr.Value))
+                {
+                    if (!_validationService.ValidateSingleValue(attr.Value, attr.ValueType, out string error))
+                    {
+                        MessageBox.Show(error, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                }
+            }
+
+            CreateObjectDTO dto;
 
             try
             {
-                // ВСЯ валидация обязательных атрибутов происходит ТУТ
-                await _objectService.CreateObjectAsync(typeId, newObject);
+                dto = BuildCreateDto();
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
-                // Обязательные атрибуты не заполнены
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-
-                // Возвращаем редактирование
                 IsEditing = true;
-                SetTableReadonlyProperty();
                 ShowControls();
-
                 return;
+            }
+
+            try
+            {
+                await _objectService.CreateObjectAsync(_currentTypeId, dto);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
                 IsEditing = true;
-                SetTableReadonlyProperty();
                 ShowControls();
-
                 return;
             }
 
-            int rowIndex = _table.Rows.IndexOf(_newRow);
-            var gridRow = NavigatorDataGridView.Rows[rowIndex];
-
-            gridRow.ReadOnly = true;
-            foreach (DataGridViewCell cell in gridRow.Cells)
-                cell.ReadOnly = true;
-
-            for (int i = 0; i < gridRow.Cells.Count; i++)
-            {
-                if (gridRow.Cells[i] is DataGridViewButtonCell btnCell)
-                {
-                    var textCell = new DataGridViewTextBoxCell
-                    {
-                        Value = btnCell.Value
-                    };  
-
-                    gridRow.Cells[i] = textCell;
-                    textCell.ReadOnly = true;
-                }
-            }
-
-            _newRow = null;
+            _editingRow = null;
             IsEditing = false;
 
-            SetTableReadonlyProperty();
-            ChangeSortMode(IsEditing);
+            NavigatorDataGridView.Invalidate();
             HideControls();
         }
 
+        private CreateObjectDTO BuildCreateDto()
+        {
+            var dto = new CreateObjectDTO
+            {
+                ID = Guid.NewGuid(),
+                Attributes = new Dictionary<Guid, ObjectAttributeDTO>()
+            };
+
+            foreach (var attr in _editingRow.Attributes.Values)
+            {
+                if (attr.IsRequired)
+                {
+                    if (attr.IsReference && (!attr.ReferenceID.HasValue || attr.ReferenceID == Guid.Empty))
+                        throw new Exception($"Поле '{attr.Name}' обязательно");
+                    if (!attr.IsReference && string.IsNullOrWhiteSpace(attr.Value))
+                        throw new Exception($"Поле '{attr.Name}' обязательно");
+                }
+
+                dto.Attributes[attr.ID] = new ObjectAttributeDTO
+                {
+                    ID = attr.ID,
+                    Name = attr.Name,
+                    ValueType = attr.ValueType,
+                    Value = attr.IsReference ? attr.ReferenceID.ToString() : attr.Value
+                };
+            }
+
+            return dto;
+        }
+
         /// <summary>
-        /// Ограничивает действия пользователя на гриде, пока добавляется новая строка.
+        /// Устанавливает режим ReadOnly для всех строк, кроме редактируемой
         /// </summary>
-        private void RestrictGridDuringCreation()
-        {
-            if (_newRow != null)
-            {
-                ChangeSortMode(IsEditing);
-            }
-        }
-
-        public CreateObjectDTO CreateNewObjectDTO()
-        {
-            if(_newRow != null)
-            {
-                return new CreateObjectDTO()
-                {
-                    ID = Guid.NewGuid(),
-                    Attributes = AddAttributesToObjectDTO()
-                };
-            }
-            return null;
-        }
-
-        private Dictionary<Guid, ObjectAttributeDTO> AddAttributesToObjectDTO()
-        {
-            var result = new Dictionary<Guid, ObjectAttributeDTO>();
-
-            int rowIndex = _table.Rows.IndexOf(_newRow);
-            if (rowIndex < 0)
-                return result;
-
-            var gridRow = NavigatorDataGridView.Rows[rowIndex];
-
-            foreach (DataColumn column in _table.Columns)
-            {
-                if (!column.ExtendedProperties.ContainsKey("ID"))
-                    continue;
-
-                var attributeId = (Guid)column.ExtendedProperties["ID"];
-                var isReference = column.ExtendedProperties["IsReference"] as bool? == true;
-
-                string finalValue;
-
-                if (isReference)
-                {
-                    var cell = gridRow.Cells[column.ColumnName];
-
-                    if (cell.Tag == null)
-                    {
-                        MessageBox.Show(
-                            $"Не выбран объект для ссылки {column.ColumnName}",
-                            "Ошибка",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
-                        continue;
-                    }
-
-                    finalValue = ((Guid)cell.Tag).ToString();
-                }
-                else
-                {
-                    var value = _newRow[column];
-                    if (value == DBNull.Value || value == null)
-                        continue;
-
-                    finalValue = value.ToString();
-                }
-
-                result[attributeId] = new ObjectAttributeDTO
-                {
-                    ID = attributeId,
-                    Name = column.ColumnName,
-                    ValueType = column.DataType,
-                    Value = finalValue
-                };
-            }
-
-            return result;
-        }
-
         private void SetTableReadonlyProperty()
         {
-            if (_table == null) return;
+            if (_rows == null || _editingRow == null)
+                return;
 
-            for (int i = 0; i < NavigatorDataGridView.Rows.Count; i++)
+            foreach (DataGridViewColumn col in NavigatorDataGridView.Columns)
             {
-                var gridRow = NavigatorDataGridView.Rows[i];
-
-                if (_newRow != null && i == _table.Rows.IndexOf(_newRow))
+                foreach (DataGridViewRow row in NavigatorDataGridView.Rows)
                 {
-                    // только редактируемая строка
-                    gridRow.ReadOnly = false;
-                    foreach (DataGridViewCell cell in gridRow.Cells)
-                        cell.ReadOnly = false;
-                }
-                else
-                {
-                    // все остальные строки — readonly
-                    gridRow.ReadOnly = true;
-                    foreach (DataGridViewCell cell in gridRow.Cells)
-                        cell.ReadOnly = true;
+                    bool isEditingRow = row.DataBoundItem == _editingRow;
+                    row.Cells[col.Index].ReadOnly = !isEditingRow;
                 }
             }
-        }
 
-        private void ChangeSortMode(bool isEditing)
-        {
-            if (isEditing && _newRow != null)
-            {
-                foreach (DataGridViewColumn col in NavigatorDataGridView.Columns)
-                {
-                    col.SortMode = DataGridViewColumnSortMode.NotSortable;
-                }
-            }
-            else
-            {
-                foreach (DataGridViewColumn col in NavigatorDataGridView.Columns)
-                {
-                    col.SortMode = DataGridViewColumnSortMode.Automatic;
-                }
-            }
+            NavigatorDataGridView.AllowUserToAddRows = false;
+
+            // Обновляем перерисовку, чтобы кнопка сразу появилась
+            NavigatorDataGridView.Invalidate();
         }
     }
 }

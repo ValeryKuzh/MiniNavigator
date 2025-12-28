@@ -12,8 +12,9 @@ namespace MiniNavigator_DB.Model
         [ForeignKey("Base_ID")]
         public BaseObject Base { get; set; }
 
-        public string Name { get; set; } 
-
+        public string Name { get; set; }
+        public string DisplayName { get; set; }
+ 
         public ICollection<ObjectType> ObjectTypes { get; set; }
     }
 }

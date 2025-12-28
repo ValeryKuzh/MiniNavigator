@@ -44,26 +44,11 @@ namespace MiniNavigator_DB.Configuration
                 new ObjectAction
                 {
                     ID = Guid.NewGuid(),
-                    Base_ID = actionAddObject.ID,
-                    Base = actionAddObject,
-                    Name = "Добавить",
-                    ObjectTypes = new[] { roleType, userType }
-                },
-                new ObjectAction
-                {
-                    ID = Guid.NewGuid(),
                     Base_ID = actionEditObject.ID,
                     Base = actionEditObject,
-                    Name = "Редактировать",
-                    ObjectTypes = new[] { roleType }
-                },
-                new ObjectAction
-                {
-                    ID = Guid.NewGuid(),
-                    Base_ID = actionDeleteObject.ID,
-                    Base = actionDeleteObject,
-                    Name = "Удалить",
-                    ObjectTypes = new[] { roleType }
+                    Name = "EDIT",
+                    DisplayName = "Редактировать",
+                    ObjectTypes = new[] { roleType, userType }
                 }
             });
             db.SaveChanges();

@@ -14,14 +14,16 @@ namespace MiniNavigator_Services.Service
         private readonly IObjectTypeRepository _objectTypeRepository;
 
         private readonly IMapper<ObjectTypeDTO, ObjectType> _objectTypeMapper;
-        
+
         public ObjectTypeService(
-            IObjectTypeRepository objectTypeRepository, 
-            
-            IMapper<ObjectTypeDTO, ObjectType> objectTypeMapper
+            IObjectTypeRepository objectTypeRepository,
+
+            IMapper<ObjectTypeDTO, ObjectType> objectTypeMapper, 
+            IMapper<ObjectActionDTO, ObjectAction> actionMapper
             )
         {
             _objectTypeRepository = objectTypeRepository;
+
             _objectTypeMapper = objectTypeMapper;
         }
 
@@ -38,6 +40,6 @@ namespace MiniNavigator_Services.Service
         public async Task<ObjectTypeDTO> GetTypeByIDAsync(Guid typeID)
         {
             return _objectTypeMapper.ToDTO(await _objectTypeRepository.GetByIdAsync(typeID));
-        } 
+        }
     }
 }

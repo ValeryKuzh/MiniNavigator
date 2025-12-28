@@ -1,14 +1,16 @@
-﻿using System;
-using System.Windows.Forms;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using MiniNavigator_Services;
 using MiniNavigator_Services.DTO;
 using MiniNavigator_Services.Service;
 using MiniNavigator_Services.Service.Interface;
-using MiniNavigator_UI.ViewModel;
 using MiniNavigator_UI.Mapper;
 using MiniNavigator_UI.Mapper.Interface;
 using MiniNavigator_UI.Service;
+using MiniNavigator_UI.Service.ActionHandler;
+using MiniNavigator_UI.Service.ActionHandler.Handler;
+using MiniNavigator_UI.ViewModel;
+using System;
+using System.Windows.Forms;
 
 namespace MiniNavigator_UI
 {
@@ -33,6 +35,16 @@ namespace MiniNavigator_UI
             services.AddScoped<IObjectService, ObjectService>();
             services.AddScoped<IObjectTypeService, ObjectTypeService>();
             services.AddScoped<IValidationService, ValidationService>();
+
+            // Action handlers
+            services.AddSingleton<IObjectActionHandler, EditActionHandler>();
+
+            // Registry
+            services.AddSingleton<ActionHandlerRegistry>(sp =>
+            {
+                var handlers = sp.GetServices<IObjectActionHandler>();
+                return new ActionHandlerRegistry(handlers);
+            });
 
             // Forms
             services.AddScoped<NavigatorForm>();

@@ -64,7 +64,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionHandlerService\Interface\IActionHandlerService.cs" />
     <Compile Include="Mapper\Interface\IMapper.cs" />
     <Compile Include="Mapper\ObjectMapper.cs" />
     <Compile Include="NavigatorForm.CreateNewObject.cs">
@@ -84,8 +83,12 @@
     <Compile Include="ReferenceSelectForm.Designer.cs">
       <DependentUpon>ReferenceSelectForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Service\IValidationService.cs" />
-    <Compile Include="Service\ValidationService.cs" />
+    <Compile Include="Service\ActionHandler\Context\ActionContext.cs" />
+    <Compile Include="Service\ActionHandler\Handler\EditActionHandler.cs" />
+    <Compile Include="Service\ActionHandler\ActionRegistry\ActionHandlerRegistry.cs" />
+    <Compile Include="Service\ActionHandler\Interface\IObjectActionHandler.cs" />
+    <Compile Include="Service\ValidationService\IValidationService.cs" />
+    <Compile Include="Service\ValidationService\ValidationService.cs" />
     <Compile Include="ViewModel\DynamicObjectRow.cs" />
     <Compile Include="ViewModel\NavObjectViewModel.cs" />
     <Compile Include="ViewModel\ObjectAttributeViewModel.cs" />

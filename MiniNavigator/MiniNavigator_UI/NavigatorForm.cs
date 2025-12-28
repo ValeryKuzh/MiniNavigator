@@ -1,8 +1,11 @@
 ﻿using Infralution.Controls.VirtualTree;
+using Microsoft.Extensions.DependencyInjection;
 using MiniNavigator_Services.DTO;
 using MiniNavigator_Services.Service.Interface;
 using MiniNavigator_UI.Mapper.Interface;
 using MiniNavigator_UI.Service;
+using MiniNavigator_UI.Service.ActionHandler;
+using MiniNavigator_UI.Service.ActionHandler.Handler;
 using MiniNavigator_UI.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -19,8 +22,10 @@ namespace MiniNavigator_UI
     public partial class NavigatorForm : Form
     {
         private readonly IObjectService _objectService;
-        private readonly IObjectTypeService _objectTypeService;
         private readonly IValidationService _validationService;
+
+        private readonly ActionHandlerRegistry _actionRegistry;
+        private readonly IServiceProvider _serviceProvider;
 
         private readonly IMapper<NavObjectViewModel, NavObjectDTO> _objectMapper;
 
@@ -35,11 +40,17 @@ namespace MiniNavigator_UI
             IObjectService objectService,
             IObjectTypeService objectTypeService,
             IValidationService validationService,
+
+            ActionHandlerRegistry actionRegistry,
+            IServiceProvider serviceProvider,
+
             IMapper<NavObjectViewModel, NavObjectDTO> objectMapper)
         {
             _objectService = objectService;
-            _objectTypeService = objectTypeService;
             _validationService = validationService;
+
+            _actionRegistry = actionRegistry;
+            _serviceProvider = serviceProvider;
 
             _objectMapper = objectMapper;
 
@@ -198,7 +209,7 @@ namespace MiniNavigator_UI
             {
                 if (e.Button == MouseButtons.Right)
                 {
-                    await ShowContextMenuAsync(navObjectViewModel, e.Location);
+                    await ShowContextMenuAsync(e.Location);
                 }
                 else if (e.Button == MouseButtons.Left)
                 {
@@ -207,17 +218,14 @@ namespace MiniNavigator_UI
             }
         }
 
-        private async Task ShowContextMenuAsync(NavObjectViewModel navObjectViewModel, Point location)
+        private async Task ShowContextMenuAsync(Point location)
         {
-            var actions = await _objectService.GetActionsForTypeObject(navObjectViewModel.ID);
-
             ContextMenuStrip menu = new ContextMenuStrip();
-            foreach (var action in actions)
-            {
-                var item = new ToolStripMenuItem(action.CommandName) { Tag = action };
-                menu.Items.Add(item);
-                item.Click += ItemAdd_Click;
-            }
+
+            var addItem = new ToolStripMenuItem("Добавить");
+            menu.Items.Add(addItem);
+
+            addItem.Click += ItemAdd_Click;
 
             menu.Show(NavigatorVirtualTree, location);
         }
@@ -257,6 +265,7 @@ namespace MiniNavigator_UI
 
             _rows.Add(row);
             _editingRow = row;
+            _isNewRow = true;
 
             int lastRowIndex = NavigatorDataGridView.Rows.Count - 1;
             if (lastRowIndex >= 0)
@@ -417,7 +426,20 @@ namespace MiniNavigator_UI
                 if (attr == null || !attr.IsVisible)
                     continue;
 
-                var value = await ResolveAttributeValueAsync(attr);
+                string displayValue = null;
+                Guid? referenceId = null;
+
+                if (attr.IsReference && !string.IsNullOrWhiteSpace(attr.Value))
+                {
+                    referenceId = Guid.Parse(attr.Value);
+
+                    var obj = await _objectService.GetObjectInfoByIdAsync(referenceId.Value);
+                    displayValue = obj?.Title;
+                }
+                else
+                {
+                    displayValue = attr.Value;
+                }
 
                 row.Attributes[attr.ID] = new ObjectAttributeViewModel
                 {
@@ -426,7 +448,9 @@ namespace MiniNavigator_UI
                     ValueType = attr.ValueType,
                     IsReference = attr.IsReference,
                     IsRequired = attr.IsRequired,
-                    Value = value
+
+                    Value = displayValue,
+                    ReferenceID = referenceId
                 };
             }
 
@@ -511,7 +535,6 @@ namespace MiniNavigator_UI
             if (e.Button != MouseButtons.Right)
                 return;
 
-            // Получаем объект из строки
             var row = _rows[e.RowIndex];
             if (row == null)
                 return;
@@ -532,20 +555,28 @@ namespace MiniNavigator_UI
 
             foreach (var action in actions)
             {
-                var item = new ToolStripMenuItem(action.CommandName) { Tag = action };
+                var item = new ToolStripMenuItem(action.DisplayName) { Tag = action };
                 menu.Items.Add(item);
-                item.Click += ContextMenuItem_Click;
+                item.Click += (s, e) => ExecuteAction(row, action);
             }
 
             menu.Show(NavigatorDataGridView, location);
         }
 
-        private void ContextMenuItem_Click(object sender, EventArgs e)
+        private async void ExecuteAction(DynamicObjectRow row, ObjectActionDTO action)
         {
-            if (sender is ToolStripMenuItem item && item.Tag is ObjectActionDTO action)
+            var handler = _actionRegistry.Resolve(action.CommandName);
+
+            var context = new ActionContext
             {
-                MessageBox.Show($"Вызвано действие: {action.CommandName}");
-            }
+                CommandName = action.CommandName,
+                Row = row,
+                ObjectTypeId = _currentTypeId,
+                Services = _serviceProvider
+            };
+
+            if (handler.CanExecute(context))
+                await handler.ExecuteAsync(context);
         }
 
 
@@ -588,6 +619,27 @@ namespace MiniNavigator_UI
                         NavigatorDataGridView.InvalidateCell(e.ColumnIndex, e.RowIndex);
                     }
                 }
+            }
+        }
+
+        public void BeginEditRow(DynamicObjectRow row)
+        {
+            if (row == null) return;
+
+            _editingRow = row;
+            IsEditing = true;
+            _isNewRow = false;
+
+            ResetSorting();
+            SetTableReadonlyProperty();
+            InitializeCreateNewObject();
+            ShowControls();
+
+            int rowIndex = _rows.IndexOf(row);
+            if (rowIndex >= 0)
+            {
+                NavigatorDataGridView.CurrentCell = NavigatorDataGridView.Rows[rowIndex].Cells[0];
+                NavigatorDataGridView.BeginEdit(true);
             }
         }
     }

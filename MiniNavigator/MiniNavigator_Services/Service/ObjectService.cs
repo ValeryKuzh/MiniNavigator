@@ -57,7 +57,7 @@ namespace MiniNavigator_Services.Service
         /// </summary>
         /// <param name="ID">ID объекта</param>
         /// <returns>Список действий с объектом</returns>
-        public async Task<List<ObjectActionDTO>> GetActionsForObject(Guid ID)
+        public async Task<List<ObjectActionDTO>> GetActionsForTypeObject(Guid ID)
         {
             var actionsDTO = new List<ObjectActionDTO>();
             if (ID == Guid.Empty)
@@ -65,7 +65,7 @@ namespace MiniNavigator_Services.Service
 
             var baseObject = await _objectRepository.GetByIdAsync(ID);
 
-            var typeOfObject = await _objectTypeRepository.GetTypeWithActionsAsync(baseObject.ID);
+            var typeOfObject = await _objectTypeRepository.GetTypeWithActionsAsync(baseObject.ObjectTypeID);
 
             if (!(typeOfObject.Actions is null))
             {
@@ -153,6 +153,18 @@ namespace MiniNavigator_Services.Service
             {
                 var attributeNameInfo = new Dictionary<Guid, ObjectAttributeDTO>();
 
+                attributeNameInfo[obj.ID] = new ObjectAttributeDTO
+                {
+                    ID = obj.ID,
+                    Name = "ID",
+                    Value = obj.ID.ToString(),
+                    IsReference = false,
+                    ValueType = typeof(Guid),
+                    IsRequired = true,
+                    IsVisible = false,
+                    Index = -1
+                };
+
                 foreach (var attr in objectTypeAttributes)
                 {
                     var value = _objectAttributeValueRepository
@@ -207,7 +219,7 @@ namespace MiniNavigator_Services.Service
         /// <param name="typeID">ID типа</param>
         /// <param name="dto">DTO для создания объекта</param>
         /// <exception cref="ArgumentException">Если не передан обязательный атрибут</exception>
-        public async Task CreateObjectAsync(Guid typeID, CreateObjectDTO dto)
+        public async Task CreateObjectAsync(Guid typeID, ObjectDTO dto)
         {
             var typeObject = await _objectRepository.GetByIdAsync(typeID);
             var attributes = (await _objectTypeRepository.GetTypeWithAttributesAsync(typeID)).Attributes;
@@ -330,6 +342,51 @@ namespace MiniNavigator_Services.Service
             return parts.Any()
                 ? string.Join(" ", parts)
                 : "(без названия)";
+        }
+
+        public async Task UpdateObjectAsync(Guid ID, ObjectDTO dto)
+        {
+            var obj = await _objectRepository.GetByIdAsync(ID);
+            if (obj == null)
+                throw new ArgumentException("Объект не найден");
+
+            var type = await _objectTypeRepository
+                .GetTypeWithAttributesAsync(obj.ObjectTypeID.Value);
+
+            var attributes = type.Attributes;
+
+            var existingValues = _objectAttributeValueRepository
+                .Query()
+                .Where(v => v.ObjectID == ID)
+                .ToList();
+
+            foreach (var attribute in attributes)
+            {
+                if (!dto.Attributes.TryGetValue(attribute.AttributeID, out var newValue))
+                    continue;
+
+                var existingValue = existingValues
+                    .FirstOrDefault(v => v.AttributeID == attribute.AttributeID);
+
+                if (existingValue != null)
+                {
+                    existingValue.Value = newValue.Value;
+                    await _objectAttributeValueRepository.UpdateAsync(existingValue);
+                }
+                else
+                {
+                    var attributeValue = new ObjectAttributeValue
+                    {
+                        ObjectID = obj.ID,
+                        Object = obj,
+                        AttributeID = attribute.AttributeID,
+                        Attribute = attribute.Attribute,
+                        Value = newValue.Value
+                    };
+
+                    await _objectAttributeValueRepository.AddAsync(attributeValue);
+                }
+            }
         }
     }
 }

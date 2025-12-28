@@ -8,10 +8,11 @@ namespace MiniNavigator_Services.Service.Interface
 {
     public interface IObjectService
     {
-        Task<List<ObjectActionDTO>> GetActionsForObject(Guid ID);
+        Task<List<ObjectActionDTO>> GetActionsForTypeObject(Guid ID);
         Task<NavObjectDTO> GetTreeOfObjectsAsync();
         Task<List<Dictionary<Guid, ObjectAttributeDTO>>> GetTableData(Guid ID);
-        Task CreateObjectAsync(Guid typeID, CreateObjectDTO dto);
+        Task CreateObjectAsync(Guid typeID, ObjectDTO dto);
+        Task UpdateObjectAsync(Guid ID, ObjectDTO dto);
         Task<ObjectInfoDTO> GetObjectInfoByIdAsync(Guid typeID);
         Task<List<ObjectInfoDTO>> GetReferenceObjectInfosByAttribute(Guid attributeID);
     }

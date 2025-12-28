@@ -13,6 +13,8 @@ namespace MiniNavigator_UI
 {
     public partial class NavigatorForm
     {
+        private bool _isNewRow;
+
         private DynamicObjectRow _editingRow;
 
         private bool _isEditing;
@@ -144,10 +146,13 @@ namespace MiniNavigator_UI
 
         private void CancelEdit()
         {
-            if (_editingRow != null)
+            if (_editingRow == null) return;
+
+            if (_isNewRow)
                 _rows.Remove(_editingRow);
 
             _editingRow = null;
+            _isNewRow = false;
             _isEditing = false;
 
             SetTableReadonlyProperty();
@@ -191,7 +196,7 @@ namespace MiniNavigator_UI
                 }
             }
 
-            CreateObjectDTO dto;
+            ObjectDTO dto;
 
             try
             {
@@ -207,7 +212,15 @@ namespace MiniNavigator_UI
 
             try
             {
-                await _objectService.CreateObjectAsync(_currentTypeId, dto);
+                if (_isNewRow)
+                {
+                    await _objectService.CreateObjectAsync(_currentTypeId, dto);
+                    _editingRow.ObjectId = dto.ID;
+                }
+                else
+                {
+                    await _objectService.UpdateObjectAsync(_editingRow.ObjectId, dto);
+                }
             }
             catch (Exception ex)
             {
@@ -224,9 +237,9 @@ namespace MiniNavigator_UI
             HideControls();
         }
 
-        private CreateObjectDTO BuildCreateDto()
+        private ObjectDTO BuildCreateDto()
         {
-            var dto = new CreateObjectDTO
+            var dto = new ObjectDTO
             {
                 ID = Guid.NewGuid(),
                 Attributes = new Dictionary<Guid, ObjectAttributeDTO>()

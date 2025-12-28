@@ -17,6 +17,7 @@ namespace MiniNavigator_Services.Mapper
             {
                 ID = entity.ID,
                 CommandName = entity.Name,
+                DisplayName = entity.DisplayName,
                 ObjectID = entity.Base_ID
             };
         }

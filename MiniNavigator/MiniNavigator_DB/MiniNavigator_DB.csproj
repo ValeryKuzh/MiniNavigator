@@ -109,6 +109,18 @@
     <Compile Include="Migrations\202512301311404_AddCascadeDeleteToObj.Designer.cs">
       <DependentUpon>202512301311404_AddCascadeDeleteToObj.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202512301728445_AddCascadeDeleteOnAllTypes.cs" />
+    <Compile Include="Migrations\202512301728445_AddCascadeDeleteOnAllTypes.Designer.cs">
+      <DependentUpon>202512301728445_AddCascadeDeleteOnAllTypes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202512301942372_FixRoleIDInUser.cs" />
+    <Compile Include="Migrations\202512301942372_FixRoleIDInUser.Designer.cs">
+      <DependentUpon>202512301942372_FixRoleIDInUser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202512302203357_AddIsTitleInAttribute.cs" />
+    <Compile Include="Migrations\202512302203357_AddIsTitleInAttribute.Designer.cs">
+      <DependentUpon>202512302203357_AddIsTitleInAttribute.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\ObjectAttributeValue.cs" />
     <Compile Include="Model\ObjectTypeAttribute.cs" />
@@ -167,6 +179,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202512301311404_AddCascadeDeleteToObj.resx">
       <DependentUpon>202512301311404_AddCascadeDeleteToObj.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202512301728445_AddCascadeDeleteOnAllTypes.resx">
+      <DependentUpon>202512301728445_AddCascadeDeleteOnAllTypes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202512301942372_FixRoleIDInUser.resx">
+      <DependentUpon>202512301942372_FixRoleIDInUser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202512302203357_AddIsTitleInAttribute.resx">
+      <DependentUpon>202512302203357_AddIsTitleInAttribute.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />

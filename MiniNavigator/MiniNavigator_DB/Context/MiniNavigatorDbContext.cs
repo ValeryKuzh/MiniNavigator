@@ -126,10 +126,10 @@ namespace MiniNavigator_DB.Context
                 .HasRequired(x => x.Base)
                 .WithMany()
                 .HasForeignKey(x => x.Base_ID)
-                .WillCascadeOnDelete(false);
+                .WillCascadeOnDelete(true);
 
             modelBuilder.Entity<ObjectUser>()
-                .HasRequired(x => x.Role)
+                .HasOptional(x => x.Role)
                 .WithMany()
                 .HasForeignKey(x => x.RoleID)
                 .WillCascadeOnDelete(false);
@@ -140,14 +140,15 @@ namespace MiniNavigator_DB.Context
                 .HasRequired(x => x.Base)
                 .WithMany()
                 .HasForeignKey(x => x.Base_ID)
-                .WillCascadeOnDelete(false);
+                .WillCascadeOnDelete(true);
 
             // ObjectFile
 
             modelBuilder.Entity<ObjectFile>()
                 .HasRequired(x => x.Base)
                 .WithMany()
-                .WillCascadeOnDelete(false);
+                .HasForeignKey(x => x.Base_ID)
+                .WillCascadeOnDelete(true);
 
             modelBuilder.Entity<ObjectFile>()
                 .HasMany(x => x.Chunks)

@@ -38,7 +38,7 @@ namespace MiniNavigator_DB.Repository
 
         public async Task DeleteByIDAsync(Guid ID)
         {
-            var entity = await _dbSet.SingleOrDefaultAsync();
+            var entity = await _dbSet.FirstOrDefaultAsync();
             if (_context.Entry(entity).State == EntityState.Detached)
             {
                 _dbSet.Attach(entity);

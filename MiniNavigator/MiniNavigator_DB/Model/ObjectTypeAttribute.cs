@@ -17,6 +17,7 @@ namespace MiniNavigator_DB.Model
         
         public bool IsRequired { get; set; }
         public bool IsVisible { get; set; }
+        public bool IsTitle { get; set; }
         public int Order { get; set; }
     }
 }

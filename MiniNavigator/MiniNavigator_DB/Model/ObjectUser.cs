@@ -11,7 +11,8 @@ namespace MiniNavigator_DB.Model
         [ForeignKey("Base_ID")]
         public BaseObject Base { get; set; }
 
-        public Guid RoleID { get; set; }
+        public Guid? RoleID { get; set; }
+        [ForeignKey("RoleID")]
         public ObjectRole Role { get; set; }
     }
 }

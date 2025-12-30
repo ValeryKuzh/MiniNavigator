@@ -5,6 +5,7 @@ using MiniNavigator_Services.Mapper.Interface;
 using MiniNavigator_Services.Service.Interface;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MiniNavigator_Services.Service
@@ -40,6 +41,24 @@ namespace MiniNavigator_Services.Service
         public async Task<ObjectTypeDTO> GetTypeByIDAsync(Guid typeID)
         {
             return _objectTypeMapper.ToDTO(await _objectTypeRepository.GetByIdAsync(typeID));
+        }
+
+        public async Task<List<ObjectAttributeDTO>> GetAttributesForTypeAsync(Guid objectTypeId)
+        {
+            var typeAttributes = (await _objectTypeRepository.GetTypeWithAttributesAsync(objectTypeId)).Attributes.ToList();
+
+            return typeAttributes.Select(ota => new ObjectAttributeDTO
+            {
+                ID = ota.Attribute.ID,
+                Name = ota.Attribute.Name,
+                ValueType = ota.Attribute.ValType,
+
+                IsReference = ota.Attribute.IsReference,
+                IsRequired = ota.IsRequired,
+                IsVisible = ota.IsVisible,
+
+                Index = ota.Order
+            }).ToList();
         }
     }
 }

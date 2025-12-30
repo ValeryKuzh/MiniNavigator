@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\MiniNavigatorDbInitializer.cs" />
+    <Compile Include="Configuration\MiniNavigatorDbInitializerTest.cs" />
     <Compile Include="Context\MiniNavigatorDbContext.cs" />
     <Compile Include="Configuration\MiniNavigatorDbConfiguration.cs" />
     <Compile Include="Migrations\202512112001361_InitialCreate.cs" />
@@ -103,6 +104,10 @@
     <Compile Include="Migrations\202512271509265_AddObjectActionDisplayName.cs" />
     <Compile Include="Migrations\202512271509265_AddObjectActionDisplayName.Designer.cs">
       <DependentUpon>202512271509265_AddObjectActionDisplayName.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202512301311404_AddCascadeDeleteToObj.cs" />
+    <Compile Include="Migrations\202512301311404_AddCascadeDeleteToObj.Designer.cs">
+      <DependentUpon>202512301311404_AddCascadeDeleteToObj.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\ObjectAttributeValue.cs" />
@@ -159,6 +164,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202512271509265_AddObjectActionDisplayName.resx">
       <DependentUpon>202512271509265_AddObjectActionDisplayName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202512301311404_AddCascadeDeleteToObj.resx">
+      <DependentUpon>202512301311404_AddCascadeDeleteToObj.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />

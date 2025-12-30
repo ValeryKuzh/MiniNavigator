@@ -14,6 +14,7 @@ namespace MiniNavigator_DB.Repository.Interface
         Task AddAsync(Entity entity);
         Task UpdateAsync(Entity entity);
         Task DeleteAsync(Entity entity);
+        Task DeleteByIDAsync(Guid ID);
         IQueryable<Entity> Query();
         Task<bool> ExistsAsync(Expression<Func<Entity, bool>> predicate);
     }

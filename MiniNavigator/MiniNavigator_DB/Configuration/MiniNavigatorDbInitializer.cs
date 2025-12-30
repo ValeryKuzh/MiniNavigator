@@ -12,31 +12,37 @@ namespace MiniNavigator_DB.Configuration
         {
             #region Object Types
 
-            var roleTypeObject = CreateNewObject(null);
-            var roleType = CreateNewObjectType(roleTypeObject, "Роль", true);
-
-            var userTypeObject = CreateNewObject(null);
-            var userType = CreateNewObjectType(userTypeObject, "Пользователь", true);
-
             var actionTypeObject = CreateNewObject(null);
             var actionType = CreateNewObjectType(actionTypeObject, "Действие", false);
 
             var attributeTypeObject = CreateNewObject(null);
             var attributeType = CreateNewObjectType(attributeTypeObject, "Атрибут", false);
 
-            db.BaseObjects.AddRange(new[] { roleTypeObject, userTypeObject, actionTypeObject, attributeTypeObject });
-            db.ObjectTypes.AddRange(new[] { roleType, userType, actionType, attributeType });
+            var roleTypeObject = CreateNewObject(null);
+            var roleType = CreateNewObjectType(roleTypeObject, "Роль", true);
+
+            var userTypeObject = CreateNewObject(null);
+            var userType = CreateNewObjectType(userTypeObject, "Пользователь", true);
+
+            var fileTypeObject = CreateNewObject(null);
+            var fileType = CreateNewObjectType(fileTypeObject, "Файл", true);
+
+            var pdfTypeObject = CreateNewObject(fileTypeObject);
+            var pdfType = CreateNewObjectType(pdfTypeObject, "PDF", true);
+
+            var excelTypeObject = CreateNewObject(fileTypeObject);
+            var excelType = CreateNewObjectType(excelTypeObject, "Excel", true);
+
+            db.BaseObjects.AddRange(new[] { actionTypeObject, attributeTypeObject, roleTypeObject, userTypeObject, fileTypeObject, pdfTypeObject, excelTypeObject });
+            db.ObjectTypes.AddRange(new[] { actionType, attributeType, roleType, userType, fileType, pdfType, excelType });
             db.SaveChanges();
 
             #endregion
 
             #region Actions
-
-            var actionAddObject = CreateNewObject(actionTypeObject);
             var actionEditObject = CreateNewObject(actionTypeObject);
-            var actionDeleteObject = CreateNewObject(actionTypeObject);
 
-            db.BaseObjects.AddRange(new[] { actionAddObject, actionEditObject, actionDeleteObject });
+            db.BaseObjects.AddRange(new[] { actionEditObject });
             db.SaveChanges();
 
             db.ObjectActions.AddRange(new[]
@@ -48,6 +54,15 @@ namespace MiniNavigator_DB.Configuration
                     Base = actionEditObject,
                     Name = "EDIT",
                     DisplayName = "Редактировать",
+                    ObjectTypes = new[] { roleType, userType }
+                },
+                new ObjectAction
+                {
+                    ID = Guid.NewGuid(),
+                    Base_ID = actionEditObject.ID,
+                    Base = actionEditObject,
+                    Name = "DELETE",
+                    DisplayName = "Удалить",
                     ObjectTypes = new[] { roleType, userType }
                 }
             });
@@ -91,6 +106,23 @@ namespace MiniNavigator_DB.Configuration
 
             #endregion
 
+            #region Files
+
+            var filePDFObject = CreateNewObject(pdfTypeObject);
+            var filePDF = new ObjectFile
+            {
+                ID = Guid.NewGuid(),
+                Base_ID = filePDFObject.ID,
+                Base = filePDFObject,
+                FileExtension = "PDF"
+            };
+
+            db.BaseObjects.Add(filePDFObject);
+            db.ObjectFiles.Add(filePDF);
+            db.SaveChanges();
+
+            #endregion
+
             #region Attributes
 
             var nameAttrObject = CreateNewObject(attributeTypeObject);
@@ -98,6 +130,7 @@ namespace MiniNavigator_DB.Configuration
             var ageAttrObject = CreateNewObject(attributeTypeObject);
             var titleAttrObject = CreateNewObject(attributeTypeObject);
             var roleAttrObject = CreateNewObject(attributeTypeObject);
+            var objectOwnerAttrObject = CreateNewObject(attributeTypeObject);
 
             var nameAttribute = new ObjectAttribute
             {
@@ -138,8 +171,19 @@ namespace MiniNavigator_DB.Configuration
                 ValueType = typeof(Guid).ToString()
             };
 
-            db.BaseObjects.AddRange(new[] { nameAttrObject, surnameAttrObject, ageAttrObject, titleAttrObject, roleAttrObject });
-            db.ObjectAttributes.AddRange(new[] { nameAttribute, surnameAttribute, ageAttribute, titleAttribute, roleAttribute });
+            var objectOwnerAttribute = new ObjectAttribute
+            {
+                ID = Guid.NewGuid(),
+                Base = objectOwnerAttrObject,
+                Name = "Object Owner",
+                IsReference = true,
+                ReferenceObjectType = userType,
+                ReferenceObjectTypeID = userType.ID,
+                ValueType = typeof(Guid).ToString()
+            };
+
+            db.BaseObjects.AddRange(new[] { nameAttrObject, surnameAttrObject, ageAttrObject, titleAttrObject, roleAttrObject, objectOwnerAttrObject });
+            db.ObjectAttributes.AddRange(new[] { nameAttribute, surnameAttribute, ageAttribute, titleAttribute, roleAttribute, objectOwnerAttribute });
             db.SaveChanges();
 
             #endregion
@@ -187,7 +231,15 @@ namespace MiniNavigator_DB.Configuration
                     IsRequired = true,
                     IsVisible = true,
                     Order = 1
-                }
+                },
+                new ObjectTypeAttribute
+                {
+                    ObjectTypeID = pdfType.ID,
+                    AttributeID = objectOwnerAttribute.ID,
+                    IsRequired = true,
+                    IsVisible = true,
+                    Order = 1
+                },
             });
             db.SaveChanges();
 

@@ -66,7 +66,7 @@ namespace MiniNavigator_DB.Context
                 .HasRequired(x => x.Object)
                 .WithMany()
                 .HasForeignKey(x => x.ObjectID)
-                .WillCascadeOnDelete(false);
+                .WillCascadeOnDelete(true);
 
             modelBuilder.Entity<ObjectAttributeValue>()
                 .HasRequired(x => x.Attribute)

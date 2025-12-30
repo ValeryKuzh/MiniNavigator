@@ -9,5 +9,6 @@ namespace MiniNavigator_Services.Service.Interface
     {
         Task<List<ObjectTypeDTO>> GetAllTypesAsync();
         Task<ObjectTypeDTO> GetTypeByIDAsync(Guid typeID);
+        Task<List<ObjectAttributeDTO>> GetAttributesForTypeAsync(Guid objectTypeId);
     }
 }

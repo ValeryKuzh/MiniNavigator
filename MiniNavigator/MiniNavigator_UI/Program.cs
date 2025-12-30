@@ -38,6 +38,7 @@ namespace MiniNavigator_UI
 
             // Action handlers
             services.AddSingleton<IObjectActionHandler, EditActionHandler>();
+            services.AddSingleton<IObjectActionHandler, DeleteActionHandler>();
 
             // Registry
             services.AddSingleton<ActionHandlerRegistry>(sp =>

@@ -36,6 +36,17 @@ namespace MiniNavigator_DB.Repository
             await _context.SaveChangesAsync();
         }
 
+        public async Task DeleteByIDAsync(Guid ID)
+        {
+            var entity = await _dbSet.SingleOrDefaultAsync();
+            if (_context.Entry(entity).State == EntityState.Detached)
+            {
+                _dbSet.Attach(entity);
+            }
+            _dbSet.Remove(entity);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<IEnumerable<Entity>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();

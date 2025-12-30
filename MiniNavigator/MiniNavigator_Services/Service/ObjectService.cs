@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace MiniNavigator_Services.Service
 {
@@ -25,6 +26,9 @@ namespace MiniNavigator_Services.Service
         private readonly IRepository<ObjectTypeAttribute> _objectTypeAttributeRepository;
         private readonly IObjectTypeRepository _objectTypeRepository;
         private readonly IObjectAttributeValueRepository _objectAttributeValueRepository;
+        private readonly IRepository<ObjectFile> _objectFileRepository;
+        private readonly IRepository<ObjectRole> _objectRoleRepository;
+        private readonly IRepository<ObjectUser> _objectUserRepository;
 
         public ObjectService(
             IObjectTypeService objectTypeService,
@@ -37,7 +41,10 @@ namespace MiniNavigator_Services.Service
             IObjectAttributeRepository objectAttributeRepository,
             IRepository<ObjectTypeAttribute> objectTypeAttributeRepository,
             IObjectTypeRepository objectTypeRepository,
-            IObjectAttributeValueRepository objectAttributeValueRepository)
+            IObjectAttributeValueRepository objectAttributeValueRepository, 
+            IRepository<ObjectFile> objectFileRepository,
+            IRepository<ObjectRole> objectRoleRepository,
+            IRepository<ObjectUser> objectUserRepository)
         {
             _objectTypeService = objectTypeService;
             
@@ -50,6 +57,9 @@ namespace MiniNavigator_Services.Service
             _objectTypeAttributeRepository = objectTypeAttributeRepository;
             _objectTypeRepository = objectTypeRepository;
             _objectAttributeValueRepository = objectAttributeValueRepository;
+            _objectFileRepository = objectFileRepository;
+            _objectRoleRepository = objectRoleRepository;
+            _objectUserRepository = objectUserRepository;
         }
 
         /// <summary>
@@ -87,37 +97,84 @@ namespace MiniNavigator_Services.Service
             {
                 Title = "Система"
             };
-            
-            foreach (var type in await _objectTypeService.GetAllTypesAsync())
-            {
-                var objType = new NavObjectDTO()
-                {
-                    ID = type.ObjectID,
-                    ObjectTypeID = null,
-                    Title = type.Title,
-                    Parent = root,
-                    ParentID = root.ID,
-                };
-                if(type.IsVisible)
-                    root.Children.Add(objType);
-            }
 
-            var baseObjects = await _objectRepository.GetAllAsync();
+            var types = await GetSortedTypesAsync();
 
-            foreach (var baseObject in baseObjects)
+            foreach (var type in types.Where(t => t.IsVisible))
             {
-                if (baseObjects.Where(bo => bo.ID == baseObject.ParentID) == null) // если тип объекта - пропускаем
+                var typeObj = await _objectRepository.GetByIdAsync(type.ObjectID);
+                if (typeObj.ObjectType == null)
                 {
-                    continue;
+                    root.Children.Add(new NavObjectDTO
+                    {
+                        ID = type.ObjectID,
+                        Title = type.Title,
+                        ParentID = root.ID,
+                        Parent = root
+                    });
                 }
                 else
                 {
-                    var navObjectDTO = _objectMapper.ToDTO(baseObject);
-                    AddObjectToTree(root, navObjectDTO);
+                    var dto = new NavObjectDTO()
+                    {
+                        ID = typeObj.ID,
+                        ObjectTypeID = typeObj.ObjectTypeID,
+                        Title = type.Title,
+                        Parent = null,
+                        ParentID = typeObj.ParentID
+                    };
+                    AddObjectToTree(root, dto);
                 }
             }
 
             return root;
+        }
+
+        private async Task<List<ObjectTypeDTO>> GetSortedTypesAsync()
+        {
+            var types = (await _objectTypeService.GetAllTypesAsync())
+                .Where(t => t.IsVisible)
+                .ToList();
+
+            var typeObjectIds = types.Select(t => t.ObjectID).ToHashSet();
+
+            var baseObjects = (await _objectRepository.GetAllAsync())
+                .Where(o => typeObjectIds.Contains(o.ID))
+                .ToList();
+
+            var objectById = baseObjects.ToDictionary(o => o.ID);
+
+            var childrenLookup = baseObjects
+                .Where(o => o.ParentID != null)
+                .GroupBy(o => o.ParentID.Value)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var result = new List<ObjectTypeDTO>();
+            var visited = new HashSet<Guid>();
+
+            void Traverse(BaseObject obj)
+            {
+                if (!visited.Add(obj.ID))
+                    return;
+
+                var type = types.First(t => t.ObjectID == obj.ID);
+                result.Add(type);
+
+                if (childrenLookup.TryGetValue(obj.ID, out var children))
+                {
+                    foreach (var child in children)
+                    {
+                        Traverse(child);
+                    }
+                }
+            }
+
+            foreach (var root in baseObjects.Where(o => o.ParentID == null))
+            {
+                Traverse(root);
+            }
+
+            return result;
         }
 
         private void AddObjectToTree(NavObjectDTO root, NavObjectDTO obj) 
@@ -388,5 +445,58 @@ namespace MiniNavigator_Services.Service
                 }
             }
         }
+
+        /// <summary>
+        /// Удаляет объект из системы
+        /// </summary>
+        /// <param name="objectId">ID объекта</param>
+        /// <exception cref="InvalidOperationException">Если объект не найден или на объект есть действующие ссылки</exception>
+        public async Task DeleteObjectAsync(Guid objectId)
+        {
+            var obj = await _objectRepository.GetByIdAsync(objectId);
+            if (obj == null)
+                throw new InvalidOperationException("Объект не найден");
+
+            bool isReferenced = _objectAttributeValueRepository
+                .Query()
+                .Any(v =>
+                    v.Attribute.IsReference &&
+                    v.Value == objectId.ToString()
+                );
+
+            if (isReferenced)
+                throw new InvalidOperationException(
+                    "Невозможно удалить объект: на него существуют ссылки"
+                );
+
+            var values = _objectAttributeValueRepository
+                .Query()
+                .Where(v => v.ObjectID == objectId)
+                .ToList();
+
+            foreach (var value in values)
+                await _objectAttributeValueRepository.DeleteAsync(value);
+
+            await DeleteTypedEntitiesAsync(objectId);
+            await _objectRepository.DeleteAsync(obj);
+        }
+
+        private async Task DeleteTypedEntitiesAsync(Guid objectId)
+        {
+            await DeleteIfExistsAsync(_objectUserRepository, x => x.Base_ID == objectId, x => x.ID);
+            await DeleteIfExistsAsync(_objectRoleRepository, x => x.Base_ID == objectId, x => x.ID);
+            await DeleteIfExistsAsync(_objectFileRepository, x => x.Base_ID == objectId, x => x.ID);
+        }
+
+        private async Task DeleteIfExistsAsync<TEntity>(
+            IRepository<TEntity> repo,
+            Func<TEntity, bool> predicate,
+            Func<TEntity, Guid> idSelector) where TEntity : class
+        {
+            var entity = repo.Query().FirstOrDefault(predicate);
+            if (entity != null)
+                await repo.DeleteByIDAsync(idSelector(entity));
+        }
+
     }
 }

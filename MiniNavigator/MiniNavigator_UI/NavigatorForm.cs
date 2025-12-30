@@ -22,6 +22,7 @@ namespace MiniNavigator_UI
     public partial class NavigatorForm : Form
     {
         private readonly IObjectService _objectService;
+        private readonly IObjectTypeService _objectTypeService;
         private readonly IValidationService _validationService;
 
         private readonly ActionHandlerRegistry _actionRegistry;
@@ -47,6 +48,7 @@ namespace MiniNavigator_UI
             IMapper<NavObjectViewModel, NavObjectDTO> objectMapper)
         {
             _objectService = objectService;
+            _objectTypeService = objectTypeService;
             _validationService = validationService;
 
             _actionRegistry = actionRegistry;
@@ -207,13 +209,20 @@ namespace MiniNavigator_UI
                 return;
             if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel navObjectViewModel)
             {
-                if (e.Button == MouseButtons.Right)
-                {
-                    await ShowContextMenuAsync(e.Location);
+
+                if (navObjectViewModel.Children.Count == 0) {
+                    if (e.Button == MouseButtons.Right)
+                    {
+                        await ShowContextMenuAsync(e.Location);
+                    }
+                    else if (e.Button == MouseButtons.Left)
+                    {
+                        await BindTableAsync(navObjectViewModel.ID);
+                    }
                 }
-                else if (e.Button == MouseButtons.Left)
+                else
                 {
-                    await BindTableAsync(navObjectViewModel.ID);
+                    NavigatorDataGridView.Columns.Clear();
                 }
             }
         }
@@ -223,9 +232,8 @@ namespace MiniNavigator_UI
             ContextMenuStrip menu = new ContextMenuStrip();
 
             var addItem = new ToolStripMenuItem("Добавить");
-            menu.Items.Add(addItem);
-
             addItem.Click += ItemAdd_Click;
+            menu.Items.Add(addItem);
 
             menu.Show(NavigatorVirtualTree, location);
         }
@@ -263,18 +271,31 @@ namespace MiniNavigator_UI
                 };
             }
 
-            _rows.Add(row);
-            _editingRow = row;
-            _isNewRow = true;
-
-            int lastRowIndex = NavigatorDataGridView.Rows.Count - 1;
-            if (lastRowIndex >= 0)
+            if (NavigatorDataGridView.ColumnCount != 0)
             {
-                NavigatorDataGridView.CurrentCell =
-                    NavigatorDataGridView.Rows[lastRowIndex].Cells[0];
-            }
+                _rows.Add(row);
+                _editingRow = row;
+                _isNewRow = true;
 
-            NavigatorDataGridView.BeginEdit(true);
+
+                int lastRowIndex = NavigatorDataGridView.Rows.Count - 1;
+                if (lastRowIndex >= 0)
+                {
+                    NavigatorDataGridView.CurrentCell =
+                        NavigatorDataGridView.Rows[lastRowIndex].Cells[0];
+                }
+
+                NavigatorDataGridView.BeginEdit(true);
+            }
+        }
+
+        public void RemoveRow(DynamicObjectRow row)
+        {
+            if (row == null || _rows == null)
+                return;
+
+            _rows.Remove(row);
+            NavigatorDataGridView.Invalidate();
         }
 
         private void ResetSorting()
@@ -285,7 +306,6 @@ namespace MiniNavigator_UI
             }
         }
 
-
         /// <summary>
         /// Биндинг объектов системы на DataGridView
         /// </summary>
@@ -294,33 +314,10 @@ namespace MiniNavigator_UI
         {
             _currentTypeId = typeId;
 
-            var tableData = await _objectService.GetTableData(typeId);
+            var attributes = await _objectTypeService.GetAttributesForTypeAsync(typeId);
 
-            _attributes = ExtractAttributes(tableData);
-
-            ConfigureGrid();
-
-            CreateColumns(_attributes);
-
-            _rows = await CreateRowsAsync(tableData);
-
-            BindGrid(_rows);
-
-            IsEditing = false;
-        }
-
-        /// <summary>
-        /// Маппит Полученные атрибуты из сервиса на ViewModel объекты
-        /// </summary>
-        /// <param name="tableData">Список объектов из сервиса</param>
-        /// <returns>Список ViewModel объектов</returns>
-        private List<ObjectAttributeViewModel> ExtractAttributes(List<Dictionary<Guid, ObjectAttributeDTO>> tableData)
-        {
-            return tableData
-                .SelectMany(dict => dict.Values)
-                .Where(a => a != null && a.IsVisible && !string.IsNullOrWhiteSpace(a.Name))
-                .GroupBy(a => a.ID)
-                .Select(g => g.First())
+            _attributes = attributes
+                .Where(a => a.IsVisible)
                 .OrderBy(a => a.Index)
                 .Select(a => new ObjectAttributeViewModel
                 {
@@ -331,6 +328,17 @@ namespace MiniNavigator_UI
                     IsRequired = a.IsRequired
                 })
                 .ToList();
+
+            ConfigureGrid();
+            CreateColumns(_attributes);
+
+            var tableData = await _objectService.GetTableData(typeId);
+
+            _rows = await CreateRowsAsync(tableData);
+
+            BindGrid(_rows);
+
+            IsEditing = false;
         }
 
         /// <summary>
@@ -499,22 +507,6 @@ namespace MiniNavigator_UI
 
             if (row.Attributes.TryGetValue(attr.ID, out var vm))
                 vm.Value = e.Value?.ToString();
-        }
-
-
-        /// <summary>
-        /// Определение значения для отображения атрибута 
-        /// </summary>
-        /// <param name="attr">Атрибут</param>
-        /// <returns>Значение</returns>
-        private async Task<string> ResolveAttributeValueAsync(ObjectAttributeDTO attr)
-        {
-            if (!attr.IsReference || attr.Value == null)
-                return attr.Value ?? string.Empty;
-
-            var obj = await _objectService.GetObjectInfoByIdAsync(Guid.Parse(attr.Value.ToString()));
-
-            return obj?.Title ?? "(Не выбран)";
         }
 
         /// <summary>

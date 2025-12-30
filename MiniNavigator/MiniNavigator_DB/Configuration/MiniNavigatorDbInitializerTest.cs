@@ -9,289 +9,278 @@ using System.Threading.Tasks;
 
 namespace MiniNavigator_DB.Configuration
 {
-    internal class MiniNavigatorDbInitializerTest : DropCreateDatabaseAlways<MiniNavigatorDbContext>
+    public class MiniNavigatorDbInitializerTest : DropCreateDatabaseAlways<MiniNavigatorDbContext>
     {
         protected override void Seed(MiniNavigatorDbContext db)
         {
-            #region ObjectTypes
+            #region Object Types
 
-            BaseObject roleTypeObj = CreateBase(null);
-            BaseObject userTypeObj = CreateBase(null);
-            BaseObject productTypeObj = CreateBase(null);
-            BaseObject attributeTypeObj = CreateBase(null);
+            var actionTypeObject = CreateNewObject(null);
+            var actionType = CreateNewObjectType(actionTypeObject, "Действие", false);
 
-            ObjectType roleType = CreateType(roleTypeObj, "Роль", true);
-            ObjectType userType = CreateType(userTypeObj, "Пользователь", true);
-            ObjectType productType = CreateType(productTypeObj, "Продукт", true);
-            ObjectType attributeType = CreateType(attributeTypeObj, "Атрибут", false);
+            var attributeTypeObject = CreateNewObject(null);
+            var attributeType = CreateNewObjectType(attributeTypeObject, "Атрибут", false);
 
-            db.BaseObjects.AddRange(new[]
-            {
-            roleTypeObj, userTypeObj, productTypeObj, attributeTypeObj
-        });
+            var roleTypeObject = CreateNewObject(null);
+            var roleType = CreateNewObjectType(roleTypeObject, "Роль", true);
 
-            db.ObjectTypes.AddRange(new[]
-            {
-            roleType, userType, productType, attributeType
-        });
+            var userTypeObject = CreateNewObject(null);
+            var userType = CreateNewObjectType(userTypeObject, "Пользователь", true);
 
+            var fileTypeObject = CreateNewObject(null);
+            var fileType = CreateNewObjectType(fileTypeObject, "Файл", true);
+
+            var pdfFileTypeObject = CreateNewObject(fileTypeObject);
+            var pdfFileType = CreateNewObjectType(pdfFileTypeObject, "PDF", true);
+
+            var excelTypeObject = CreateNewObject(fileTypeObject);
+            var excelType = CreateNewObjectType(excelTypeObject, "Excel", true);
+
+            db.BaseObjects.AddRange(new[] { actionTypeObject, attributeTypeObject, roleTypeObject, userTypeObject, fileTypeObject, pdfFileTypeObject, excelTypeObject });
+            db.ObjectTypes.AddRange(new[] { actionType, attributeType, roleType, userType, fileType, pdfFileType, excelType });
             db.SaveChanges();
 
             #endregion
 
-            #region Roles
+            #region Actions
+            var actionEditObject = CreateNewObject(actionTypeObject);
+            var actionDeleteObject = CreateNewObject(actionTypeObject);
 
-            BaseObject adminRoleObj = CreateBase(roleTypeObj);
-            BaseObject managerRoleObj = CreateBase(roleTypeObj);
-            BaseObject userRoleObj = CreateBase(roleTypeObj);
+            db.BaseObjects.AddRange(new[] { actionEditObject });
+            db.SaveChanges();
 
-            ObjectRole adminRole = CreateRole(adminRoleObj);
-            ObjectRole managerRole = CreateRole(managerRoleObj);
-            ObjectRole userRole = CreateRole(userRoleObj);
-
-            db.BaseObjects.AddRange(new[]
+            db.ObjectActions.AddRange(new[]
             {
-            adminRoleObj, managerRoleObj, userRoleObj
-        });
-
-            db.ObjectRoles.AddRange(new[]
-            {
-            adminRole, managerRole, userRole
-        });
-
+                CreateAction(actionEditObject, "EDIT", "Редактировать", roleType, userType, pdfFileType),
+                CreateAction(actionDeleteObject, "DELETE", "Удалить", roleType, userType, pdfFileType),
+            });
             db.SaveChanges();
 
             #endregion
 
-            #region Users
+            #region Roles and Users
 
-            List<UserSeed> users = new List<UserSeed>
-        {
-            CreateUser(userTypeObj, adminRole),
-            CreateUser(userTypeObj, managerRole),
-            CreateUser(userTypeObj, userRole),
-            CreateUser(userTypeObj, userRole)
-        };
+            var roleAObject = CreateNewObject(roleTypeObject);
+            var roleA = CreateRole(roleAObject);
 
-            db.BaseObjects.AddRange(users.Select(u => u.Base));
-            db.ObjectUsers.AddRange(users.Select(u => u.User));
+            var roleBObject = CreateNewObject(roleTypeObject);
+            var roleB = CreateRole(roleBObject);
+
+            var userAObject = CreateNewObject(userTypeObject);
+            var userA = CreateUser(userAObject, roleA);
+
+            db.BaseObjects.AddRange(new[] { roleAObject, roleBObject, userAObject });
+            db.ObjectRoles.AddRange(new[] { roleA, roleB });
+            db.ObjectUsers.Add(userA);
             db.SaveChanges();
 
             #endregion
 
-            #region Products
+            #region Files
 
-            List<BaseObject> products = new List<BaseObject>
-        {
-            CreateBase(productTypeObj),
-            CreateBase(productTypeObj),
-            CreateBase(productTypeObj)
-        };
+            var filePDFObject = CreateNewObject(pdfFileTypeObject);
+            var filePDF = CreateFile(filePDFObject, "PDF");
 
-            db.BaseObjects.AddRange(products);
+            db.BaseObjects.Add(filePDFObject);
+            db.ObjectFiles.Add(filePDF);
             db.SaveChanges();
 
             #endregion
 
             #region Attributes
 
-            List<ObjectAttribute> attributes = new List<ObjectAttribute>
-        {
-            CreateAttribute(attributeTypeObj, "Name", typeof(string)),
-            CreateAttribute(attributeTypeObj, "Surname", typeof(string)),
-            CreateAttribute(attributeTypeObj, "Email", typeof(string)),
-            CreateAttribute(attributeTypeObj, "Phone", typeof(string)),
-            CreateAttribute(attributeTypeObj, "Age", typeof(int)),
-            CreateAttribute(attributeTypeObj, "IsActive", typeof(bool)),
-            CreateAttribute(attributeTypeObj, "CreatedAt", typeof(DateTime)),
-            CreateAttribute(attributeTypeObj, "LastLogin", typeof(DateTime)),
-            CreateAttribute(attributeTypeObj, "Salary", typeof(decimal)),
-            CreateAttribute(attributeTypeObj, "Price", typeof(decimal)),
-            CreateAttribute(attributeTypeObj, "Description", typeof(string))
-        };
+            var nameAttrObject = CreateNewObject(attributeTypeObject);
+            var surnameAttrObject = CreateNewObject(attributeTypeObject);
+            var ageAttrObject = CreateNewObject(attributeTypeObject);
+            var titleAttrObject = CreateNewObject(attributeTypeObject);
+            var roleAttrObject = CreateNewObject(attributeTypeObject);
+            var objectOwnerAttrObject = CreateNewObject(attributeTypeObject);
+            var fileNameAttrObject = CreateNewObject(attributeTypeObject);
+            var createdAtAttrObject = CreateNewObject(attributeTypeObject);
 
-            ObjectAttribute roleRefAttr = CreateReferenceAttribute(
-                attributeTypeObj, "Role", roleType);
+            var nameAttribute = CreateAttribute("Name", nameAttrObject, false, null, typeof(string));
+            var surnameAttribute = CreateAttribute("Surname", surnameAttrObject, false, null, typeof(string));
+            var ageAttribute = CreateAttribute("Age", ageAttrObject, false, null, typeof(byte));
+            var titleAttribute = CreateAttribute("Title", titleAttrObject, false, null, typeof(string));
+            var roleAttribute = CreateAttribute("Role", roleAttrObject, true, roleType, typeof(Guid));
+            var objectOwnerAttribute = CreateAttribute("Object Owner", objectOwnerAttrObject, true, userType, typeof(Guid));
+            var fileNameAttribute = CreateAttribute("File Name", fileNameAttrObject, false, null, typeof(string));
+            var createdAtAttribute = CreateAttribute("Created At", createdAtAttrObject, false, null, typeof(DateTime));
 
-            attributes.Add(roleRefAttr);
 
-            db.BaseObjects.AddRange(attributes.Select(a => a.Base));
-            db.ObjectAttributes.AddRange(attributes);
+            db.BaseObjects.AddRange(new[] {
+                nameAttrObject,
+                surnameAttrObject,
+                ageAttrObject,
+                titleAttrObject,
+                roleAttrObject,
+                objectOwnerAttrObject,
+                fileNameAttrObject,
+                createdAtAttrObject
+            });
+            db.ObjectAttributes.AddRange(new[] {
+                nameAttribute,
+                surnameAttribute,
+                ageAttribute,
+                titleAttribute,
+                roleAttribute,
+                objectOwnerAttribute,
+                fileNameAttribute,
+                createdAtAttribute
+            });
             db.SaveChanges();
 
             #endregion
 
             #region ObjectTypeAttributes
 
-            int order = 1;
-            foreach (ObjectAttribute attr in attributes)
-            {
-                db.ObjectTypeAttributes.Add(new ObjectTypeAttribute
-                {
-                    ObjectTypeID = userType.ID,
-                    AttributeID = attr.ID,
-                    Order = order++,
-                    IsVisible = true,
-                    IsRequired = attr.Name == "Name" || attr.Name == "Email"
-                });
-            }
-
             db.ObjectTypeAttributes.AddRange(new[]
             {
-            CreateOTA(productType, "Name", 1, attributes),
-            CreateOTA(productType, "Price", 2, attributes),
-            CreateOTA(productType, "Description", 3, attributes)
-        });
+                CreateObjectTypeAttribute(userType, nameAttribute, true, true, true, 1),
+                CreateObjectTypeAttribute(userType, surnameAttribute, true, true, true, 2),
+                CreateObjectTypeAttribute(userType, roleAttribute, true, true, false, 3),
+                CreateObjectTypeAttribute(userType, ageAttribute, true, true, false, 4),
 
+                CreateObjectTypeAttribute(roleType, titleAttribute, true, true, true, 1),
+
+                CreateObjectTypeAttribute(pdfFileType, fileNameAttribute, true, true, true, 1),
+                CreateObjectTypeAttribute(pdfFileType, objectOwnerAttribute, true, true, false, 2),
+                CreateObjectTypeAttribute(pdfFileType, createdAtAttribute, false, true, false, 3)
+            });
             db.SaveChanges();
 
             #endregion
 
-            #region AttributeValues
+            #region ObjectAttributeValues
 
-            foreach (UserSeed u in users)
+            db.ObjectAttributeValues.AddRange(new[]
             {
-                AddValue(db, u.Base, "Name", "Test");
-                AddValue(db, u.Base, "Surname", "User");
-                AddValue(db, u.Base, "Email", "user@mail.com");
-                AddValue(db, u.Base, "Age", "30");
-                AddValue(db, u.Base, "IsActive", "true");
-                AddValue(db, u.Base, "Role", adminRoleObj.ID.ToString());
-            }
+                CreateAttributeValue(roleAObject, titleAttribute, "Admin"),
 
-            foreach (BaseObject product in products)
-            {
-                AddValue(db, product, "Name", "Test product");
-                AddValue(db, product, "Price", "199.99");
-                AddValue(db, product, "Description", "Seeded product");
-            }
+                CreateAttributeValue(roleBObject, titleAttribute, "Manager"),
 
+                CreateAttributeValue(userAObject, nameAttribute, "Valery"),
+                CreateAttributeValue(userAObject, surnameAttribute, "Kuzhovnik"),
+                CreateAttributeValue(userAObject, roleAttribute, roleAObject.ID.ToString()),
+                CreateAttributeValue(userAObject, ageAttribute, "19"),
+
+                CreateAttributeValue(filePDFObject, fileNameAttribute, "lol.pdf"),
+                CreateAttributeValue(filePDFObject, objectOwnerAttribute, userAObject.ID.ToString()),
+                CreateAttributeValue(filePDFObject, createdAtAttribute, DateTime.Now.ToString())
+            });
             db.SaveChanges();
-
             #endregion
 
             base.Seed(db);
         }
 
-        #region Helpers (совместимо с .NET 4.8)
-
-        private BaseObject CreateBase(BaseObject type)
+        private BaseObject CreateNewObject(BaseObject objType)
         {
             return new BaseObject
             {
                 ID = Guid.NewGuid(),
-                ObjectType = type,
-                ObjectTypeID = type != null ? type.ID : (Guid?)null,
-                Parent = type,
-                ParentID = type != null ? type.ID : (Guid?)null
+                ObjectTypeID = objType?.ID,
+                ObjectType = objType,
+                ParentID = objType?.ID,
+                Parent = objType
             };
         }
 
-        private ObjectType CreateType(BaseObject baseObj, string name, bool visible)
+        private ObjectType CreateNewObjectType(BaseObject objOfType, string name, bool isVisible)
         {
             return new ObjectType
             {
                 ID = Guid.NewGuid(),
-                Base = baseObj,
-                Base_ID = baseObj.ID,
+                Base_ID = objOfType.ID,
+                Base = objOfType,
                 Name = name,
-                IsVisible = visible
+                IsVisible = isVisible
             };
         }
 
-        private ObjectRole CreateRole(BaseObject obj)
+        private ObjectRole CreateRole(BaseObject roleObject)
         {
             return new ObjectRole
             {
                 ID = Guid.NewGuid(),
-                Base = obj,
-                Base_ID = obj.ID
+                Base_ID = roleObject.ID,
+                Base = roleObject
             };
         }
 
-        private UserSeed CreateUser(BaseObject type, ObjectRole role)
+        private ObjectUser CreateUser(BaseObject userObject, ObjectRole role)
         {
-            BaseObject obj = CreateBase(type);
-
-            ObjectUser user = new ObjectUser
+            return new ObjectUser
             {
                 ID = Guid.NewGuid(),
-                Base = obj,
-                Base_ID = obj.ID,
-                RoleID = role.ID,
+                Base_ID = userObject.ID,
+                Base = userObject,
+                RoleID = role?.ID,
                 Role = role
             };
-
-            return new UserSeed { Base = obj, User = user };
         }
 
-        private ObjectAttribute CreateAttribute(
-            BaseObject attrTypeObj, string name, Type valueType)
+        private ObjectFile CreateFile(BaseObject fileObject, string fileExtension)
+        {
+            return new ObjectFile
+            {
+                ID = Guid.NewGuid(),
+                Base_ID = fileObject.ID,
+                Base = fileObject,
+                FileExtension = fileExtension
+            };
+        }
+
+        private ObjectAttribute CreateAttribute(string attributeName, BaseObject attributeObject, bool isReference, ObjectType referenceObjectType, Type type)
         {
             return new ObjectAttribute
             {
                 ID = Guid.NewGuid(),
-                Base = CreateBase(attrTypeObj),
-                Name = name,
-                ValueType = valueType.ToString()
+                Base = attributeObject,
+                Name = attributeName,
+                IsReference = isReference,
+                ReferenceObjectType = referenceObjectType,
+                ReferenceObjectTypeID = referenceObjectType?.ID,
+                ValueType = type.ToString()
             };
         }
 
-        private ObjectAttribute CreateReferenceAttribute(
-            BaseObject attrTypeObj, string name, ObjectType refType)
+        private ObjectAction CreateAction(BaseObject baseObject, string commandName, string displayName, params ObjectType[] types)
         {
-            return new ObjectAttribute
+            return new ObjectAction
             {
                 ID = Guid.NewGuid(),
-                Base = CreateBase(attrTypeObj),
-                Name = name,
-                IsReference = true,
-                ReferenceObjectType = refType,
-                ReferenceObjectTypeID = refType.ID,
-                ValueType = typeof(Guid).ToString()
+                Base_ID = baseObject.ID,
+                Base = baseObject,
+                Name = commandName,
+                DisplayName = displayName,
+                ObjectTypes = types
             };
         }
 
-        private ObjectTypeAttribute CreateOTA(
-            ObjectType type, string attrName, int order,
-            List<ObjectAttribute> attrs)
+        private ObjectTypeAttribute CreateObjectTypeAttribute(ObjectType objectType, ObjectAttribute attribute, bool isRequired, bool isVisible, bool isTitle, int index)
         {
-            ObjectAttribute attr = attrs.First(a => a.Name == attrName);
-
             return new ObjectTypeAttribute
             {
-                ObjectTypeID = type.ID,
-                AttributeID = attr.ID,
-                Order = order,
-                IsVisible = true
+                ObjectTypeID = objectType.ID,
+                AttributeID = attribute.ID,
+                IsRequired = isRequired,
+                IsVisible = isVisible,
+                IsTitle = isTitle,
+                Order = index
             };
         }
 
-        private void AddValue(
-            MiniNavigatorDbContext db,
-            BaseObject obj,
-            string attrName,
-            string value)
+        private ObjectAttributeValue CreateAttributeValue(BaseObject baseObject, ObjectAttribute attribute, string value)
         {
-            ObjectAttribute attr = db.ObjectAttributes
-                .First(a => a.Name == attrName);
-
-            db.ObjectAttributeValues.Add(new ObjectAttributeValue
+            return new ObjectAttributeValue
             {
-                Object = obj,
-                ObjectID = obj.ID,
-                Attribute = attr,
-                AttributeID = attr.ID,
+                Object = baseObject,
+                ObjectID = baseObject.ID,
+                Attribute = attribute,
+                AttributeID = attribute.ID,
                 Value = value
-            });
+            };
         }
-
-        private class UserSeed
-        {
-            public BaseObject Base;
-            public ObjectUser User;
-        }
-
-        #endregion
     }
 }

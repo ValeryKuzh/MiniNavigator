@@ -2,7 +2,9 @@
 using MiniNavigator_DB.Model;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Core.Metadata.Edm;
 
 namespace MiniNavigator_DB.Configuration
 {
@@ -27,44 +29,30 @@ namespace MiniNavigator_DB.Configuration
             var fileTypeObject = CreateNewObject(null);
             var fileType = CreateNewObjectType(fileTypeObject, "Файл", true);
 
-            var pdfTypeObject = CreateNewObject(fileTypeObject);
-            var pdfType = CreateNewObjectType(pdfTypeObject, "PDF", true);
+            var pdfFileTypeObject = CreateNewObject(fileTypeObject);
+            var pdfFileType = CreateNewObjectType(pdfFileTypeObject, "PDF", true);
 
             var excelTypeObject = CreateNewObject(fileTypeObject);
-            var excelType = CreateNewObjectType(excelTypeObject, "Excel", true);
+            var excelFileType = CreateNewObjectType(excelTypeObject, "Excel", true);
 
-            db.BaseObjects.AddRange(new[] { actionTypeObject, attributeTypeObject, roleTypeObject, userTypeObject, fileTypeObject, pdfTypeObject, excelTypeObject });
-            db.ObjectTypes.AddRange(new[] { actionType, attributeType, roleType, userType, fileType, pdfType, excelType });
+            db.BaseObjects.AddRange(new[] { actionTypeObject, attributeTypeObject, roleTypeObject, userTypeObject, fileTypeObject, pdfFileTypeObject, excelTypeObject });
+            db.ObjectTypes.AddRange(new[] { actionType, attributeType, roleType, userType, fileType, pdfFileType, excelFileType });
             db.SaveChanges();
 
             #endregion
 
             #region Actions
+
             var actionEditObject = CreateNewObject(actionTypeObject);
+            var actionDeleteObject = CreateNewObject(actionTypeObject);
 
             db.BaseObjects.AddRange(new[] { actionEditObject });
             db.SaveChanges();
 
             db.ObjectActions.AddRange(new[]
             {
-                new ObjectAction
-                {
-                    ID = Guid.NewGuid(),
-                    Base_ID = actionEditObject.ID,
-                    Base = actionEditObject,
-                    Name = "EDIT",
-                    DisplayName = "Редактировать",
-                    ObjectTypes = new[] { roleType, userType }
-                },
-                new ObjectAction
-                {
-                    ID = Guid.NewGuid(),
-                    Base_ID = actionEditObject.ID,
-                    Base = actionEditObject,
-                    Name = "DELETE",
-                    DisplayName = "Удалить",
-                    ObjectTypes = new[] { roleType, userType }
-                }
+                CreateAction(actionEditObject, "EDIT", "Редактировать", roleType, userType, pdfFileType), 
+                CreateAction(actionDeleteObject, "DELETE", "Удалить", roleType, userType, pdfFileType),
             });
             db.SaveChanges();
 
@@ -73,52 +61,36 @@ namespace MiniNavigator_DB.Configuration
             #region Roles and Users
 
             var roleAObject = CreateNewObject(roleTypeObject);
-            var roleA = new ObjectRole
-            {
-                ID = Guid.NewGuid(),
-                Base_ID = roleAObject.ID,
-                Base = roleAObject
-            };
+            var roleA = CreateRole(roleAObject);    
 
             var roleBObject = CreateNewObject(roleTypeObject);
-            var roleB = new ObjectRole
-            {
-                ID = Guid.NewGuid(),
-                Base_ID = roleBObject.ID,
-                Base = roleBObject
-            };
-
+            var roleB = CreateRole(roleBObject);
 
             var userAObject = CreateNewObject(userTypeObject);
-            var userA = new ObjectUser
-            {
-                ID = Guid.NewGuid(),
-                Base_ID = userAObject.ID,
-                Base = userAObject,
-                RoleID = roleA.ID,
-                Role = roleA
-            };
+            var userA = CreateUser(userAObject, roleA);
 
-            db.BaseObjects.AddRange(new[] { roleAObject, userAObject });
-            db.ObjectRoles.Add(roleA);
+            db.BaseObjects.AddRange(new[] { roleAObject, roleBObject, userAObject });
+
+            db.ObjectRoles.AddRange(new[] { roleA, roleB });
+
             db.ObjectUsers.Add(userA);
+
             db.SaveChanges();
 
             #endregion
 
             #region Files
 
-            var filePDFObject = CreateNewObject(pdfTypeObject);
-            var filePDF = new ObjectFile
-            {
-                ID = Guid.NewGuid(),
-                Base_ID = filePDFObject.ID,
-                Base = filePDFObject,
-                FileExtension = "PDF"
-            };
+            var filePDFObject = CreateNewObject(pdfFileTypeObject);
+            var filePDF = CreateFile(filePDFObject, "PDF");
+            
+            var fileExcelObject = CreateNewObject(pdfFileTypeObject);
+            var fileExcel = CreateFile(fileExcelObject, "Excel");
 
-            db.BaseObjects.Add(filePDFObject);
-            db.ObjectFiles.Add(filePDF);
+            db.BaseObjects.AddRange(new[] { filePDFObject, fileExcelObject });
+
+            db.ObjectFiles.AddRange(new[]{ filePDF, fileExcel });
+
             db.SaveChanges();
 
             #endregion
@@ -131,59 +103,39 @@ namespace MiniNavigator_DB.Configuration
             var titleAttrObject = CreateNewObject(attributeTypeObject);
             var roleAttrObject = CreateNewObject(attributeTypeObject);
             var objectOwnerAttrObject = CreateNewObject(attributeTypeObject);
+            var fileNameAttrObject = CreateNewObject(attributeTypeObject);
+            var createdAtAttrObject = CreateNewObject(attributeTypeObject);
 
-            var nameAttribute = new ObjectAttribute
-            {
-                ID = Guid.NewGuid(),
-                Base = nameAttrObject,
-                Name = "Name",
-                ValueType = typeof(string).ToString()
-            };
-            var surnameAttribute = new ObjectAttribute
-            {
-                ID = Guid.NewGuid(),
-                Base = surnameAttrObject,
-                Name = "Surname",
-                ValueType = typeof(string).ToString()
-            };
-            var ageAttribute = new ObjectAttribute
-            {
-                ID = Guid.NewGuid(),
-                Base = ageAttrObject,
-                Name = "Age",
-                ValueType = typeof(byte).ToString()
-            };
-            var titleAttribute = new ObjectAttribute
-            {
-                ID = Guid.NewGuid(),
-                Base = titleAttrObject,
-                Name = "Title",
-                ValueType = typeof(string).ToString()
-            };
-            var roleAttribute = new ObjectAttribute
-            {
-                ID = Guid.NewGuid(),
-                Base = roleAttrObject,
-                Name = "Role",
-                IsReference = true,
-                ReferenceObjectType = roleType,
-                ReferenceObjectTypeID = roleType.ID,
-                ValueType = typeof(Guid).ToString()
-            };
+            var nameAttribute = CreateAttribute("Name", nameAttrObject, false, null, typeof(string));
+            var surnameAttribute = CreateAttribute("Surname", surnameAttrObject, false, null, typeof(string));
+            var ageAttribute = CreateAttribute("Age", ageAttrObject, false, null, typeof(byte));
+            var titleAttribute = CreateAttribute("Title", titleAttrObject, false, null, typeof(string));
+            var roleAttribute = CreateAttribute("Role", roleAttrObject, true, roleType, typeof(Guid));
+            var objectOwnerAttribute = CreateAttribute("Object Owner", objectOwnerAttrObject, true, userType, typeof(Guid));
+            var fileNameAttribute = CreateAttribute("File Name", fileNameAttrObject, false, null, typeof(string));
+            var createdAtAttribute = CreateAttribute("Created At", createdAtAttrObject, false, null, typeof(DateTime));
 
-            var objectOwnerAttribute = new ObjectAttribute
-            {
-                ID = Guid.NewGuid(),
-                Base = objectOwnerAttrObject,
-                Name = "Object Owner",
-                IsReference = true,
-                ReferenceObjectType = userType,
-                ReferenceObjectTypeID = userType.ID,
-                ValueType = typeof(Guid).ToString()
-            };
 
-            db.BaseObjects.AddRange(new[] { nameAttrObject, surnameAttrObject, ageAttrObject, titleAttrObject, roleAttrObject, objectOwnerAttrObject });
-            db.ObjectAttributes.AddRange(new[] { nameAttribute, surnameAttribute, ageAttribute, titleAttribute, roleAttribute, objectOwnerAttribute });
+            db.BaseObjects.AddRange(new[] { 
+                nameAttrObject, 
+                surnameAttrObject, 
+                ageAttrObject, 
+                titleAttrObject, 
+                roleAttrObject, 
+                objectOwnerAttrObject,
+                fileNameAttrObject,
+                createdAtAttrObject
+            });
+            db.ObjectAttributes.AddRange(new[] { 
+                nameAttribute, 
+                surnameAttribute, 
+                ageAttribute, 
+                titleAttribute,
+                roleAttribute, 
+                objectOwnerAttribute,
+                fileNameAttribute,
+                createdAtAttribute 
+            });
             db.SaveChanges();
 
             #endregion
@@ -192,54 +144,20 @@ namespace MiniNavigator_DB.Configuration
 
             db.ObjectTypeAttributes.AddRange(new[]
             {
-                new ObjectTypeAttribute
-                {
-                    ObjectTypeID = userType.ID,
-                    AttributeID = nameAttribute.ID,
-                    IsRequired = true,
-                    IsVisible = true,
-                    Order = 1
-                },
-                new ObjectTypeAttribute
-                {
-                    ObjectTypeID = userType.ID,
-                    AttributeID = surnameAttribute.ID,
-                    IsRequired = true,
-                    IsVisible = true,
-                    Order = 2
-                },
-                new ObjectTypeAttribute
-                {
-                    ObjectTypeID = userType.ID,
-                    AttributeID = roleAttribute.ID,
-                    IsRequired = true,
-                    IsVisible = true,
-                    Order = 3
-                },
-                new ObjectTypeAttribute
-                {
-                    ObjectTypeID = userType.ID,
-                    AttributeID = ageAttribute.ID,
-                    IsRequired = false,
-                    IsVisible = true,
-                    Order = 4
-                },
-                new ObjectTypeAttribute
-                {
-                    ObjectTypeID = roleType.ID,
-                    AttributeID = titleAttribute.ID,
-                    IsRequired = true,
-                    IsVisible = true,
-                    Order = 1
-                },
-                new ObjectTypeAttribute
-                {
-                    ObjectTypeID = pdfType.ID,
-                    AttributeID = objectOwnerAttribute.ID,
-                    IsRequired = true,
-                    IsVisible = true,
-                    Order = 1
-                },
+                CreateObjectTypeAttribute(userType, nameAttribute, true, true, true, 1),
+                CreateObjectTypeAttribute(userType, surnameAttribute, true, true, true, 2),
+                CreateObjectTypeAttribute(userType, roleAttribute, true, true, false, 3),
+                CreateObjectTypeAttribute(userType, ageAttribute, true, true, false, 4),
+
+                CreateObjectTypeAttribute(roleType, titleAttribute, true, true, true, 1),
+
+                CreateObjectTypeAttribute(pdfFileType, fileNameAttribute, true, true, true, 1),
+                CreateObjectTypeAttribute(pdfFileType, objectOwnerAttribute, true, true, false, 2),
+                CreateObjectTypeAttribute(pdfFileType, createdAtAttribute, false, true, false, 3),
+
+                CreateObjectTypeAttribute(excelFileType, fileNameAttribute, true, true, true, 1),
+                CreateObjectTypeAttribute(excelFileType, objectOwnerAttribute, true, true, false, 2),
+                CreateObjectTypeAttribute(excelFileType, createdAtAttribute, false, true, false, 3)
             });
             db.SaveChanges();
 
@@ -249,54 +167,22 @@ namespace MiniNavigator_DB.Configuration
 
             db.ObjectAttributeValues.AddRange(new[]
             {
-                new ObjectAttributeValue
-                {
-                    Object = userAObject,
-                    ObjectID = userAObject.ID,
-                    Attribute = nameAttribute,
-                    AttributeID = nameAttribute.ID,
-                    Value = "Valery"
-                },
-                new ObjectAttributeValue
-                {
-                    Object = userAObject,
-                    ObjectID = userAObject.ID,
-                    Attribute = surnameAttribute,
-                    AttributeID = surnameAttribute.ID,
-                    Value = "Kuzhovnik"
-                },
-                new ObjectAttributeValue
-                {
-                    Object = userAObject,
-                    ObjectID = userAObject.ID,
-                    Attribute = ageAttribute,
-                    AttributeID = ageAttribute.ID,
-                    Value = "19"
-                },
-                new ObjectAttributeValue
-                {
-                    Object = roleAObject,
-                    ObjectID = roleAObject.ID,
-                    Attribute = titleAttribute,
-                    AttributeID = titleAttribute.ID,
-                    Value = "Admin"
-                },
-                new ObjectAttributeValue
-                {
-                    Object = roleBObject,
-                    ObjectID = roleBObject.ID,
-                    Attribute = titleAttribute,
-                    AttributeID = titleAttribute.ID,
-                    Value = "Manager"
-                },
-                new ObjectAttributeValue
-                {
-                    Object = userAObject,
-                    ObjectID = userAObject.ID,
-                    Attribute = roleAttribute,
-                    AttributeID = roleAttribute.ID,
-                    Value = roleAObject.ID.ToString()
-                }
+                CreateAttributeValue(roleAObject, titleAttribute, "Admin"),
+
+                CreateAttributeValue(roleBObject, titleAttribute, "Manager"),
+
+                CreateAttributeValue(userAObject, nameAttribute, "Valery"),
+                CreateAttributeValue(userAObject, surnameAttribute, "Kuzhovnik"),
+                CreateAttributeValue(userAObject, roleAttribute, roleAObject.ID.ToString()),
+                CreateAttributeValue(userAObject, ageAttribute, "19"),
+
+                CreateAttributeValue(filePDFObject, fileNameAttribute, "lol.pdf"),
+                CreateAttributeValue(filePDFObject, objectOwnerAttribute, userAObject.ID.ToString()),
+                CreateAttributeValue(filePDFObject, createdAtAttribute, DateTime.Now.ToString()),
+
+                CreateAttributeValue(fileExcelObject, fileNameAttribute, "lol.xlsx"),
+                CreateAttributeValue(fileExcelObject, objectOwnerAttribute, userAObject.ID.ToString()),
+                CreateAttributeValue(fileExcelObject, createdAtAttribute, DateTime.Now.ToString())
             });
             db.SaveChanges();
             #endregion
@@ -325,6 +211,91 @@ namespace MiniNavigator_DB.Configuration
                 Base = objOfType,
                 Name = name,
                 IsVisible = isVisible
+            };
+        }
+
+        private ObjectRole CreateRole(BaseObject roleObject)
+        {
+            return new ObjectRole
+            {
+                ID = Guid.NewGuid(),
+                Base_ID = roleObject.ID,
+                Base = roleObject
+            };
+        }
+
+        private ObjectUser CreateUser(BaseObject userObject, ObjectRole role)
+        {
+            return new ObjectUser
+            {
+                ID = Guid.NewGuid(),
+                Base_ID = userObject.ID,
+                Base = userObject,
+                RoleID = role?.ID,
+                Role = role
+            };
+        }
+
+        private ObjectFile CreateFile(BaseObject fileObject, string fileExtension)
+        {
+            return new ObjectFile
+            {
+                ID = Guid.NewGuid(),
+                Base_ID = fileObject.ID,
+                Base = fileObject,
+                FileExtension = fileExtension
+            };
+        }
+
+        private ObjectAttribute CreateAttribute(string attributeName, BaseObject attributeObject, bool isReference, ObjectType referenceObjectType, Type type)
+        {
+            return new ObjectAttribute
+            {
+                ID = Guid.NewGuid(),
+                Base = attributeObject,
+                Name = attributeName,
+                IsReference = isReference,
+                ReferenceObjectType = referenceObjectType,
+                ReferenceObjectTypeID = referenceObjectType?.ID,
+                ValueType = type.ToString() 
+            };
+        }
+
+        private ObjectAction CreateAction(BaseObject baseObject, string commandName, string displayName, params ObjectType[] types)
+        {
+            return new ObjectAction
+            {
+                ID = Guid.NewGuid(),
+                Base_ID = baseObject.ID,
+                Base = baseObject,
+                Name = commandName,
+                DisplayName = displayName,
+                ObjectTypes = types
+            };
+        }
+
+        private ObjectTypeAttribute CreateObjectTypeAttribute(ObjectType objectType, ObjectAttribute attribute, bool isRequired, bool isVisible, bool isTitle, int index)
+        {
+            return new ObjectTypeAttribute
+            {
+                ObjectTypeID = objectType.ID,
+                AttributeID = attribute.ID,
+                IsRequired = isRequired,
+                IsVisible = isVisible,
+                IsTitle = isTitle,
+                Order = index
+            };
+        }
+
+        private ObjectAttributeValue CreateAttributeValue(BaseObject baseObject, ObjectAttribute attribute, string value)
+        {
+            return new ObjectAttributeValue
+            {
+                Object = baseObject,
+                ObjectID = baseObject.ID,
+                Attribute = attribute,
+                AttributeID = attribute.ID,
+                Value = value
             };
         }
     }

@@ -200,7 +200,7 @@ namespace MiniNavigator_UI
 
             try
             {
-                dto = BuildCreateDto();
+                dto = BuildObjectDto();
             }
             catch (Exception ex)
             {
@@ -220,6 +220,7 @@ namespace MiniNavigator_UI
                 else
                 {
                     await _objectService.UpdateObjectAsync(_editingRow.ObjectId, dto);
+                    await RefreshRowAsync(_editingRow, dto);
                 }
             }
             catch (Exception ex)
@@ -237,7 +238,7 @@ namespace MiniNavigator_UI
             HideControls();
         }
 
-        private ObjectDTO BuildCreateDto()
+        private ObjectDTO BuildObjectDto()
         {
             var dto = new ObjectDTO
             {
@@ -267,6 +268,48 @@ namespace MiniNavigator_UI
             return dto;
         }
 
+
+        private async Task RefreshRowAsync(DynamicObjectRow row, ObjectDTO dto)
+        {
+            foreach (var dtoAttr in dto.Attributes.Values)
+            {
+                if (!row.Attributes.TryGetValue(dtoAttr.ID, out var vm))
+                    continue;
+
+                if (vm.IsReference)
+                {
+                    if (Guid.TryParse(dtoAttr.Value, out Guid parsedId))
+                    {
+                        vm.ReferenceID = parsedId;
+                    }
+                    else
+                    {
+                        vm.ReferenceID = null;
+                    }
+
+                    if (vm.ReferenceID.HasValue)
+                    {
+                        var obj = await _objectService
+                            .GetObjectInfoByIdAsync(vm.ReferenceID.Value);
+
+                        vm.Value = obj?.Title;
+                    }
+                    else
+                    {
+                        vm.Value = null;
+                    }
+                }
+                else
+                {
+                    vm.Value = dtoAttr.Value;
+                }
+            }
+
+            var index = _rows.IndexOf(row);
+            if (index >= 0)
+                NavigatorDataGridView.InvalidateRow(index);
+        }
+
         /// <summary>
         /// Устанавливает режим ReadOnly для всех строк, кроме редактируемой
         /// </summary>
@@ -286,7 +329,6 @@ namespace MiniNavigator_UI
 
             NavigatorDataGridView.AllowUserToAddRows = false;
 
-            // Обновляем перерисовку, чтобы кнопка сразу появилась
             NavigatorDataGridView.Invalidate();
         }
     }

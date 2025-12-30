@@ -130,6 +130,10 @@ namespace MiniNavigator_Services.Service
             return root;
         }
 
+        /// <summary>
+        /// Сортирует список обектов чтобы родители шли раньше детей
+        /// </summary>
+        /// <returns>Список отсортированных объектов</returns>
         private async Task<List<ObjectTypeDTO>> GetSortedTypesAsync()
         {
             var types = (await _objectTypeService.GetAllTypesAsync())
@@ -177,6 +181,11 @@ namespace MiniNavigator_Services.Service
             return result;
         }
 
+        /// <summary>
+        /// Рекурсивно добавляет объект навигации в дерево
+        /// </summary>
+        /// <param name="root">Корень дерева</param>
+        /// <param name="obj">Объект для добавления</param>
         private void AddObjectToTree(NavObjectDTO root, NavObjectDTO obj) 
         {
             if (obj.ParentID == root.ID)
@@ -325,21 +334,40 @@ namespace MiniNavigator_Services.Service
         /// </summary>
         /// <param name="ID">ID объекта</param>
         /// <returns>Объект с информацией об объекте</returns>
-        public async Task<ObjectInfoDTO> GetObjectInfoByIdAsync(Guid ID)
+        public async Task<ObjectInfoDTO> GetObjectInfoByIdAsync(Guid id)
         {
-            var obj = await _objectRepository.GetByIdAsync(ID);
-            
-            var attributes = (await _objectTypeRepository.GetTypeWithAttributesAsync((Guid)obj.ObjectTypeID)).Attributes;
-            ObjectAttributeValue titleAttribute = null;
-            foreach(var attr in attributes)
+            var obj = await _objectRepository.GetByIdAsync(id);
+            if (obj == null)
+                return null;
+
+            string title = null;
+
+            if (obj.ObjectTypeID.HasValue)
             {
-                if(attr.Attribute.Name == "Title")
-                    titleAttribute = await _objectAttributeValueRepository.GetByIdAsync(obj.ID, attr.AttributeID);
+                var type = await _objectTypeRepository
+                    .GetTypeWithAttributesAsync(obj.ObjectTypeID.Value);
+
+                var titleAttr = type.Attributes
+                    .FirstOrDefault(a => a.Attribute.Name == "Title");
+
+                if (titleAttr != null)
+                {
+                    var titleValue = await _objectAttributeValueRepository
+                        .GetByIdAsync(obj.ID, titleAttr.AttributeID);
+
+                    title = titleValue?.Value;
+                }
             }
-            return new ObjectInfoDTO()
+
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                title = await BuildObjectTitleAsync(obj);
+            }
+
+            return new ObjectInfoDTO
             {
                 ID = obj.ID,
-                Title = titleAttribute.Value
+                Title = title
             };
         }
 
@@ -376,14 +404,19 @@ namespace MiniNavigator_Services.Service
 
             return result;
         }
-
+        
+        /// <summary>
+        /// Создает Title объекта из required-параметров для отображения на UI
+        /// </summary>
+        /// <param name="obj">Объект системы</param>
+        /// <returns>Title объекта</returns>
         private async Task<string> BuildObjectTitleAsync(BaseObject obj)
         {
             var type = await _objectTypeRepository
                 .GetTypeWithAttributesAsync(obj.ObjectTypeID.Value);
 
-            var requiredAttrs = type.Attributes
-                .Where(a => a.IsRequired)
+            var titleAttrs = type.Attributes
+                .Where(a => a.IsTitle && !a.Attribute.IsReference)
                 .OrderBy(a => a.Order)
                 .ToList();
 
@@ -392,7 +425,7 @@ namespace MiniNavigator_Services.Service
                 .Where(v => v.ObjectID == obj.ID)
                 .ToList();
 
-            var parts = requiredAttrs
+            var parts = titleAttrs
                 .Select(a => values.FirstOrDefault(v => v.AttributeID == a.AttributeID)?.Value)
                 .Where(v => !string.IsNullOrWhiteSpace(v));
 
@@ -400,7 +433,13 @@ namespace MiniNavigator_Services.Service
                 ? string.Join(" ", parts)
                 : "(без названия)";
         }
-
+        
+        /// <summary>
+        /// Обновляет данные объекта системы
+        /// </summary>
+        /// <param name="ID">ID объекта</param>
+        /// <param name="dto">DTO объекта</param>
+        /// <exception cref="ArgumentException">Объект не найден</exception>
         public async Task UpdateObjectAsync(Guid ID, ObjectDTO dto)
         {
             var obj = await _objectRepository.GetByIdAsync(ID);
@@ -416,7 +455,7 @@ namespace MiniNavigator_Services.Service
                 .Query()
                 .Where(v => v.ObjectID == ID)
                 .ToList();
-
+                
             foreach (var attribute in attributes)
             {
                 if (!dto.Attributes.TryGetValue(attribute.AttributeID, out var newValue))
@@ -453,6 +492,7 @@ namespace MiniNavigator_Services.Service
         /// <exception cref="InvalidOperationException">Если объект не найден или на объект есть действующие ссылки</exception>
         public async Task DeleteObjectAsync(Guid objectId)
         {
+            if (objectId == Guid.Empty) return;
             var obj = await _objectRepository.GetByIdAsync(objectId);
             if (obj == null)
                 throw new InvalidOperationException("Объект не найден");
@@ -481,13 +521,25 @@ namespace MiniNavigator_Services.Service
             await _objectRepository.DeleteAsync(obj);
         }
 
+        /// <summary>
+        /// Удаляет объекты типов связанные с объектом
+        /// </summary>
+        /// <param name="objectId">ID удаляемого объекта</param>
         private async Task DeleteTypedEntitiesAsync(Guid objectId)
         {
+            if (objectId == Guid.Empty) return;
             await DeleteIfExistsAsync(_objectUserRepository, x => x.Base_ID == objectId, x => x.ID);
             await DeleteIfExistsAsync(_objectRoleRepository, x => x.Base_ID == objectId, x => x.ID);
             await DeleteIfExistsAsync(_objectFileRepository, x => x.Base_ID == objectId, x => x.ID);
         }
 
+        /// <summary>
+        /// Проверяет есть ли такой объект типа и удаляет его
+        /// </summary>
+        /// <param name="repo">Репозиторий для удаления</param>
+        /// <param name="predicate">Условие для удаления</param>
+        /// <param name="idSelector">Выбор ID для объекта типа</param>
+        /// <returns></returns>
         private async Task DeleteIfExistsAsync<TEntity>(
             IRepository<TEntity> repo,
             Func<TEntity, bool> predicate,
@@ -497,6 +549,5 @@ namespace MiniNavigator_Services.Service
             if (entity != null)
                 await repo.DeleteByIDAsync(idSelector(entity));
         }
-
     }
 }

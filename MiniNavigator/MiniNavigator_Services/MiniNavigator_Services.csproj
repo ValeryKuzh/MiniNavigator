@@ -70,6 +70,7 @@
     <Compile Include="DTO\ObjectTypeDTO.cs" />
     <Compile Include="DTO\UploadFileDTO.cs" />
     <Compile Include="Mapper\AttributeMapper.cs" />
+    <Compile Include="Mapper\AttributeTypeMapper.cs" />
     <Compile Include="Mapper\ChunkMapper.cs" />
     <Compile Include="Mapper\FileMapper.cs" />
     <Compile Include="Mapper\Interface\IMapper.cs" />
@@ -77,6 +78,8 @@
     <Compile Include="Mapper\ObjectMapper.cs" />
     <Compile Include="Mapper\ObjectTypeMapper.cs" />
     <Compile Include="ServiceFactory.cs" />
+    <Compile Include="Service\AttributeService\AttributeService.cs" />
+    <Compile Include="Service\AttributeService\IAttributeService.cs" />
     <Compile Include="Service\FileService\FileService.cs" />
     <Compile Include="Service\FileService\IFileService.cs" />
     <Compile Include="Service\ObjectService\IObjectService.cs" />

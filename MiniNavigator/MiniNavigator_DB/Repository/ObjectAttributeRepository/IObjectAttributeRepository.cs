@@ -5,11 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MiniNavigator_DB.Repository
+namespace MiniNavigator_DB.Repository.Interface
 {
-    public interface IObjectAttributeRepository
+    public interface IObjectAttributeRepository : IRepository<ObjectAttribute>
     {
         Task<ObjectAttribute> GetAttributeWithObjectTypesAsync(Guid attributeId);
-        IQueryable<ObjectAttribute> Query();
     }
 }

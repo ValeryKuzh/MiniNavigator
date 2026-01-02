@@ -252,7 +252,7 @@ namespace MiniNavigator_UI
                 var addItem = new ToolStripMenuItem("Добавить файл");
                 addItem.Click += async (s, e) =>
                 {
-                    ItemAdd_Click(s, e);
+                    AddItem_Click(s, e);
                     await FileAdd_Click(type);
                 };
                 menu.Items.Add(addItem);
@@ -260,13 +260,69 @@ namespace MiniNavigator_UI
             else
             {
                 var addItem = new ToolStripMenuItem("Добавить");
-                addItem.Click += ItemAdd_Click;
+                addItem.Click += AddItem_Click;
                 menu.Items.Add(addItem);
             }
-            
+
+            var addAttributeItem = new ToolStripMenuItem("Добавить атрибут");
+            addAttributeItem.Click += async (s, e) =>
+            { 
+                await AddAttributeItem_Click(vm.ID); 
+            };
+            menu.Items.Add(addAttributeItem);
+
             menu.Show(NavigatorVirtualTree, location);
         }
 
+        private async Task AddAttributeItem_Click(Guid typeID)
+        {
+            var allObjectTypes = await _objectTypeService.GetAllTypesAsync();
+            
+            var list = new List<NavObjectViewModel>();
+            
+            GetAllObjectsTypesFromTree(_treeOfObjects, list);
+            var objectTypesIDs = list
+                                .Where(n => n.ID != typeID)
+                                .Select(n => n.ID)
+                                .Distinct()
+                                .ToList();
+            var objectTypes = allObjectTypes.Where(t => objectTypesIDs.Contains(t.ObjectID)).ToList();
+
+            using (var form = new AddAttributeForm(objectTypes))
+            {
+                if (form.ShowDialog() == DialogResult.OK)
+                {
+                    var attributeDto = new ObjectAttributeDTO
+                    {
+                        ID = Guid.NewGuid(),
+                        Name = form.Name,
+                        IsReference = form.IsReference,
+                        ValueType = form.SelectedValueType,
+                        IsRequired = form.IsRequired,
+                        IsVisible = form.Visible,
+                        IsTitle = form.IsTitle,
+                        Index = _attributes.Count + 1
+                    };
+
+
+                }
+            }
+        }
+
+        public void GetAllObjectsTypesFromTree(NavObjectViewModel root, List<NavObjectViewModel> list)
+        {
+            if (root.Children != null && root.Children.Count != 0)
+            {
+                foreach (var node in root.Children)
+                {
+                    GetAllObjectsTypesFromTree(node, list);
+                }
+            }
+            else
+            {
+                list.Add(root);
+            }
+        }
 
         private async Task FileAdd_Click(ObjectTypeDTO type)
         {
@@ -307,7 +363,7 @@ namespace MiniNavigator_UI
             }
         }
 
-        private void ItemAdd_Click(object sender, EventArgs e)
+        private void AddItem_Click(object sender, EventArgs e)
         {
             if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel && _rows != null)
             {

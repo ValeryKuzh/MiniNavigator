@@ -1,5 +1,6 @@
 ﻿using MiniNavigator_DB.Context;
 using MiniNavigator_DB.Model;
+using MiniNavigator_DB.Repository.Interface;
 using System;
 using System.Data.Entity;
 using System.Linq;

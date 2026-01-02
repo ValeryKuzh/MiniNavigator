@@ -16,6 +16,7 @@ namespace MiniNavigator_Services.DTO
         public string Value { get; set; }
         public bool IsRequired { get; set; }
         public bool IsVisible { get; set; }
+        public bool IsTitle { get; set; }
         public int Index { get; set; }
     }
 }

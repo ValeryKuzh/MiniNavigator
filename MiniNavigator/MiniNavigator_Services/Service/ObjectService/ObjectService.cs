@@ -1,5 +1,4 @@
 ﻿using MiniNavigator_DB.Model;
-using MiniNavigator_DB.Repository;
 using MiniNavigator_DB.Repository.Interface;
 using MiniNavigator_Services.DTO;
 using MiniNavigator_Services.Mapper.Interface;

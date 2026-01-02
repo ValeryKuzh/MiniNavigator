@@ -64,6 +64,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddAttributeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddAttributeForm.Designer.cs">
+      <DependentUpon>AddAttributeForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="DateTimeEditForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -101,6 +107,9 @@
     <Compile Include="ViewModel\DynamicObjectRow.cs" />
     <Compile Include="ViewModel\NavObjectViewModel.cs" />
     <Compile Include="ViewModel\ObjectAttributeViewModel.cs" />
+    <EmbeddedResource Include="AddAttributeForm.resx">
+      <DependentUpon>AddAttributeForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DateTimeEditForm.resx">
       <DependentUpon>DateTimeEditForm.cs</DependentUpon>
     </EmbeddedResource>

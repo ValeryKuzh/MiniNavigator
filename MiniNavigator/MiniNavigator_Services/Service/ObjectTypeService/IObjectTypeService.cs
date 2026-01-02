@@ -8,7 +8,8 @@ namespace MiniNavigator_Services.Service.Interface
     public interface IObjectTypeService
     {
         Task<List<ObjectTypeDTO>> GetAllTypesAsync();
-        Task<ObjectTypeDTO> GetTypeByIDAsync(Guid typeID);
+        Task<ObjectTypeDTO> GetTypeByTypeObjectIDAsync(Guid typeID);
         Task<List<ObjectAttributeDTO>> GetAttributesForTypeAsync(Guid objectTypeId);
+        Task<bool> IsFileTypeAsync(Guid objectTypeId);
     }
 }

@@ -64,6 +64,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DateTimeEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DateTimeEditForm.Designer.cs">
+      <DependentUpon>DateTimeEditForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Mapper\Interface\IMapper.cs" />
     <Compile Include="Mapper\ObjectMapper.cs" />
     <Compile Include="NavigatorForm.CreateNewObject.cs">
@@ -85,14 +91,19 @@
     </Compile>
     <Compile Include="Service\ActionHandler\Context\ActionContext.cs" />
     <Compile Include="Service\ActionHandler\Handler\DeleteActionHandler.cs" />
+    <Compile Include="Service\ActionHandler\Handler\DownloadActionHandler.cs" />
     <Compile Include="Service\ActionHandler\Handler\EditActionHandler.cs" />
     <Compile Include="Service\ActionHandler\ActionRegistry\ActionHandlerRegistry.cs" />
+    <Compile Include="Service\ActionHandler\Handler\OpenActionHandler.cs" />
     <Compile Include="Service\ActionHandler\Interface\IObjectActionHandler.cs" />
     <Compile Include="Service\ValidationService\IValidationService.cs" />
     <Compile Include="Service\ValidationService\ValidationService.cs" />
     <Compile Include="ViewModel\DynamicObjectRow.cs" />
     <Compile Include="ViewModel\NavObjectViewModel.cs" />
     <Compile Include="ViewModel\ObjectAttributeViewModel.cs" />
+    <EmbeddedResource Include="DateTimeEditForm.resx">
+      <DependentUpon>DateTimeEditForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="NavigatorForm.resx">
       <DependentUpon>NavigatorForm.cs</DependentUpon>
     </EmbeddedResource>

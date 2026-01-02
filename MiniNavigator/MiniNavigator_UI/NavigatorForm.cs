@@ -1,6 +1,6 @@
 ﻿using Infralution.Controls.VirtualTree;
-using Microsoft.Extensions.DependencyInjection;
 using MiniNavigator_Services.DTO;
+using MiniNavigator_Services.Service;
 using MiniNavigator_Services.Service.Interface;
 using MiniNavigator_UI.Mapper.Interface;
 using MiniNavigator_UI.Service;
@@ -23,6 +23,7 @@ namespace MiniNavigator_UI
     {
         private readonly IObjectService _objectService;
         private readonly IObjectTypeService _objectTypeService;
+        private readonly IFileService _fileService;
         private readonly IValidationService _validationService;
 
         private readonly ActionHandlerRegistry _actionRegistry;
@@ -37,23 +38,27 @@ namespace MiniNavigator_UI
         private Guid _currentTypeId;
 
 
-        public NavigatorForm(
+        public NavigatorForm
+            (
             IObjectService objectService,
             IObjectTypeService objectTypeService,
+            IFileService fileService,
             IValidationService validationService,
 
             ActionHandlerRegistry actionRegistry,
             IServiceProvider serviceProvider,
 
-            IMapper<NavObjectViewModel, NavObjectDTO> objectMapper)
+            IMapper<NavObjectViewModel, NavObjectDTO> objectMapper
+            )
         {
             _objectService = objectService;
             _objectTypeService = objectTypeService;
+            _fileService = fileService;
             _validationService = validationService;
 
             _actionRegistry = actionRegistry;
             _serviceProvider = serviceProvider;
-
+            
             _objectMapper = objectMapper;
 
             InitializeComponent();
@@ -63,8 +68,16 @@ namespace MiniNavigator_UI
             NavigatorDataGridView.ColumnHeaderMouseClick += NavigatorDataGridView_ColumnHeaderMouseClick;
             NavigatorDataGridView.CellValidating += NavigatorDataGridView_CellValidating;
             NavigatorDataGridView.CellPainting += NavigatorDataGridView_CellPainting;
+            NavigatorDataGridView.CellBeginEdit += NavigatorDataGridView_CellBeginEdit;
+
 
             this.Load += NavigatorForm_Load;
+        }
+        private void NavigatorDataGridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            if (!IsEditing)
+                e.Cancel = true;
+
         }
 
         private void NavigatorDataGridView_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
@@ -75,7 +88,7 @@ namespace MiniNavigator_UI
             var column = NavigatorDataGridView.Columns[e.ColumnIndex];
             var attr = column.Tag as ObjectAttributeViewModel;
 
-            if (attr == null || !attr.IsReference)
+            if (attr == null || (!attr.IsReference && attr.ValueType != typeof(DateTime)))
                 return;
 
             var row = _rows[e.RowIndex];
@@ -213,7 +226,7 @@ namespace MiniNavigator_UI
                 if (navObjectViewModel.Children.Count == 0) {
                     if (e.Button == MouseButtons.Right)
                     {
-                        await ShowContextMenuAsync(e.Location);
+                        await ShowContextMenuAsync(e.Location, navObjectViewModel);
                     }
                     else if (e.Button == MouseButtons.Left)
                     {
@@ -227,15 +240,71 @@ namespace MiniNavigator_UI
             }
         }
 
-        private async Task ShowContextMenuAsync(Point location)
+        private async Task ShowContextMenuAsync(Point location, NavObjectViewModel vm)
         {
+            var type = await _objectTypeService
+                .GetTypeByTypeObjectIDAsync(vm.ID);
+
             ContextMenuStrip menu = new ContextMenuStrip();
 
-            var addItem = new ToolStripMenuItem("Добавить");
-            addItem.Click += ItemAdd_Click;
-            menu.Items.Add(addItem);
-
+            if (await _objectTypeService.IsFileTypeAsync(type.ID))
+            {
+                var addItem = new ToolStripMenuItem("Добавить файл");
+                addItem.Click += async (s, e) =>
+                {
+                    ItemAdd_Click(s, e);
+                    await FileAdd_Click(type);
+                };
+                menu.Items.Add(addItem);
+            }
+            else
+            {
+                var addItem = new ToolStripMenuItem("Добавить");
+                addItem.Click += ItemAdd_Click;
+                menu.Items.Add(addItem);
+            }
+            
             menu.Show(NavigatorVirtualTree, location);
+        }
+
+
+        private async Task FileAdd_Click(ObjectTypeDTO type)
+        {
+            var filter = await _fileService.GetOpenFileDialogFilterAsync(type.ID);
+
+            using (var openFileDialog = new OpenFileDialog
+            {
+                Title = $"Выберите {type.Title} файл",
+                Filter = filter,
+                Multiselect = false
+            })
+            {
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    var filePath = openFileDialog.FileName;
+
+                    var fileAttr = _editingRow.Attributes
+                        .Values
+                        .FirstOrDefault(a => a.Name.ToLower().Contains("File"));
+
+                    if (fileAttr != null)
+                    {
+                        fileAttr.Value = filePath;
+                    }
+                    else
+                    {
+                        _editingRow.Attributes[type.ID] = new ObjectAttributeViewModel
+                        {
+                            ID = type.ID,
+                            Name = "File",
+                            ValueType = typeof(string),
+                            Value = filePath
+                        };
+                    }
+
+                    NavigatorDataGridView.Invalidate();
+                }
+            }
         }
 
         private void ItemAdd_Click(object sender, EventArgs e)
@@ -252,7 +321,6 @@ namespace MiniNavigator_UI
                 ShowControls();
             }
         }
-
 
         private void AddNewRow()
         {
@@ -488,7 +556,7 @@ namespace MiniNavigator_UI
         /// </summary>
         private void NavigatorDataGridView_CellValuePushed(object sender, DataGridViewCellValueEventArgs e)
         {
-            if (!_isEditing)
+            if (!IsEditing)
                 return;
 
             var row = _rows[e.RowIndex];
@@ -555,6 +623,11 @@ namespace MiniNavigator_UI
             menu.Show(NavigatorDataGridView, location);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="action"></param>
         private async void ExecuteAction(DynamicObjectRow row, ObjectActionDTO action)
         {
             var handler = _actionRegistry.Resolve(action.CommandName);
@@ -594,21 +667,39 @@ namespace MiniNavigator_UI
             var column = NavigatorDataGridView.Columns[e.ColumnIndex];
             var attr = column.Tag as ObjectAttributeViewModel;
 
-            if (attr == null || !attr.IsReference)
+            if (attr == null || (!attr.IsReference && attr.ValueType != typeof(DateTime)))
                 return;
 
-            if (attr.IsReference && row == _editingRow && IsEditing)
+            if (row == _editingRow && IsEditing)
             {
-                using (var form = new ReferenceSelectForm(attr.ID, _objectService))
+                if (attr.IsReference)
                 {
-                    if (form.ShowDialog() == DialogResult.OK)
+                    using (var form = new ReferenceSelectForm(attr.ID, _objectService))
                     {
-                        var vm = row.Attributes[attr.ID];
+                        if (form.ShowDialog() == DialogResult.OK)
+                        {
+                            var vm = row.Attributes[attr.ID];
 
-                        vm.Value = form.SelectedTitle;
-                        vm.ReferenceID = form.SelectedID;
+                            vm.Value = form.SelectedTitle;
+                            vm.ReferenceID = form.SelectedID;
 
-                        NavigatorDataGridView.InvalidateCell(e.ColumnIndex, e.RowIndex);
+                            NavigatorDataGridView.InvalidateCell(e.ColumnIndex, e.RowIndex);
+                        }
+                    }
+                }
+                else if(attr.ValueType == typeof(DateTime))
+                {
+                    if (!DateTime.TryParse(attr.Value, out DateTime value))
+                    {
+                        value = DateTime.Now;
+                    }
+                    using (var form = new DateTimeEditForm(value))
+                    {
+                        if (form.ShowDialog() == DialogResult.OK)
+                        {
+                            row.Attributes[attr.ID].Value = form.SelectedDate.ToString("yyyy-MM-dd");
+                            NavigatorDataGridView.InvalidateCell(e.ColumnIndex, e.RowIndex);
+                        }
                     }
                 }
             }

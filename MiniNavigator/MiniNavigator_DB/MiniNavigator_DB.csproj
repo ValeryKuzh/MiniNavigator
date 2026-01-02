@@ -128,6 +128,7 @@
     <Compile Include="Repository\ObjectAttributeRepository\ObjectAttributeRepository.cs" />
     <Compile Include="Repository\ObjectAttributeValueRepository\IObjectAttributeValueRepository.cs" />
     <Compile Include="Repository\ObjectAttributeValueRepository\ObjectAttributeValueRepository.cs" />
+    <Compile Include="Repository\ObjectFileRepository\FileUploadSession.cs" />
     <Compile Include="Repository\ObjectTypeRepository\IObjectTypeRepository.cs" />
     <Compile Include="Model\BaseObject.cs" />
     <Compile Include="Model\ObjectAction.cs" />
@@ -190,9 +191,7 @@
       <DependentUpon>202512302203357_AddIsTitleInAttribute.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Repository\ObjectFileRepository\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

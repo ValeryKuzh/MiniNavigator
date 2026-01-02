@@ -216,6 +216,22 @@ namespace MiniNavigator_UI
                 {
                     await _objectService.CreateObjectAsync(_currentTypeId, dto);
                     _editingRow.ObjectId = dto.ID;
+
+                    var fileAttr = _editingRow.Attributes.Values
+                        .FirstOrDefault(a => !string.IsNullOrWhiteSpace(a.Value) && System.IO.File.Exists(a.Value));
+
+                    if (fileAttr != null)
+                    {
+                        var filePath = fileAttr.Value;
+                        if(await _fileService.UploadFileAsync(dto.ID, filePath))
+                        {
+                            MessageBox.Show("Файл загружен!", "Успешно", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Файл не загружен!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
                 }
                 else
                 {
@@ -223,6 +239,7 @@ namespace MiniNavigator_UI
                     await RefreshRowAsync(_editingRow, dto);
                 }
             }
+
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);

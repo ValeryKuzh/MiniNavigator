@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using MiniNavigator_Services.Service;
+using MiniNavigator_Services.Service.Interface;
+using System.Threading.Tasks;
 
 namespace MiniNavigator_UI.Service.ActionHandler
 {
@@ -15,7 +17,6 @@ namespace MiniNavigator_UI.Service.ActionHandler
             {
                 form.BeginEditRow(context.Row);
             }
-
             return Task.CompletedTask;
         }
     }

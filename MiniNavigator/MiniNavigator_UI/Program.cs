@@ -34,11 +34,14 @@ namespace MiniNavigator_UI
             // Services
             services.AddScoped<IObjectService, ObjectService>();
             services.AddScoped<IObjectTypeService, ObjectTypeService>();
+            services.AddScoped<IFileService, FileService>();
             services.AddScoped<IValidationService, ValidationService>();
 
             // Action handlers
             services.AddSingleton<IObjectActionHandler, EditActionHandler>();
             services.AddSingleton<IObjectActionHandler, DeleteActionHandler>();
+            services.AddSingleton<IObjectActionHandler, DownloadActionHandler>();
+            services.AddSingleton<IObjectActionHandler, OpenActionHandler>();
 
             // Registry
             services.AddSingleton<ActionHandlerRegistry>(sp =>

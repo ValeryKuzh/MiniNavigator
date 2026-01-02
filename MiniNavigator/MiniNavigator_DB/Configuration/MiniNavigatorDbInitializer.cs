@@ -32,10 +32,10 @@ namespace MiniNavigator_DB.Configuration
             var pdfFileTypeObject = CreateNewObject(fileTypeObject);
             var pdfFileType = CreateNewObjectType(pdfFileTypeObject, "PDF", true);
 
-            var excelTypeObject = CreateNewObject(fileTypeObject);
-            var excelFileType = CreateNewObjectType(excelTypeObject, "Excel", true);
+            var excelFileTypeObject = CreateNewObject(fileTypeObject);
+            var excelFileType = CreateNewObjectType(excelFileTypeObject, "Excel", true);
 
-            db.BaseObjects.AddRange(new[] { actionTypeObject, attributeTypeObject, roleTypeObject, userTypeObject, fileTypeObject, pdfFileTypeObject, excelTypeObject });
+            db.BaseObjects.AddRange(new[] { actionTypeObject, attributeTypeObject, roleTypeObject, userTypeObject, fileTypeObject, pdfFileTypeObject, excelFileTypeObject });
             db.ObjectTypes.AddRange(new[] { actionType, attributeType, roleType, userType, fileType, pdfFileType, excelFileType });
             db.SaveChanges();
 
@@ -45,14 +45,18 @@ namespace MiniNavigator_DB.Configuration
 
             var actionEditObject = CreateNewObject(actionTypeObject);
             var actionDeleteObject = CreateNewObject(actionTypeObject);
+            var actionDownloadObject = CreateNewObject(actionTypeObject);
+            var actionOpenObject = CreateNewObject(actionTypeObject);
 
-            db.BaseObjects.AddRange(new[] { actionEditObject });
+            db.BaseObjects.AddRange(new[] { actionEditObject, actionDeleteObject, actionDownloadObject, actionOpenObject });
             db.SaveChanges();
 
             db.ObjectActions.AddRange(new[]
             {
-                CreateAction(actionEditObject, "EDIT", "Редактировать", roleType, userType, pdfFileType), 
-                CreateAction(actionDeleteObject, "DELETE", "Удалить", roleType, userType, pdfFileType),
+                CreateAction(actionEditObject, "EDIT", "Редактировать", roleType, userType, pdfFileType, excelFileType), 
+                CreateAction(actionDeleteObject, "DELETE", "Удалить", roleType, userType, pdfFileType, excelFileType),
+                CreateAction(actionDownloadObject, "DOWNLOAD", "Скачать", pdfFileType, excelFileType),
+                CreateAction(actionOpenObject, "OPEN", "Открыть", pdfFileType, excelFileType),
             });
             db.SaveChanges();
 
@@ -84,7 +88,7 @@ namespace MiniNavigator_DB.Configuration
             var filePDFObject = CreateNewObject(pdfFileTypeObject);
             var filePDF = CreateFile(filePDFObject, "PDF");
             
-            var fileExcelObject = CreateNewObject(pdfFileTypeObject);
+            var fileExcelObject = CreateNewObject(excelFileTypeObject);
             var fileExcel = CreateFile(fileExcelObject, "Excel");
 
             db.BaseObjects.AddRange(new[] { filePDFObject, fileExcelObject });

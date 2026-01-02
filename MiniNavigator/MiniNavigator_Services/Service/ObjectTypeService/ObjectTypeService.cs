@@ -13,17 +13,20 @@ namespace MiniNavigator_Services.Service
     public class ObjectTypeService : IObjectTypeService
     {
         private readonly IObjectTypeRepository _objectTypeRepository;
+        private readonly IRepository<BaseObject> _objectRepository;
 
         private readonly IMapper<ObjectTypeDTO, ObjectType> _objectTypeMapper;
 
         public ObjectTypeService(
             IObjectTypeRepository objectTypeRepository,
+            IRepository<BaseObject> objectRepository,
 
             IMapper<ObjectTypeDTO, ObjectType> objectTypeMapper, 
             IMapper<ObjectActionDTO, ObjectAction> actionMapper
             )
         {
             _objectTypeRepository = objectTypeRepository;
+            _objectRepository = objectRepository;
 
             _objectTypeMapper = objectTypeMapper;
         }
@@ -38,9 +41,11 @@ namespace MiniNavigator_Services.Service
             return types;
         }
 
-        public async Task<ObjectTypeDTO> GetTypeByIDAsync(Guid typeID)
+        public async Task<ObjectTypeDTO> GetTypeByTypeObjectIDAsync(Guid objectTypeID)
         {
-            return _objectTypeMapper.ToDTO(await _objectTypeRepository.GetByIdAsync(typeID));
+            var objectOfType = await _objectRepository.GetByIdAsync(objectTypeID);
+            var type = _objectTypeRepository.Query().Where(x => x.Base_ID == objectOfType.ID).FirstOrDefault();
+            return _objectTypeMapper.ToDTO(type);
         }
 
         public async Task<List<ObjectAttributeDTO>> GetAttributesForTypeAsync(Guid objectTypeId)
@@ -59,6 +64,26 @@ namespace MiniNavigator_Services.Service
 
                 Index = ota.Order
             }).ToList();
+        }
+
+        public async Task<bool> IsFileTypeAsync(Guid objectTypeID)
+        {
+            var type = await _objectTypeRepository.GetByIdAsync(objectTypeID);
+            if (type == null)
+                return false;
+
+            if (type.Name == "Файл")
+                return true;
+
+            if (type.Base != null && type.Base.ObjectTypeID.HasValue)
+            {
+                var parentObj = await _objectRepository.GetByIdAsync(type.Base_ID);
+                var parentType = _objectTypeRepository.Query().Where(x => x.Base_ID == parentObj.ObjectTypeID.Value).FirstOrDefault();
+
+                return parentType?.Name == "Файл";
+            }
+
+            return false;
         }
     }
 }

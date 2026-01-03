@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MiniNavigator_DB.Model
 {
+    /// <summary>
+    /// Файл в системе
+    /// </summary>
     public class ObjectFile
     {
         public Guid ID { get; set; }

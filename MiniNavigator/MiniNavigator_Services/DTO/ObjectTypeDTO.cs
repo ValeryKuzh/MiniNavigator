@@ -2,6 +2,9 @@
 
 namespace MiniNavigator_Services.DTO
 {
+    /// <summary>
+    /// DTO для передачи типов объектов в дерево
+    /// </summary>
     public class ObjectTypeDTO
     {
         public Guid ID { get; set; }

@@ -35,6 +35,7 @@ namespace MiniNavigator_UI
             services.AddScoped<IObjectService, ObjectService>();
             services.AddScoped<IObjectTypeService, ObjectTypeService>();
             services.AddScoped<IFileService, FileService>();
+            services.AddScoped<IAttributeService, AttributeService>();
             services.AddScoped<IValidationService, ValidationService>();
 
             // Action handlers

@@ -10,6 +10,9 @@ using System.Windows.Forms;
 
 namespace MiniNavigator_UI
 {
+    /// <summary>
+    /// Форма для работы с DateTime атрибутами
+    /// </summary>
     public partial class DateTimeEditForm : Form
     {
         public DateTime SelectedDate { get; private set; }

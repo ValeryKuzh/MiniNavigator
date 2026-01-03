@@ -1,9 +1,10 @@
-﻿using MiniNavigator_Services.Service;
-using MiniNavigator_Services.Service.Interface;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace MiniNavigator_UI.Service.ActionHandler
 {
+    /// <summary>
+    /// Обработчик действия "Редактировать"
+    /// </summary>
     public class EditActionHandler : IObjectActionHandler
     {
         public string CommandName => "EDIT";

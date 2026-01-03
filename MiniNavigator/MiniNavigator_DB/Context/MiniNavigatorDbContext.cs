@@ -3,6 +3,9 @@ using System.Data.Entity;
 
 namespace MiniNavigator_DB.Context
 {
+    /// <summary>
+    /// Контекст базы данных системы
+    /// </summary>
     [DbConfigurationType(typeof(MiniNavigatorDbConfiguration))]
     public class MiniNavigatorDbContext : DbContext
     {
@@ -19,6 +22,10 @@ namespace MiniNavigator_DB.Context
 
         public MiniNavigatorDbContext(string connectionString) : base(connectionString) { }
         public MiniNavigatorDbContext() : base("name=HomeDbConnection") { }
+
+        /// <summary>
+        /// Конфигурацияя базы данных при создании
+        /// </summary>
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
 
@@ -33,8 +40,6 @@ namespace MiniNavigator_DB.Context
             modelBuilder.Entity<ObjectAttribute>().HasKey(oa => oa.ID);
 
             modelBuilder.Entity<ObjectFile>().HasKey(of => of.ID);
-
-            modelBuilder.Entity<ObjectConfig>().HasKey(oc => oc.ID);
 
             modelBuilder.Entity<ObjectUser>().HasKey(ou => ou.ID);
 

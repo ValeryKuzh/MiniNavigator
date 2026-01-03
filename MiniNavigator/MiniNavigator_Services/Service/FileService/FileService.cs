@@ -1,17 +1,16 @@
 ﻿using MiniNavigator_DB.Model;
 using MiniNavigator_DB.Repository.Interface;
 using MiniNavigator_DB.Repository.ObjectFileRepository;
-using MiniNavigator_Services.DTO;
-using MiniNavigator_Services.Mapper;
-using MiniNavigator_Services.Mapper.Interface;
 using System;
-using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace MiniNavigator_Services.Service
 {
+    /// <summary>
+    /// Сервис для работы с файлами
+    /// </summary>
     public class FileService : IFileService
     {
         private readonly IObjectTypeRepository _objectTypeRepository;
@@ -31,9 +30,16 @@ namespace MiniNavigator_Services.Service
             _objectFileRepository = objectFileRepository;
             _objectFileChunkRepository = objectFileChunkRepository;
         }
-        public async Task<string> GetOpenFileDialogFilterAsync(Guid objectTypeId)
+
+        /// <summary>
+        /// Получает фильтр для типа файла
+        /// </summary>
+        /// <param name="objectTypeID">ID объекта типа</param>
+        /// <returns>Фильтр</returns>
+        public async Task<string> GetOpenFileDialogFilterAsync(Guid objectTypeID)
         {
-            var type = await _objectTypeRepository.GetByIdAsync(objectTypeId);
+            if (objectTypeID == Guid.Empty) throw new ArgumentNullException(nameof(objectTypeID));
+            var type = await _objectTypeRepository.GetByIdAsync(objectTypeID);
 
             if (type == null)
                 return "Все файлы (*.*)|*.*";
@@ -49,9 +55,22 @@ namespace MiniNavigator_Services.Service
             }
         }
 
+        /// <summary>
+        /// Загружает файл в БД по чанкам
+        /// </summary>
+        /// <param name="fileObjectID">ID объекта файла</param>
+        /// <param name="filePath">Путь к файлу</param>
+        /// <returns>Загружен файл или нет</returns>
         public async Task<bool> UploadFileAsync(Guid fileObjectID, string filePath)
         {
-            ValidateFilePath(filePath);
+
+            if (fileObjectID == Guid.Empty) throw new ArgumentNullException(nameof(fileObjectID));
+
+            if (string.IsNullOrWhiteSpace(filePath))
+                throw new ArgumentException("Путь к файлу пуст");
+
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException(filePath);
 
             var session = new FileUploadSession();
 
@@ -104,20 +123,20 @@ namespace MiniNavigator_Services.Service
             }
         }
 
-        private void ValidateFilePath(string filePath)
-        {
-            if (string.IsNullOrWhiteSpace(filePath))
-                throw new ArgumentException("Путь к файлу пуст");
-
-            if (!System.IO.File.Exists(filePath))
-                throw new FileNotFoundException(filePath);
-        }
-
         /// <summary>
         /// Создаёт запись о файле и возвращает его ID
         /// </summary>
+        /// <returns>Файл</returns>
         private ObjectFile CreateFileEntity(Guid fileObjectID, string filePath)
         {
+            if (fileObjectID == Guid.Empty) throw new ArgumentNullException(nameof(fileObjectID));
+
+            if (string.IsNullOrWhiteSpace(filePath))
+                throw new ArgumentException("Путь к файлу пуст");
+
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException(filePath);
+
             return new ObjectFile
             {
                 FileExtension = Path.GetExtension(filePath),
@@ -126,12 +145,13 @@ namespace MiniNavigator_Services.Service
         }
 
         /// <summary>
-        /// Собирает файл и БД
+        /// Собирает файл из БД
         /// </summary>
         /// <param name="fileID">ID файла</param>
         /// <returns>Поток для скачивания</returns>
         public async Task<Stream> DownloadFileAsync(Guid fileID)
         {
+            if (fileID == Guid.Empty) throw new ArgumentNullException(nameof(fileID));
 
             var file = _objectFileRepository.Query().Where(x => x.Base_ID == fileID).First();
             if (file == null)

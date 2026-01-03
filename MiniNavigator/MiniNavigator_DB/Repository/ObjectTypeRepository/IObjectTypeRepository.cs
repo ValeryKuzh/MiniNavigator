@@ -1,5 +1,4 @@
-﻿
-using MiniNavigator_DB.Model;
+﻿using MiniNavigator_DB.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace MiniNavigator_DB.Repository.Interface
 {
+    /// <summary>
+    /// Интерфейс, расширяемый для ObjectType
+    /// </summary>
     public interface IObjectTypeRepository
     {
         Task<ObjectType> GetByIdAsync(Guid ID);

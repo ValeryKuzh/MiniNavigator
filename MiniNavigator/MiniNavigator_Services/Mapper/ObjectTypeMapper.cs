@@ -4,6 +4,9 @@ using MiniNavigator_Services.Mapper.Interface;
 
 namespace MiniNavigator_Services.Mapper
 {
+    /// <summary>
+    /// Маппер для ObjectTypeDTO <=> ObjectType
+    /// </summary>
     public class ObjectTypeMapper : IMapper<ObjectTypeDTO, ObjectType>
     {
         public ObjectTypeDTO ToDTO(ObjectType entity)

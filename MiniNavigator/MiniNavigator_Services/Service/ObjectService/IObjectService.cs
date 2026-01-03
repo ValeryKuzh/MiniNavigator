@@ -1,5 +1,4 @@
-﻿using MiniNavigator_DB.Model;
-using MiniNavigator_Services.DTO;
+﻿using MiniNavigator_Services.DTO;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

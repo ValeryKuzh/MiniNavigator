@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MiniNavigator_DB.Model
 {
+    /// <summary>
+    /// Связь между типом и атрибутом
+    /// </summary>
     public class ObjectTypeAttribute
     {
         public Guid ObjectTypeID { get; set; }

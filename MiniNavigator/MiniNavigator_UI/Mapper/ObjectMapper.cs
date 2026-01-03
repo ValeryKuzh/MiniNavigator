@@ -1,11 +1,12 @@
 ﻿using MiniNavigator_Services.DTO;
 using MiniNavigator_UI.Mapper.Interface;
 using MiniNavigator_UI.ViewModel;
-using System;
-using System.Collections.Generic;
 
 namespace MiniNavigator_UI.Mapper
 {
+    /// <summary>
+    /// Маппер для NavObjectViewModel <=> NavObjectDTO
+    /// </summary>
     public class ObjectMapper : IMapper<NavObjectViewModel, NavObjectDTO>
     {
         public NavObjectViewModel ToViewModel(NavObjectDTO entity)

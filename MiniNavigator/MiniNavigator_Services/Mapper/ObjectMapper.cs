@@ -4,6 +4,9 @@ using MiniNavigator_DB.Model;
 
 namespace MiniNavigator_Services.Mapper
 {
+    /// <summary>
+    /// Маппер для NavObjectDTO <=> BaseObject
+    /// </summary>
     public class ObjectMapper : IMapper<NavObjectDTO, BaseObject>
     {
         public NavObjectDTO ToDTO(BaseObject entity)

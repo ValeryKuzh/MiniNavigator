@@ -3,6 +3,9 @@ using System;
 
 namespace MiniNavigator_UI.Service.ActionHandler
 {
+    /// <summary>
+    /// Объект контекста действия над объектом
+    /// </summary>
     public class ActionContext
     {
         public string CommandName { get; set; }

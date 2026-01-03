@@ -6,23 +6,22 @@ using MiniNavigator_Services.Service.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace MiniNavigator_Services.Service
 {
+    /// <summary>
+    /// Сервис для работы с объектами системы
+    /// </summary>
     public class ObjectService : IObjectService
     {
         private readonly IObjectTypeService _objectTypeService;
 
-        private readonly IMapper<NavObjectDTO, BaseObject> _objectMapper;
         private readonly IMapper<ObjectActionDTO, ObjectAction> _actionMapper;
         private readonly IMapper<ObjectAttributeDTO, ObjectAttributeValue> _attributeMapper;
 
         private readonly IRepository<BaseObject> _objectRepository;
         private readonly IObjectAttributeRepository _objectAttributeRepository;
-        private readonly IRepository<ObjectTypeAttribute> _objectTypeAttributeRepository;
         private readonly IObjectTypeRepository _objectTypeRepository;
         private readonly IObjectAttributeValueRepository _objectAttributeValueRepository;
         private readonly IRepository<ObjectFile> _objectFileRepository;
@@ -47,13 +46,11 @@ namespace MiniNavigator_Services.Service
         {
             _objectTypeService = objectTypeService;
             
-            _objectMapper = objectMapper;
             _actionMapper = actionMapper;
             _attributeMapper = attributeMapper;
 
             _objectRepository = objectRepository;
             _objectAttributeRepository = objectAttributeRepository;
-            _objectTypeAttributeRepository = objectTypeAttributeRepository;
             _objectTypeRepository = objectTypeRepository;
             _objectAttributeValueRepository = objectAttributeValueRepository;
             _objectFileRepository = objectFileRepository;
@@ -68,6 +65,8 @@ namespace MiniNavigator_Services.Service
         /// <returns>Список действий с объектом</returns>
         public async Task<List<ObjectActionDTO>> GetActionsForTypeObject(Guid ID)
         {
+            if (ID == Guid.Empty) throw new ArgumentNullException(nameof(ID));
+
             var actionsDTO = new List<ObjectActionDTO>();
             if (ID == Guid.Empty)
                 return actionsDTO;
@@ -208,6 +207,8 @@ namespace MiniNavigator_Services.Service
         /// <returns>Список объектов</returns>
         public async Task<List<Dictionary<Guid, ObjectAttributeDTO>>> GetTableData(Guid ID)
         {
+            if (ID == Guid.Empty) throw new ArgumentNullException(nameof(ID));
+
             var result = new List<Dictionary<Guid, ObjectAttributeDTO>>();
 
             var objectsOfType = _objectRepository.Query().Where(bo => bo.ObjectTypeID == ID).ToList();
@@ -261,6 +262,8 @@ namespace MiniNavigator_Services.Service
         /// <returns>Список атрибутов</returns>
         private async Task<List<ObjectTypeAttribute>> GetAttributesForTypeAsync(Guid ID)
         {
+            if (ID == Guid.Empty) throw new ArgumentNullException(nameof(ID));
+
             var attributes = new List<ObjectTypeAttribute>();
 
             var typeObject = await _objectRepository.GetByIdAsync(ID);
@@ -286,6 +289,9 @@ namespace MiniNavigator_Services.Service
         /// <exception cref="ArgumentException">Если не передан обязательный атрибут</exception>
         public async Task CreateObjectAsync(Guid typeID, ObjectDTO dto)
         {
+            if (typeID == Guid.Empty) throw new ArgumentNullException(nameof(typeID));
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+
             var typeObject = await _objectRepository.GetByIdAsync(typeID);
             var attributes = (await _objectTypeRepository.GetTypeWithAttributesAsync(typeID)).Attributes;
 
@@ -333,9 +339,11 @@ namespace MiniNavigator_Services.Service
         /// </summary>
         /// <param name="ID">ID объекта</param>
         /// <returns>Объект с информацией об объекте</returns>
-        public async Task<ObjectInfoDTO> GetObjectInfoByIdAsync(Guid id)
+        public async Task<ObjectInfoDTO> GetObjectInfoByIdAsync(Guid ID)
         {
-            var obj = await _objectRepository.GetByIdAsync(id);
+            if (ID == Guid.Empty) throw new ArgumentNullException(nameof(ID));
+
+            var obj = await _objectRepository.GetByIdAsync(ID);
             if (obj == null)
                 return null;
 
@@ -377,6 +385,8 @@ namespace MiniNavigator_Services.Service
         /// <returns>Список объектов</returns>
         public async Task<List<ObjectInfoDTO>> GetReferenceObjectInfosByAttribute(Guid attributeID)
         {
+            if (attributeID == Guid.Empty) throw new ArgumentNullException(nameof(attributeID));
+
             var attribute = await _objectAttributeRepository
                 .GetAttributeWithObjectTypesAsync(attributeID);
 
@@ -411,6 +421,7 @@ namespace MiniNavigator_Services.Service
         /// <returns>Title объекта</returns>
         private async Task<string> BuildObjectTitleAsync(BaseObject obj)
         {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
             var type = await _objectTypeRepository
                 .GetTypeWithAttributesAsync(obj.ObjectTypeID.Value);
 
@@ -441,6 +452,9 @@ namespace MiniNavigator_Services.Service
         /// <exception cref="ArgumentException">Объект не найден</exception>
         public async Task UpdateObjectAsync(Guid ID, ObjectDTO dto)
         {
+            if (ID == Guid.Empty) throw new ArgumentNullException(nameof(ID));
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+
             var obj = await _objectRepository.GetByIdAsync(ID);
             if (obj == null)
                 throw new ArgumentException("Объект не найден");
@@ -487,12 +501,13 @@ namespace MiniNavigator_Services.Service
         /// <summary>
         /// Удаляет объект из системы
         /// </summary>
-        /// <param name="objectId">ID объекта</param>
+        /// <param name="objectID">ID объекта</param>
         /// <exception cref="InvalidOperationException">Если объект не найден или на объект есть действующие ссылки</exception>
-        public async Task DeleteObjectAsync(Guid objectId)
+        public async Task DeleteObjectAsync(Guid objectID)
         {
-            if (objectId == Guid.Empty) return;
-            var obj = await _objectRepository.GetByIdAsync(objectId);
+            if (objectID == Guid.Empty) return;
+
+            var obj = await _objectRepository.GetByIdAsync(objectID);
             if (obj == null)
                 throw new InvalidOperationException("Объект не найден");
 
@@ -500,7 +515,7 @@ namespace MiniNavigator_Services.Service
                 .Query()
                 .Any(v =>
                     v.Attribute.IsReference &&
-                    v.Value == objectId.ToString()
+                    v.Value == objectID.ToString()
                 );
 
             if (isReferenced)
@@ -510,13 +525,13 @@ namespace MiniNavigator_Services.Service
 
             var values = _objectAttributeValueRepository
                 .Query()
-                .Where(v => v.ObjectID == objectId)
+                .Where(v => v.ObjectID == objectID)
                 .ToList();
 
             foreach (var value in values)
                 await _objectAttributeValueRepository.DeleteAsync(value);
 
-            await DeleteTypedEntitiesAsync(objectId);
+            await DeleteTypedEntitiesAsync(objectID);
             await _objectRepository.DeleteAsync(obj);
         }
 

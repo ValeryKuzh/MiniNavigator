@@ -11,6 +11,9 @@ using System.Windows.Forms;
 
 namespace MiniNavigator_UI
 {
+    /// <summary>
+    /// Редактирование и добавление объектов в систему
+    /// </summary>
     public partial class NavigatorForm
     {
         private bool _isNewRow;
@@ -94,6 +97,9 @@ namespace MiniNavigator_UI
             return btn;
         }
 
+        /// <summary>
+        /// Метод для инициализации положения кнопок
+        /// </summary>
         private void PositionCreateButtons()
         {
             if (ApplyBtn == null || CancelButton == null)
@@ -255,6 +261,10 @@ namespace MiniNavigator_UI
             HideControls();
         }
 
+        /// <summary>
+        /// Создает объект системы
+        /// </summary>
+        /// <returns>Объект системы</returns>
         private ObjectDTO BuildObjectDto()
         {
             var dto = new ObjectDTO
@@ -285,9 +295,16 @@ namespace MiniNavigator_UI
             return dto;
         }
 
-
+        /// <summary>
+        /// Обновляет строку
+        /// </summary>
+        /// <param name="row">Редактируемая строка</param>
+        /// <param name="dto">Обхект системы</param>
         private async Task RefreshRowAsync(DynamicObjectRow row, ObjectDTO dto)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+
             foreach (var dtoAttr in dto.Attributes.Values)
             {
                 if (!row.Attributes.TryGetValue(dtoAttr.ID, out var vm))

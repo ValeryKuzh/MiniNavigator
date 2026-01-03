@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using MiniNavigator_Services.DTO;
+using System;
 using System.Threading.Tasks;
 
-namespace MiniNavigator_Services.Service.AttributeService
+namespace MiniNavigator_Services.Service
 {
-    internal interface IAttributeService
+    public interface IAttributeService
     {
+        Task CreateAttributeAsync(ObjectAttributeDTO objectAttributeDTO, Guid typeID);
     }
 }

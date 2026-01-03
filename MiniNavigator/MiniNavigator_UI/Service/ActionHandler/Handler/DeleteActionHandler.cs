@@ -1,13 +1,13 @@
 ﻿using MiniNavigator_Services.Service.Interface;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MiniNavigator_UI.Service.ActionHandler.Handler
 {
+    /// <summary>
+    /// Обработчик действия "Удалить"
+    /// </summary>
     public class DeleteActionHandler : IObjectActionHandler
     {
         public string CommandName => "DELETE";

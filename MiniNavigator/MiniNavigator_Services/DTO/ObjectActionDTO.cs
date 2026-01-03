@@ -2,6 +2,9 @@
 
 namespace MiniNavigator_Services.DTO
 {
+    /// <summary>
+    /// DTO для передачи информации о действиях в системе
+    /// </summary>
     public class ObjectActionDTO
     {
         public Guid ID { get; set; }

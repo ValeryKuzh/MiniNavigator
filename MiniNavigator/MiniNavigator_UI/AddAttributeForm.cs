@@ -11,6 +11,9 @@ using System.Windows.Forms;
 
 namespace MiniNavigator_UI
 {
+    /// <summary>
+    /// Форма для работы с атрибутами
+    /// </summary>
     public partial class AddAttributeForm : Form
     {
         public string AttributeName => NameAttributeTextBox.Text.Trim();
@@ -19,8 +22,8 @@ namespace MiniNavigator_UI
         public bool IsReference => IsreferenceCheckBox.Checked;
         public bool IsTitle => IsTitleCheckBox.Checked;
 
-        public Type SelectedValueType =>
-            DataTypeComboBox.SelectedItem as Type;
+        public Type SelectedValueType => !IsReference ?
+            DataTypeComboBox.SelectedItem as Type : typeof(Guid);
 
         public Guid? SelectedReferenceTypeId =>
             IsReference
@@ -28,7 +31,6 @@ namespace MiniNavigator_UI
                 : null;
 
         private readonly List<ObjectTypeDTO> _objectTypes;
-
 
         public AddAttributeForm(List<ObjectTypeDTO> objectTypes)
         {
@@ -41,6 +43,9 @@ namespace MiniNavigator_UI
             InitEvents();
         }
 
+        /// <summary>
+        /// Инициализация комбобокса с типами
+        /// </summary>
         private void InitDataTypes()
         {
             DataTypeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -65,6 +70,11 @@ namespace MiniNavigator_UI
             DataTypeComboBox.SelectedIndex = 0;
         }
 
+        /// <summary>
+        /// Получает Title для типа
+        /// </summary>
+        /// <param name="type">Тип</param>
+        /// <returns>Title типа</returns>
         private string GetFriendlyTypeName(Type type)
         {
             if (type == typeof(string)) return "Строка";
@@ -78,6 +88,9 @@ namespace MiniNavigator_UI
             return type.Name;
         }
 
+        /// <summary>
+        /// Инициализация комбобокса для ссылочных типов
+        /// </summary>
         private void InitReferenceTypes()
         {
             ReferenceTypeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -89,6 +102,9 @@ namespace MiniNavigator_UI
             ReferenceTypeComboBox.Enabled = false;
         }
 
+        /// <summary>
+        /// Инициализация событий для характеристик атрибута
+        /// </summary>
         private void InitEvents()
         {
             IsreferenceCheckBox.CheckedChanged += (s, e) =>

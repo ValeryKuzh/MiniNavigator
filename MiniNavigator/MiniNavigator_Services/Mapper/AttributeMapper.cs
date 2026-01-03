@@ -1,12 +1,12 @@
 ﻿using MiniNavigator_DB.Model;
 using MiniNavigator_Services.DTO;
 using MiniNavigator_Services.Mapper.Interface;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MiniNavigator_Services.Mapper
 {
+    /// <summary>
+    /// Маппер для ObjectAttributeDTO <=> ObjectAttributeValue
+    /// </summary>
     public class AttributeMapper : IMapper<ObjectAttributeDTO, ObjectAttributeValue>
     {
         public ObjectAttributeDTO ToDTO(ObjectAttributeValue entity)

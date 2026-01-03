@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace MiniNavigator_DB.Model
 {
     /// <summary>
-    /// Допустимые атрибуты для объекта
+    /// Атрибут объекта
     /// </summary>
     public class ObjectAttribute
     {

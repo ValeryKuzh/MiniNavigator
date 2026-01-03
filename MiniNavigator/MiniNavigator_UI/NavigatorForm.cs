@@ -19,11 +19,15 @@ using System.Windows.Forms.VisualStyles;
 
 namespace MiniNavigator_UI
 {
+    /// <summary>
+    /// Основная форма приложения
+    /// </summary>
     public partial class NavigatorForm : Form
     {
         private readonly IObjectService _objectService;
         private readonly IObjectTypeService _objectTypeService;
         private readonly IFileService _fileService;
+        private readonly IAttributeService _attributeService;
         private readonly IValidationService _validationService;
 
         private readonly ActionHandlerRegistry _actionRegistry;
@@ -43,6 +47,7 @@ namespace MiniNavigator_UI
             IObjectService objectService,
             IObjectTypeService objectTypeService,
             IFileService fileService,
+            IAttributeService attributeService,
             IValidationService validationService,
 
             ActionHandlerRegistry actionRegistry,
@@ -54,6 +59,7 @@ namespace MiniNavigator_UI
             _objectService = objectService;
             _objectTypeService = objectTypeService;
             _fileService = fileService;
+            _attributeService = attributeService;
             _validationService = validationService;
 
             _actionRegistry = actionRegistry;
@@ -65,7 +71,6 @@ namespace MiniNavigator_UI
 
             NavigatorDataGridView.RowHeaderMouseClick += NavigatorDataGridView_RowHeaderMouseClick;
             NavigatorDataGridView.CellClick += NavigatorDataGridView_CellClick;
-            NavigatorDataGridView.ColumnHeaderMouseClick += NavigatorDataGridView_ColumnHeaderMouseClick;
             NavigatorDataGridView.CellValidating += NavigatorDataGridView_CellValidating;
             NavigatorDataGridView.CellPainting += NavigatorDataGridView_CellPainting;
             NavigatorDataGridView.CellBeginEdit += NavigatorDataGridView_CellBeginEdit;
@@ -73,13 +78,19 @@ namespace MiniNavigator_UI
 
             this.Load += NavigatorForm_Load;
         }
+
+        /// <summary>
+        /// Отменять редактирование, если не в режиме редактирования
+        /// </summary>
         private void NavigatorDataGridView_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
             if (!IsEditing)
                 e.Cancel = true;
-
         }
 
+        /// <summary>
+        /// Отрисовка кнопки поверх ячейки
+        /// </summary>
         private void NavigatorDataGridView_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
             if (e.RowIndex < 0 || e.ColumnIndex < 0)
@@ -125,6 +136,9 @@ namespace MiniNavigator_UI
             );
         }
 
+        /// <summary>
+        /// Валидация значений в ячейках
+        /// </summary>
         private void NavigatorDataGridView_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
             if (!IsEditing || e.RowIndex < 0 || e.ColumnIndex < 0)
@@ -136,7 +150,6 @@ namespace MiniNavigator_UI
             if (attr == null)
                 return;
 
-            // Ссылочные атрибуты не валидируем
             if (attr.IsReference)
                 return;
 
@@ -162,12 +175,9 @@ namespace MiniNavigator_UI
             }
         }
 
-
-        private void NavigatorDataGridView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
-        {
-            SetTableReadonlyProperty();
-        }
-
+        /// <summary>
+        /// Обработчик загрузки формы
+        /// </summary>
         private async void NavigatorForm_Load(object sender, EventArgs e)
         {
             BindTree();
@@ -178,6 +188,9 @@ namespace MiniNavigator_UI
             NavigatorVirtualTree.Refresh();
         }
 
+        /// <summary>
+        /// Биндинг на дерево
+        /// </summary>
         private void BindTree()
         {
             var binding = new ObjectRowBinding(typeof(NavObjectViewModel));
@@ -195,12 +208,20 @@ namespace MiniNavigator_UI
             NavigatorVirtualTree.RowBindings.Add(binding);
         }
 
+        /// <summary>
+        /// Инициализация дерева
+        /// </summary>
         private async Task InitRootAsync()
         {
             var rootDto = await _objectService.GetTreeOfObjectsAsync();
             _treeOfObjects = ConvertTreeToViewModels(rootDto);
         }
 
+        /// <summary>
+        /// Конвертация элементов дерева из DTO во ViewModel
+        /// </summary>
+        /// <param name="root">Корень дерева DTO</param>
+        /// <returns>Корень дерева ViewModel</returns>
         public NavObjectViewModel ConvertTreeToViewModels(NavObjectDTO root)
         {
             var result = _objectMapper.ToViewModel(root);
@@ -216,6 +237,9 @@ namespace MiniNavigator_UI
             return result;
         }
 
+        /// <summary>
+        /// Обработчик нажатия мыши по дереву
+        /// </summary>
         private async void NavigatorVirtualTree_MouseUp(object sender, MouseEventArgs e)
         {
             if (IsEditing)
@@ -240,8 +264,16 @@ namespace MiniNavigator_UI
             }
         }
 
+        /// <summary>
+        /// Отрисовка контекстного меню для типов 
+        /// </summary>
+        /// <param name="location">Точка нажатия на форму</param>
+        /// <param name="vm">Объект, по которому кликнули</param>
         private async Task ShowContextMenuAsync(Point location, NavObjectViewModel vm)
         {
+            if (vm == null) throw new ArgumentNullException(nameof(vm)); 
+            if (location == null) throw new ArgumentNullException(nameof(location));
+
             var type = await _objectTypeService
                 .GetTypeByTypeObjectIDAsync(vm.ID);
 
@@ -274,8 +306,14 @@ namespace MiniNavigator_UI
             menu.Show(NavigatorVirtualTree, location);
         }
 
+        /// <summary>
+        /// Обработчик добавления атрибута
+        /// </summary>
+        /// <param name="typeID">ID обхекта типа</param>
         private async Task AddAttributeItem_Click(Guid typeID)
         {
+            if (typeID == null) throw new ArgumentNullException(nameof(typeID));
+
             var allObjectTypes = await _objectTypeService.GetAllTypesAsync();
             
             var list = new List<NavObjectViewModel>();
@@ -286,6 +324,7 @@ namespace MiniNavigator_UI
                                 .Select(n => n.ID)
                                 .Distinct()
                                 .ToList();
+
             var objectTypes = allObjectTypes.Where(t => objectTypesIDs.Contains(t.ObjectID)).ToList();
 
             using (var form = new AddAttributeForm(objectTypes))
@@ -295,20 +334,29 @@ namespace MiniNavigator_UI
                     var attributeDto = new ObjectAttributeDTO
                     {
                         ID = Guid.NewGuid(),
-                        Name = form.Name,
+                        Name = form.AttributeName,
                         IsReference = form.IsReference,
-                        ValueType = form.SelectedValueType,
+                        ValueType = form.SelectedValueType ?? null,
                         IsRequired = form.IsRequired,
-                        IsVisible = form.Visible,
+                        IsVisible = form.IsVisible,
                         IsTitle = form.IsTitle,
-                        Index = _attributes.Count + 1
+                        ReferenceObjectTypeID = form.SelectedReferenceTypeId ?? null,
+                        Index = (await GetAttributesForType(typeID)).Count + 1
                     };
+                    var type = allObjectTypes.Where(ot => ot.ObjectID == typeID).First();
 
+                    await _attributeService.CreateAttributeAsync(attributeDto, type.ID);
 
+                    await BindTableAsync(typeID);
                 }
             }
         }
 
+        /// <summary>
+        /// Получение типов из дерева в виде списка
+        /// </summary>
+        /// <param name="root">Корень дерева</param>
+        /// <param name="list">Список для добавления типов</param>
         public void GetAllObjectsTypesFromTree(NavObjectViewModel root, List<NavObjectViewModel> list)
         {
             if (root.Children != null && root.Children.Count != 0)
@@ -324,8 +372,14 @@ namespace MiniNavigator_UI
             }
         }
 
+        /// <summary>
+        /// Обработчик добавления файла
+        /// </summary>
+        /// <param name="type">Обьект файла</param>
         private async Task FileAdd_Click(ObjectTypeDTO type)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+
             var filter = await _fileService.GetOpenFileDialogFilterAsync(type.ID);
 
             using (var openFileDialog = new OpenFileDialog
@@ -363,6 +417,9 @@ namespace MiniNavigator_UI
             }
         }
 
+        /// <summary>
+        /// Обработчик добавления нового объекта
+        /// </summary>
         private void AddItem_Click(object sender, EventArgs e)
         {
             if (NavigatorVirtualTree.SelectedRow?.Item is NavObjectViewModel && _rows != null)
@@ -378,6 +435,9 @@ namespace MiniNavigator_UI
             }
         }
 
+        /// <summary>
+        /// Добавление новой строки в таблице
+        /// </summary>
         private void AddNewRow()
         {
             var row = new DynamicObjectRow();
@@ -413,6 +473,10 @@ namespace MiniNavigator_UI
             }
         }
 
+        /// <summary>
+        /// Удаление строки из таблицы
+        /// </summary>
+        /// <param name="row">Удаляемая строка</param>
         public void RemoveRow(DynamicObjectRow row)
         {
             if (row == null || _rows == null)
@@ -422,6 +486,9 @@ namespace MiniNavigator_UI
             NavigatorDataGridView.Invalidate();
         }
 
+        /// <summary>
+        /// Сброс сортировки
+        /// </summary>
         private void ResetSorting()
         {
             foreach (DataGridViewColumn col in NavigatorDataGridView.Columns)
@@ -433,25 +500,14 @@ namespace MiniNavigator_UI
         /// <summary>
         /// Биндинг объектов системы на DataGridView
         /// </summary>
-        /// <param name="typeId">Тип объектов</param>
+        /// <param name="typeId">Тип объекта</param>
         private async Task BindTableAsync(Guid typeId)
         {
+            if(typeId == Guid.Empty) throw new ArgumentNullException(nameof(typeId));
+
             _currentTypeId = typeId;
 
-            var attributes = await _objectTypeService.GetAttributesForTypeAsync(typeId);
-
-            _attributes = attributes
-                .Where(a => a.IsVisible)
-                .OrderBy(a => a.Index)
-                .Select(a => new ObjectAttributeViewModel
-                {
-                    ID = a.ID,
-                    Name = a.Name,
-                    ValueType = a.ValueType,
-                    IsReference = a.IsReference,
-                    IsRequired = a.IsRequired
-                })
-                .ToList();
+            _attributes = await GetAttributesForType(typeId);
 
             ConfigureGrid();
             CreateColumns(_attributes);
@@ -463,6 +519,31 @@ namespace MiniNavigator_UI
             BindGrid(_rows);
 
             IsEditing = false;
+        }
+
+        /// <summary>
+        /// Получение атрибутов для типа
+        /// </summary>
+        /// <param name="typeID">Тип объекта</param>
+        /// <returns>Список атрибутов</returns>
+        public async Task<List<ObjectAttributeViewModel>> GetAttributesForType(Guid typeID)
+        {
+            if (typeID == Guid.Empty) throw new ArgumentNullException(nameof(typeID));
+
+            var attributes = await _objectTypeService.GetAttributesForTypeAsync(typeID);
+
+            return attributes
+                .Where(a => a.IsVisible)
+                .OrderBy(a => a.Index)
+                .Select(a => new ObjectAttributeViewModel
+                {
+                    ID = a.ID,
+                    Name = a.Name,
+                    ValueType = a.ValueType,
+                    IsReference = a.IsReference,
+                    IsRequired = a.IsRequired
+                })
+                .ToList();
         }
 
         /// <summary>
@@ -487,6 +568,8 @@ namespace MiniNavigator_UI
         /// <param name="attributes">ViewModel объекты атрибутов</param>
         private void CreateColumns(List<ObjectAttributeViewModel> attributes)
         {
+            if(attributes == null) throw new ArgumentNullException(nameof(attributes));
+
             foreach (var attr in attributes)
             {
                 var column = CreateColumn(attr);
@@ -501,6 +584,8 @@ namespace MiniNavigator_UI
         /// <returns>Колонка DataGridView</returns>
         private DataGridViewColumn CreateColumn(ObjectAttributeViewModel attr)
         {
+            if(attr == null) throw new ArgumentNullException(nameof(attr));
+
             DataGridViewColumn column;
 
             if (attr.ValueType == typeof(bool))
@@ -527,6 +612,8 @@ namespace MiniNavigator_UI
         /// <returns>Структура для отображения на DataGridView</returns>
         private async Task<BindingList<DynamicObjectRow>> CreateRowsAsync(List<Dictionary<Guid, ObjectAttributeDTO>> tableData)
         {
+            if(tableData == null) throw new ArgumentNullException(nameof(tableData));
+            
             var rows = new BindingList<DynamicObjectRow>();
 
             foreach (var rowDict in tableData)
@@ -545,6 +632,8 @@ namespace MiniNavigator_UI
         /// <returns>Строка для DataGridView</returns>
         private async Task<DynamicObjectRow> CreateRowAsync(Dictionary<Guid, ObjectAttributeDTO> rowDict)
         {
+            if (rowDict == null) throw new ArgumentNullException(nameof(rowDict));
+
             var row = new DynamicObjectRow();
 
             var idAttr = rowDict.Values.FirstOrDefault(a => a.Name == "ID");
@@ -642,6 +731,9 @@ namespace MiniNavigator_UI
             NavigatorDataGridView.DataSource = rows;
         }
 
+        /// <summary>
+        /// Обработчик нажатия мышью по заголовку строки
+        /// </summary>
         private async void NavigatorDataGridView_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             NavigatorDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -659,8 +751,16 @@ namespace MiniNavigator_UI
             await ShowContextMenuForRowAsync(row, NavigatorDataGridView.PointToClient(Cursor.Position));
         }
 
+        /// <summary>
+        /// Отображение контекстного меню для объекта
+        /// </summary>
+        /// <param name="row">Выбранная строка</param>
+        /// <param name="location">Точка по которой кликнули</param>
         private async Task ShowContextMenuForRowAsync(DynamicObjectRow row, Point location)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (location == null) throw new ArgumentNullException(nameof(location));
+
             var objectId = row.ObjectId;
             var actions = await _objectService.GetActionsForTypeObject(objectId);
 
@@ -680,12 +780,14 @@ namespace MiniNavigator_UI
         }
 
         /// <summary>
-        /// 
+        /// Выполнение действия
         /// </summary>
-        /// <param name="row"></param>
-        /// <param name="action"></param>
+        /// <param name="row">Выбранная строка</param>
+        /// <param name="action">DTO действия</param>
         private async void ExecuteAction(DynamicObjectRow row, ObjectActionDTO action)
         {
+            if (row == null) throw new ArgumentNullException(nameof(row));
+
             var handler = _actionRegistry.Resolve(action.CommandName);
 
             var context = new ActionContext
@@ -761,9 +863,13 @@ namespace MiniNavigator_UI
             }
         }
 
+        /// <summary>
+        /// Начало редатирования строки
+        /// </summary>
+        /// <param name="row">Редактируемая строка</param>
         public void BeginEditRow(DynamicObjectRow row)
         {
-            if (row == null) return;
+            if (row == null) throw new ArgumentNullException(nameof(row));
 
             _editingRow = row;
             IsEditing = true;

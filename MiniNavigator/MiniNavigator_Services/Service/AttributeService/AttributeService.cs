@@ -1,24 +1,22 @@
 ﻿using MiniNavigator_DB.Model;
 using MiniNavigator_DB.Repository.Interface;
 using MiniNavigator_Services.DTO;
-using MiniNavigator_Services.Mapper;
-using MiniNavigator_Services.Mapper.Interface;
-using MiniNavigator_Services.Service.Interface;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MiniNavigator_Services.Service.AttributeService
+namespace MiniNavigator_Services.Service
 {
-    public class AttributeService
+    /// <summary>
+    /// Сервис для работы с атрибутами
+    /// </summary>
+    public class AttributeService : IAttributeService
     {
         private readonly IRepository<BaseObject> _objectRepository;
         private readonly IRepository<ObjectTypeAttribute> _objectTypeAttributeRepository;
         private readonly IObjectTypeRepository _objectTypeRepository;
         private readonly IObjectAttributeRepository _objectAttributeRepository;
 
-        private readonly IMapper<ObjectAttributeDTO, ObjectTypeAttribute> _attributeTypeMapper = new AttributeTypeMapper();
-        private readonly IMapper<ObjectAttributeDTO, ObjectAttributeValue> _attributeMapper = new AttributeMapper();
         public AttributeService
             (
             IRepository<BaseObject> objectRepository,
@@ -34,27 +32,48 @@ namespace MiniNavigator_Services.Service.AttributeService
         }
 
         /// <summary>
-        /// 
+        /// Добавляет новый атрибут в систему
         /// </summary>
         /// <param name="objectAttributeDTO">DTO с информацией об атрибуте</param>
         /// <param name="typeID">ID типа, к которому привязан атрибут</param>
-        /// <returns></returns>
-        public async Task CreateAttribute(ObjectAttributeDTO objectAttributeDTO, Guid typeID)
+        public async Task CreateAttributeAsync(ObjectAttributeDTO objectAttributeDTO, Guid typeID)
         {
+            if(objectAttributeDTO == null) throw new ArgumentNullException(nameof(objectAttributeDTO));
+            if(typeID == Guid.Empty) throw new ArgumentNullException(nameof(typeID));
+
             var attributeType = _objectTypeRepository.Query().Where(x => x.Name == "Атрибут").First();
+            var attributeTypeObject = _objectRepository.Query().Where(bo => bo.ObjectTypeID == attributeType.Base_ID).First();
             var attrObject = new BaseObject
             {
                 ID = Guid.NewGuid(),
-                ObjectTypeID = attributeType.ID,
-                ParentID = attributeType.ID
+                ObjectTypeID = attributeTypeObject.ID,
+                ParentID = attributeTypeObject.ID
             };
             await _objectRepository.AddAsync(attrObject);
 
             var attribute = new ObjectAttribute
             {
                 ID = Guid.NewGuid(),
+                Base_ID = attrObject.ID,
+                Base = attrObject,
+                Name = objectAttributeDTO.Name,
+                IsReference = objectAttributeDTO.IsReference,
+                ValueType = objectAttributeDTO.ValueType.FullName,
+                ReferenceObjectTypeID = objectAttributeDTO.ReferenceObjectTypeID
             };
-            //await _objectAttributeRepository.AddAsync();
+            await _objectAttributeRepository.AddAsync(attribute);
+
+            var objectTypeAttribute = new ObjectTypeAttribute
+            {
+                ObjectTypeID = typeID,
+                AttributeID = attribute.ID,
+                Attribute = attribute,
+                IsRequired = objectAttributeDTO.IsRequired,
+                IsTitle = objectAttributeDTO.IsTitle,
+                IsVisible = objectAttributeDTO.IsVisible,
+                Order = objectAttributeDTO.Index
+            };
+            await _objectTypeAttributeRepository.AddAsync(objectTypeAttribute);
         }
     }
 }

@@ -66,7 +66,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\MiniNavigatorDbInitializer.cs" />
-    <Compile Include="Configuration\MiniNavigatorDbInitializerTest.cs" />
     <Compile Include="Context\MiniNavigatorDbContext.cs" />
     <Compile Include="Configuration\MiniNavigatorDbConfiguration.cs" />
     <Compile Include="Migrations\202512112001361_InitialCreate.cs" />
@@ -121,6 +120,10 @@
     <Compile Include="Migrations\202512302203357_AddIsTitleInAttribute.Designer.cs">
       <DependentUpon>202512302203357_AddIsTitleInAttribute.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202601031852374_DeleteObjectConfig.cs" />
+    <Compile Include="Migrations\202601031852374_DeleteObjectConfig.Designer.cs">
+      <DependentUpon>202601031852374_DeleteObjectConfig.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\ObjectAttributeValue.cs" />
     <Compile Include="Model\ObjectTypeAttribute.cs" />
@@ -133,7 +136,6 @@
     <Compile Include="Model\BaseObject.cs" />
     <Compile Include="Model\ObjectAction.cs" />
     <Compile Include="Model\ObjectAttribute.cs" />
-    <Compile Include="Model\ObjectConfig.cs" />
     <Compile Include="Model\ObjectFile.cs" />
     <Compile Include="Model\ObjectFileChunk.cs" />
     <Compile Include="Model\ObjectRole.cs" />
@@ -147,7 +149,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Data\MiniNavigator.sqlite" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -189,6 +190,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202512302203357_AddIsTitleInAttribute.resx">
       <DependentUpon>202512302203357_AddIsTitleInAttribute.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202601031852374_DeleteObjectConfig.resx">
+      <DependentUpon>202601031852374_DeleteObjectConfig.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />

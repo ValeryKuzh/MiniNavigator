@@ -2,6 +2,9 @@
 
 namespace MiniNavigator_DB.Model
 {
+    /// <summary>
+    /// Чанк файла
+    /// </summary>
     public class ObjectFileChunk
     {
         public Guid ID { get; set; }

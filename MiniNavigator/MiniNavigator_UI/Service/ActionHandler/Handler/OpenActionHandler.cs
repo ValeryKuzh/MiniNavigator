@@ -1,17 +1,16 @@
 ﻿using MiniNavigator_Services.Service;
 using MiniNavigator_Services.Service.Interface;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Net.WebRequestMethods;
 
 namespace MiniNavigator_UI.Service.ActionHandler.Handler
 {
+    /// <summary>
+    /// Обработчик действия "Открыть"
+    /// </summary>
     public class OpenActionHandler : IObjectActionHandler
     {
         public string CommandName => "OPEN";

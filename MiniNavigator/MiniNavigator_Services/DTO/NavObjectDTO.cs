@@ -1,10 +1,11 @@
-﻿using MiniNavigator_DB.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace MiniNavigator_Services.DTO
 {
+    /// <summary>
+    /// DTO для передачи объектов, которые отображаются в дереве типов
+    /// </summary>
     public class NavObjectDTO
     {
         public Guid ID { get; set; }

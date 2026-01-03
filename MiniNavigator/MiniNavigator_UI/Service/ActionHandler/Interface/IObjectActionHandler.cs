@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace MiniNavigator_UI.Service.ActionHandler
 {
+    /// <summary>
+    /// Интерфейс обработчиков действий системы
+    /// </summary>
     public interface IObjectActionHandler
     {
         string CommandName { get; }

@@ -1,15 +1,15 @@
 ﻿using MiniNavigator_Services.Service;
 using MiniNavigator_Services.Service.Interface;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MiniNavigator_UI.Service.ActionHandler.Handler
 {
+    /// <summary>
+    /// Обработчик действия "Скачать"
+    /// </summary>
     public class DownloadActionHandler : IObjectActionHandler
     {
         public string CommandName => "DOWNLOAD";

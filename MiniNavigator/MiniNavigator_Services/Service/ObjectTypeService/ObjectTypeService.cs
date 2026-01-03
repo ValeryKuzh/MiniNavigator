@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace MiniNavigator_Services.Service
 {
+    /// <summary>
+    /// Сервис для работы с типами объектов системы
+    /// </summary>
     public class ObjectTypeService : IObjectTypeService
     {
         private readonly IObjectTypeRepository _objectTypeRepository;
@@ -31,6 +34,10 @@ namespace MiniNavigator_Services.Service
             _objectTypeMapper = objectTypeMapper;
         }
 
+        /// <summary>
+        /// Получение всех типов системы
+        /// </summary>
+        /// <returns>Список типов системы</returns>
         public async Task<List<ObjectTypeDTO>> GetAllTypesAsync()
         {
             List<ObjectTypeDTO> types = new List<ObjectTypeDTO>();
@@ -41,16 +48,29 @@ namespace MiniNavigator_Services.Service
             return types;
         }
 
+        /// <summary>
+        /// Получает тип по ID объекта типа
+        /// </summary>
+        /// <param name="objectTypeID">ID объекта типа</param>
+        /// <returns>Тип</returns>
         public async Task<ObjectTypeDTO> GetTypeByTypeObjectIDAsync(Guid objectTypeID)
         {
+            if (objectTypeID == Guid.Empty) throw new ArgumentNullException(nameof(objectTypeID));
             var objectOfType = await _objectRepository.GetByIdAsync(objectTypeID);
             var type = _objectTypeRepository.Query().Where(x => x.Base_ID == objectOfType.ID).FirstOrDefault();
             return _objectTypeMapper.ToDTO(type);
         }
 
-        public async Task<List<ObjectAttributeDTO>> GetAttributesForTypeAsync(Guid objectTypeId)
+        /// <summary>
+        /// ПОлучает список атрибутов, валидных для типа
+        /// </summary>
+        /// <param name="objectTypeID">ID объекта типа</param>
+        /// <returns>Список атрибутов типа</returns>
+        public async Task<List<ObjectAttributeDTO>> GetAttributesForTypeAsync(Guid objectTypeID)
         {
-            var typeAttributes = (await _objectTypeRepository.GetTypeWithAttributesAsync(objectTypeId)).Attributes.ToList();
+            if (objectTypeID == Guid.Empty) throw new ArgumentNullException(nameof(objectTypeID));
+
+            var typeAttributes = (await _objectTypeRepository.GetTypeWithAttributesAsync(objectTypeID)).Attributes.ToList();
 
             return typeAttributes.Select(ota => new ObjectAttributeDTO
             {
@@ -66,8 +86,15 @@ namespace MiniNavigator_Services.Service
             }).ToList();
         }
 
+        /// <summary>
+        /// Проверяет является ли тип типом "Файл"
+        /// </summary>
+        /// <param name="objectTypeID">ID объекта типа</param>
+        /// <returns>Тип является типом "Файл"</returns>
         public async Task<bool> IsFileTypeAsync(Guid objectTypeID)
         {
+            if (objectTypeID == Guid.Empty) throw new ArgumentNullException(nameof(objectTypeID));
+
             var type = await _objectTypeRepository.GetByIdAsync(objectTypeID);
             if (type == null)
                 return false;

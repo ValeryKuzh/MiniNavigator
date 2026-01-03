@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MiniNavigator_DB.Model
 {
+    /// <summary>
+    /// Пользователь системы
+    /// </summary>
     public class ObjectUser
     {
         public Guid ID { get; set; }
